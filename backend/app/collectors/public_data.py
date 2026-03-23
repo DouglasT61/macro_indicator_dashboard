@@ -96,23 +96,38 @@ class PublicDataCollector:
         statuses: dict[str, str] = {}
 
         with httpx.Client(timeout=self.timeout_seconds, headers={'User-Agent': 'Mozilla/5.0 macro-stress-dashboard/0.1'}) as client:
-            fred_series, fred_status = self._collect_fred_series(client, start, end)
+            try:
+                fred_series, fred_status = self._collect_fred_series(client, start, end)
+            except Exception as exc:
+                fred_series, fred_status = {}, f'FRED collector failed: {exc.__class__.__name__}.'
             collected.update(fred_series)
             statuses['fred'] = fred_status
 
-            ecb_series, ecb_status = self._collect_ecb_series(client, start, end)
+            try:
+                ecb_series, ecb_status = self._collect_ecb_series(client, start, end)
+            except Exception as exc:
+                ecb_series, ecb_status = {}, f'ECB collector failed: {exc.__class__.__name__}.'
             collected.update(ecb_series)
             statuses['ecb'] = ecb_status
 
-            treasury_series, treasury_status = self._collect_treasury_series(client, treasury_start, end)
+            try:
+                treasury_series, treasury_status = self._collect_treasury_series(client, treasury_start, end)
+            except Exception as exc:
+                treasury_series, treasury_status = {}, f'Treasury collector failed: {exc.__class__.__name__}.'
             collected.update(treasury_series)
             statuses['treasury'] = treasury_status
 
-            yahoo_series, yahoo_status = self._collect_yahoo_futures_series(client, start, end)
+            try:
+                yahoo_series, yahoo_status = self._collect_yahoo_futures_series(client, start, end)
+            except Exception as exc:
+                yahoo_series, yahoo_status = {}, f'Yahoo market collector failed: {exc.__class__.__name__}.'
             collected.update(yahoo_series)
             statuses['yahoo_market'] = yahoo_status
 
-        support_series, support_status = self._collect_support_series(start, end, collected)
+        try:
+            support_series, support_status = self._collect_support_series(start, end, collected)
+        except Exception as exc:
+            support_series, support_status = {}, f'Support collector failed: {exc.__class__.__name__}.'
         collected.update(support_series)
         statuses['support'] = support_status
 
