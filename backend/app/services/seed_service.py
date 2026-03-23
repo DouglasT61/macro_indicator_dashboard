@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import date, datetime, timedelta, timezone
+from typing import Callable
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -218,67 +219,85 @@ def _upsert_manual_overlay(db: Session, key: str, value: float, notes: str) -> N
     db.commit()
 
 
-def _refresh_public_overlays(db: Session) -> str:
+def _refresh_public_overlays(db: Session, status_callback: Callable[[str], None] | None = None) -> str:
     messages: list[str] = []
 
     try:
-        marine = collect_marine_insurance_assessment()
+        if status_callback:
+            status_callback('Refreshing overlay: marine_insurance_stress')
+        marine = collect_marine_insurance_assessment(timeout_seconds=8.0)
         _upsert_manual_overlay(db, 'marine_insurance_stress', marine.score, marine.notes)
         messages.append('Marine insurance overlay refreshed from Beinsure site scan.')
     except Exception:
         messages.append('Marine insurance overlay remains manual/demo; site scan unavailable on this refresh.')
 
     try:
-        tanker = collect_tanker_disruption_assessment(settings.aishub_username)
+        if status_callback:
+            status_callback('Refreshing overlay: tanker_disruption_score')
+        tanker = collect_tanker_disruption_assessment(settings.aishub_username, timeout_seconds=8.0)
         _upsert_manual_overlay(db, 'tanker_disruption_score', tanker.score, tanker.notes)
         messages.append('Tanker disruption overlay refreshed from public shipping sources.')
     except Exception:
         messages.append('Tanker disruption overlay remains manual/demo; public shipping sources unavailable on this refresh.')
 
     try:
-        private_credit = collect_private_credit_stress()
+        if status_callback:
+            status_callback('Refreshing overlay: private_credit_stress')
+        private_credit = collect_private_credit_stress(timeout_seconds=8.0)
         _upsert_manual_overlay(db, private_credit.key, private_credit.value, private_credit.notes)
         messages.append('Private credit overlay refreshed from public market proxies.')
     except Exception:
         messages.append('Private credit overlay remains manual/demo; public market proxies unavailable on this refresh.')
 
     try:
-        geopolitical = collect_geopolitical_escalation_signal()
+        if status_callback:
+            status_callback('Refreshing overlay: geopolitical_escalation_toggle')
+        geopolitical = collect_geopolitical_escalation_signal(timeout_seconds=8.0)
         _upsert_manual_overlay(db, geopolitical.key, geopolitical.value, geopolitical.notes)
         messages.append('Geopolitical escalation toggle refreshed from public news scan.')
     except Exception:
         messages.append('Geopolitical escalation toggle remains manual/demo; public news scan unavailable on this refresh.')
 
     try:
-        intervention = collect_central_bank_intervention_signal()
+        if status_callback:
+            status_callback('Refreshing overlay: central_bank_intervention_toggle')
+        intervention = collect_central_bank_intervention_signal(timeout_seconds=8.0)
         _upsert_manual_overlay(db, intervention.key, intervention.value, intervention.notes)
         messages.append('Central bank intervention toggle refreshed from official Fed feeds.')
     except Exception:
         messages.append('Central bank intervention toggle remains manual/demo; official Fed feeds unavailable on this refresh.')
 
     try:
-        pni = collect_p_and_i_circular_stress()
+        if status_callback:
+            status_callback('Refreshing overlay: p_and_i_circular_stress')
+        pni = collect_p_and_i_circular_stress(timeout_seconds=8.0)
         _upsert_manual_overlay(db, pni.key, pni.value, pni.notes)
         messages.append('P&I circular stress refreshed from official club notices.')
     except Exception:
         messages.append('P&I circular stress remains manual/demo; official club notices unavailable on this refresh.')
 
     try:
-        iaea = collect_iaea_nuclear_ambiguity()
+        if status_callback:
+            status_callback('Refreshing overlay: iaea_nuclear_ambiguity')
+        iaea = collect_iaea_nuclear_ambiguity(timeout_seconds=8.0)
         _upsert_manual_overlay(db, iaea.key, iaea.value, iaea.notes)
         messages.append('IAEA nuclear ambiguity refreshed from official verification statements.')
     except Exception:
         messages.append('IAEA nuclear ambiguity remains manual/demo; official verification statements unavailable on this refresh.')
 
     try:
-        interceptor = collect_interceptor_depletion_signal()
+        if status_callback:
+            status_callback('Refreshing overlay: interceptor_depletion')
+        interceptor = collect_interceptor_depletion_signal(timeout_seconds=8.0)
         _upsert_manual_overlay(db, interceptor.key, interceptor.value, interceptor.notes)
         messages.append('Interceptor depletion refreshed from operational reporting.')
     except Exception:
         messages.append('Interceptor depletion remains manual/demo; operational reporting unavailable on this refresh.')
 
     try:
-        fragmentation = collect_governance_fragmentation_signal()
+        if status_callback:
+            status_callback('Refreshing overlay: governance_fragmentation')
+        fragmentation = collect_governance_fragmentation_signal(timeout_seconds=8.0)
         _upsert_manual_overlay(db, fragmentation.key, fragmentation.value, fragmentation.notes)
         messages.append('Governance fragmentation refreshed from conflict and statement scans.')
     except Exception:
@@ -291,7 +310,10 @@ def _build_demo_baseline(end_date: date | None = None) -> dict[str, list[tuple[d
     return generate_demo_history(days=LIVE_HISTORY_DAYS, end_date=end_date)
 
 
-def _build_series_payloads(end_date: date | None = None) -> tuple[dict[str, list[tuple[datetime, float]]], dict[str, str], dict[str, str], str]:
+def _build_series_payloads(
+    end_date: date | None = None,
+    status_callback: Callable[[str], None] | None = None,
+) -> tuple[dict[str, list[tuple[datetime, float]]], dict[str, str], dict[str, str], str]:
     baseline = _build_demo_baseline(end_date=end_date)
     source_map = {definition.key: definition.source for definition in SERIES_DEFINITIONS}
     provider_messages = {
@@ -304,7 +326,9 @@ def _build_series_payloads(end_date: date | None = None) -> tuple[dict[str, list
     data_mode = 'demo'
 
     try:
-        collection = PublicDataCollector().collect(days=LIVE_HISTORY_DAYS, end_date=end_date)
+        if status_callback:
+            status_callback('Refreshing provider series: market_data')
+        collection = PublicDataCollector(timeout_seconds=12.0).collect(days=LIVE_HISTORY_DAYS, end_date=end_date)
     except Exception:
         return baseline, source_map, provider_messages, data_mode
 
@@ -332,7 +356,9 @@ def _build_series_payloads(end_date: date | None = None) -> tuple[dict[str, list
         if key in {'fred', 'ecb', 'treasury', 'yahoo_market', 'support'}:
             provider_messages[f'{key}_status'] = message
     try:
-        hormuz = collect_hormuz_transit_assessment()
+        if status_callback:
+            status_callback('Refreshing provider series: shipping_data')
+        hormuz = collect_hormuz_transit_assessment(timeout_seconds=8.0)
         baseline['hormuz_tanker_transit_stress'] = hormuz.history
         source_map['hormuz_tanker_transit_stress'] = hormuz.source
         provider_messages['shipping_data'] = 'PortWatch Strait of Hormuz tanker transit data is live.'
@@ -437,14 +463,27 @@ def bootstrap_demo_only(db: Session) -> None:
 def refresh_market_data(db: Session, config: dict) -> None:
     series_lookup = ensure_series_registry(db)
     seed_manual_inputs(db)
-    history_map, source_map, provider_messages, data_mode = _build_series_payloads()
+    history_map, source_map, provider_messages, data_mode = _build_series_payloads(
+        status_callback=lambda message: save_source_status(
+            db,
+            get_source_status(db).get('data_mode', 'mixed'),
+            {**dict(get_source_status(db).get('providers', {})), 'refresh_status': message},
+        ),
+    )
 
     for definition in SERIES_DEFINITIONS:
         history = history_map[definition.key]
         records = compute_series_metrics(history, config['thresholds'].get(definition.key))
         _replace_series_values(db, series_lookup[definition.key], records, source_override=source_map.get(definition.key))
 
-    provider_messages['manual_overlays'] = _refresh_public_overlays(db)
+    provider_messages['manual_overlays'] = _refresh_public_overlays(
+        db,
+        status_callback=lambda message: save_source_status(
+            db,
+            get_source_status(db).get('data_mode', 'mixed'),
+            {**dict(get_source_status(db).get('providers', {})), 'refresh_status': message},
+        ),
+    )
     save_source_status(db, data_mode, provider_messages)
     _recompute_regime_scores(db, config)
     _recompute_alerts(db, config)
