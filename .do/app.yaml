@@ -62,6 +62,7 @@ static_sites:
 
 databases:
   - name: macro-db
+    cluster_name: macro-stress-dashboard-db
     engine: PG
     production: true
     version: "16"
