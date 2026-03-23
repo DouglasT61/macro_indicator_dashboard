@@ -326,9 +326,11 @@ def _build_series_payloads(
     data_mode = 'demo'
 
     try:
-        if status_callback:
-            status_callback('Refreshing provider series: market_data')
-        collection = PublicDataCollector(timeout_seconds=12.0).collect(days=LIVE_HISTORY_DAYS, end_date=end_date)
+        collection = PublicDataCollector(timeout_seconds=12.0).collect(
+            days=LIVE_HISTORY_DAYS,
+            end_date=end_date,
+            status_callback=status_callback,
+        )
     except Exception:
         return baseline, source_map, provider_messages, data_mode
 

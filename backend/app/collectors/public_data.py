@@ -89,7 +89,12 @@ class PublicDataCollector:
         self.timeout_seconds = timeout_seconds
         self.fred_timeout_seconds = min(timeout_seconds, 6.0)
 
-    def collect(self, days: int = 180, end_date: date | None = None) -> CollectionResult:
+    def collect(
+        self,
+        days: int = 180,
+        end_date: date | None = None,
+        status_callback: Callable[[str], None] | None = None,
+    ) -> CollectionResult:
         end = end_date or date.today()
         start = end - timedelta(days=days - 1)
         treasury_start = end - timedelta(days=max(days, TREASURY_HISTORY_DAYS) - 1)
@@ -98,6 +103,8 @@ class PublicDataCollector:
 
         with httpx.Client(timeout=self.timeout_seconds, headers={'User-Agent': 'Mozilla/5.0 macro-stress-dashboard/0.1'}) as client:
             try:
+                if status_callback:
+                    status_callback('market_data: fred')
                 fred_series, fred_status = self._collect_fred_series(client, start, end)
             except Exception as exc:
                 fred_series, fred_status = {}, f'FRED collector failed: {exc.__class__.__name__}.'
@@ -105,6 +112,8 @@ class PublicDataCollector:
             statuses['fred'] = fred_status
 
             try:
+                if status_callback:
+                    status_callback('market_data: ecb')
                 ecb_series, ecb_status = self._collect_ecb_series(client, start, end)
             except Exception as exc:
                 ecb_series, ecb_status = {}, f'ECB collector failed: {exc.__class__.__name__}.'
@@ -112,6 +121,8 @@ class PublicDataCollector:
             statuses['ecb'] = ecb_status
 
             try:
+                if status_callback:
+                    status_callback('market_data: treasury')
                 treasury_series, treasury_status = self._collect_treasury_series(client, treasury_start, end)
             except Exception as exc:
                 treasury_series, treasury_status = {}, f'Treasury collector failed: {exc.__class__.__name__}.'
@@ -119,6 +130,8 @@ class PublicDataCollector:
             statuses['treasury'] = treasury_status
 
             try:
+                if status_callback:
+                    status_callback('market_data: yahoo_market')
                 yahoo_series, yahoo_status = self._collect_yahoo_futures_series(client, start, end)
             except Exception as exc:
                 yahoo_series, yahoo_status = {}, f'Yahoo market collector failed: {exc.__class__.__name__}.'
@@ -126,6 +139,8 @@ class PublicDataCollector:
             statuses['yahoo_market'] = yahoo_status
 
         try:
+            if status_callback:
+                status_callback('market_data: support')
             support_series, support_status = self._collect_support_series(start, end, collected)
         except Exception as exc:
             support_series, support_status = {}, f'Support collector failed: {exc.__class__.__name__}.'
