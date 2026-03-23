@@ -1,0 +1,49 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    image: macro-dashboard-backend:local
+    environment:
+      APP_ENV: docker
+      API_HOST: 0.0.0.0
+      API_PORT: 8005
+      FRONTEND_ORIGIN: http://localhost:4173
+      DATABASE_URL: sqlite:////data/macro_dashboard.db
+      DEMO_MODE: "true"
+      SCHEDULER_ENABLED: "true"
+      BOOTSTRAP_ON_STARTUP: "true"
+      REFRESH_HOUR: 6
+      REFRESH_MINUTE: 0
+      ENABLE_ALERTS: "true"
+      REGIME_CONFIG_PATH: /app/backend/config/regime_config.json
+      FRED_API_KEY: ${FRED_API_KEY:-}
+      EIA_API_KEY: ${EIA_API_KEY:-}
+      MARKET_DATA_API_KEY: ${MARKET_DATA_API_KEY:-}
+      AISHUB_USERNAME: ${AISHUB_USERNAME:-}
+    ports:
+      - "8005:8005"
+    volumes:
+      - macro_dashboard_data:/data
+      - macro_dashboard_exports:/exports
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8005/api/v1/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    image: macro-dashboard-frontend:local
+    ports:
+      - "4173:4173"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  macro_dashboard_data:
+  macro_dashboard_exports:

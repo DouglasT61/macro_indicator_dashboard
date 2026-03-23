@@ -1,0 +1,457 @@
+# Advanced User Guide
+
+## Purpose
+
+This dashboard is built as an advanced indicator of monetary stress, not a generic macro dashboard. The core use case is to monitor whether a maritime and energy shock remains a price problem, migrates into dollar funding stress, or becomes a Treasury-plumbing event that raises Fed-backstop and repression risk.
+
+The working chain is:
+
+`marine war-risk / shipping disruption -> oil supply shock -> higher energy import bills -> global dollar funding stress -> weaker foreign marginal UST demand -> repo stress / basis unwind -> Treasury dysfunction -> Fed backstop -> inflation / repression risk`
+
+## The Four Summary Cards At The Top
+
+The top of the app should be read as four decision cards:
+
+1. Sticky Inflation
+2. Convex Inflation / Funding Stress
+3. Break / Repression
+4. Fast-Moving Stress Panel
+
+### Sticky Inflation
+
+This card measures whether the shock is still primarily physical and inflationary. It rises when oil spreads, shipping stress, and related inflation inputs are elevated, but funding markets and Treasury clearing still function.
+
+Interpretation:
+
+- `0-44`: background signal only
+- `45-59`: building inflation persistence risk
+- `60-74`: active Sticky regime
+- `75-100`: dominant Sticky regime
+
+Typical drivers:
+
+- Brent prompt spread
+- WTI prompt spread
+- tanker freight
+- marine insurance overlay
+- energy price pressure
+
+### Convex Inflation / Funding Stress
+
+This is the transition regime. It rises when the oil shock begins to move into offshore dollar scarcity, repo pressure, rates volatility, and weaker duration clearing.
+
+Interpretation:
+
+- `0-44`: no material funding migration yet
+- `45-59`: transition risk is forming
+- `60-74`: active Convex regime
+- `75-100`: dominant nonlinear funding-stress regime
+
+Typical drivers:
+
+- cross-currency basis stress
+- SOFR spread stress
+- MOVE or rates-volatility stress
+- auction deterioration
+- Treasury basis stress
+
+### Break / Repression
+
+This card measures whether the system is moving from stress into dysfunction. It rises when weak auctions, poor Treasury liquidity, and policy-plumbing backstop usage start to cluster.
+
+Interpretation:
+
+- `0-44`: break risk low
+- `45-59`: dysfunction risk building
+- `60-74`: active break-risk regime
+- `75-100`: dominant dysfunction / repression regime
+
+Typical drivers:
+
+- auction stress
+- Treasury liquidity deterioration
+- FIMA repo usage
+- Fed swap line usage
+- intervention overlays
+
+### Fast-Moving Stress Panel
+
+This is not a regime score. It is the simultaneity trigger panel.
+
+It watches five fast signals:
+
+- Brent prompt spread
+- JPY/USD basis
+- SOFR versus target
+- Treasury liquidity proxy
+- Treasury basis proxy
+
+Interpretation:
+
+- `0-2` stressed signals: contained
+- `3` stressed signals: warning
+- `4-5` stressed signals: critical
+
+The cards in this panel are color-coded by condition:
+
+- green: normal
+- yellow: early caution
+- orange: warning
+- red: critical
+
+## Direct Answers To Your Questions
+
+### 1. Are all 3 regime cards set to the same baseline number?
+
+They are on the same `0-100` scale, but they are not anchored to an identical fixed baseline in the sense of “all start at 33.” Each score is calculated independently from its own weighted set of indicators. You read them both absolutely and relatively:
+
+- absolute level tells you how strong that regime is on its own
+- relative rank tells you which regime is dominant right now
+
+The app’s formal regime label is whichever card has the highest score.
+
+### 2. Same question for 7-day and 30-day?
+
+Yes. The `7d` and `30d` figures are same-scale changes in each regime score over those windows. They are not rebased to the other cards. A `+9` on Convex means Convex itself has strengthened by 9 points versus 7 days ago.
+
+Practical use:
+
+- high score + rising `7d` = active and accelerating
+- high score + falling `7d` = still dominant but easing
+- lower score + sharply rising `7d` = transition candidate
+
+### 3. What component of the app is the causal chain?
+
+The causal chain is the row of stress nodes beneath the top-level summary area. It shows these stages:
+
+- Marine insurance stress
+- Oil physical stress
+- Dollar funding stress
+- UST demand stress
+- Repo / basis stress
+- Fed intervention stress
+- Inflation / repression stress
+
+Its job is directional, not statistical. It shows where the stress is concentrated in the transmission mechanism.
+
+### 4. In the detailed panels how do I tell whether the move is broadening or narrowing?
+
+There are three ways:
+
+1. The panel header breadth label now states whether the move is broadening, narrowing, or mixed.
+2. The indicator tiles show color state per metric, so multiple orange/red tiles in the same panel means breadth is increasing.
+3. The sparklines and deltas show whether stress is accelerating or decelerating.
+
+Use this rule:
+
+- broadening = more indicators in the panel are simultaneously yellow/orange/red and their short-term moves are still rising
+- narrowing = fewer stressed indicators and the short-term changes are flattening or falling
+
+### 5. Why is the Convex card the key transition regime?
+
+Because this is the point where a physical inflation shock stops being just a price problem and starts becoming a system-plumbing problem. Sticky can stay contained. Break is the end-state. Convex is where the nonlinear transition happens:
+
+- oil stress is still present
+- dollar funding gets tighter
+- rates vol rises
+- repo and basis trades become less stable
+- duration clearing starts to weaken
+
+That is the regime where the probability of a rapid policy or market-structure shift rises most sharply.
+
+### 6. At what level do the 3 signals in simultaneity constitute warning and criticality?
+
+In the fast-moving stress panel:
+
+- warning = `3` of `5` signals are in warning or critical territory
+- critical = `4` or more of `5` signals are in warning or critical territory
+
+This is separate from the regime cards. It is a synchronization rule, not a regime-score rule.
+
+### 7. What is the difference between physical and rhetorical in the Brent M1-M2 spread?
+
+A physical move means prompt barrels are genuinely scarce. A rhetorical move means headlines are loud but the front of the crude curve is not tightening enough to confirm actual prompt scarcity.
+
+In practice:
+
+- physical = Brent M1-M2 backwardation widens and stays wide
+- rhetorical = headlines intensify but Brent M1-M2 does not widen materially or fades quickly
+
+That is why prompt spread matters more than outright oil price alone.
+
+### 8. Does the app consider policy announcements or just hard data?
+
+Both, but differently.
+
+Hard data is in the automated feeds. Policy announcements are currently handled through manual overlays and event annotations:
+
+- `central_bank_intervention_toggle`
+- `geopolitical_escalation_toggle`
+- event annotation notes
+
+Yes, policy announcements can be factored in probabilistically. The intended use is:
+
+- add an event annotation describing the announcement
+- set the relevant manual overlay
+- include a note stating whether you view it as low, medium, or high probability of actual intervention
+
+That lets you push the regime engine with an explicit, auditable discretionary overlay instead of pretending the signal is a confirmed market fact.
+
+### 9. How often is FRED updated, and does that imply lag?
+
+FRED frequency depends on the underlying series. Some are daily, some weekly, some monthly, and some only update after agency releases. That absolutely implies lag in parts of the dashboard.
+
+Practical implication:
+
+- daily market-series proxies are more responsive
+- weekly and monthly macro series are better confirmation than trigger tools
+
+Yes, faster public daily sources can reduce lag. That is why the app already prefers direct market data where feasible and uses manual overlays for areas where public macro data is too slow.
+
+### 10. Can the app find live real cross-currency data instead of a proxy?
+
+Not from a clean, stable, free public feed that is suitable for a locally hosted app without paid licensing. That is why the current implementation uses transparent public proxies.
+
+If you later want true live basis data, that should be added through:
+
+- a licensed market-data feed
+- CSV import from an external source you trust
+- a custom adapter behind environment-variable credentials
+
+### 11. Why are we using a proxy for MOVE if public live sources exist?
+
+Because many public pages display MOVE visually but do not provide a stable, free, machine-friendly API or redistribution path suitable for an app like this. The current design favors a reproducible public data pipeline over a brittle scrape.
+
+That said, your question is valid. If you have a stable public endpoint or acceptable scrape target, the app can be upgraded from proxy to direct feed.
+
+### 12. Why are we using a proxy for Treasury liquidity when there is a daily Treasury liquidity index?
+
+Same reason: the app is currently using a direct public-market derived proxy rather than a proprietary or fragile endpoint. A published daily Treasury liquidity index would be preferable if we can source it consistently and lawfully in machine-readable form.
+
+As built today:
+
+- current metric = public derived liquidity stress proxy
+- intended future upgrade = direct daily Treasury liquidity index feed
+
+### 13. How does the app indicate warning or critical in the intraday section?
+
+It now does this visually on each card:
+
+- the card background and border reflect the condition color
+- a status pill labels the state
+- the section header states the simultaneity thresholds
+
+So you should not have to infer state only from the narrative text below each metric.
+
+### 14. Where do I get marine insurance stress and tanker disruption data from?
+
+Those are manual because there is no clean free public series that reliably captures them.
+
+Practical sources for manual entry:
+
+- war-risk premium commentary from marine brokers and trade press
+- tanker-route disruption reports
+- port congestion and rerouting updates
+- sanctions, seizures, or reinsurance availability headlines
+- shipowner and charterer commentary
+
+Suggested scoring method:
+
+- `0-20`: normal
+- `21-40`: elevated headlines but limited physical effect
+- `41-60`: persistent disruption / higher premiums / rerouting
+- `61-80`: severe disruption or insurance withdrawal risk
+- `81-100`: extreme disruption / effective market impairment
+
+### 15. Where do UST auction stress and consumer credit stress come from, and why are those charts horizontal?
+
+Current sources:
+
+- `auction_stress` comes from Treasury auction data via the Treasury Fiscal Data API
+- `consumer_credit_stress` comes from public FRED-based credit deterioration inputs
+
+If those charts look flat, the usual reason is update frequency. Auction data only changes when there is a new auction. Consumer credit inputs are often weekly or monthly. Between observations, the chart can appear flat because the series is forward-filled or unchanged until the next official update.
+
+That is normal and does not mean the app is broken.
+
+### 16. Where do I get private credit markdown stress for manual entry, and how do I manually enter all datasets that require it?
+
+Private credit markdown stress is manual because there is no comprehensive public daily series. Reasonable inputs include:
+
+- fund markdown disclosures
+- gate or withdrawal restrictions
+- BDC and private-credit earnings commentary
+- covenant stress headlines
+- secondaries pricing commentary
+- credit-market sell-side notes
+
+To enter manual data:
+
+1. Open the Settings / Manual Inputs panel.
+2. Choose the manual series key.
+3. Enter the value.
+4. Add notes for source and rationale.
+5. Save.
+
+Use CSV import when you want to bulk-load a faster or proprietary series instead of using the built-in feed.
+
+### 17. Add a chart for the practical interpretation rule using 3 key metrics and Sticky, Convex, Break thresholds.
+
+That chart is now added near the top of the dashboard as `Practical Interpretation Rule`.
+
+It combines three baskets into one composite line:
+
+- Sticky basket: Brent, WTI, tanker freight
+- Convex basket: JPY basis, SOFR spread, MOVE proxy
+- Break basket: auction stress, Treasury liquidity proxy, FIMA usage
+
+It also draws three horizontal threshold lines:
+
+- `45` = Sticky threshold
+- `60` = Convex threshold
+- `75` = Break threshold
+
+Use it as a practical single-line read of where the system is moving.
+
+## The 15 Core Metrics, Sources, And Why They Matter
+
+### 1. Brent M1-M2 Prompt Spread
+
+- App key: `brent_prompt_spread`
+- Source: `market/yahoo-bz-calendar`
+- Why tracked: detects prompt physical crude scarcity
+- Contribution: primary trigger for Sticky regime and physical-vs-rhetorical validation
+
+### 2. WTI M1-M2 Prompt Spread
+
+- App key: `wti_prompt_spread`
+- Source: `market/yahoo-cl-calendar`
+- Why tracked: confirms whether prompt tightness is broad, not Brent-only
+- Contribution: corroborates physical oil stress
+
+### 3. Tanker Freight Proxy
+
+- App key: `tanker_freight_proxy`
+- Source: `fred/TSIFRGHT`
+- Why tracked: shipping cost pressure is the bridge from marine disruption to import inflation
+- Contribution: confirms maritime transmission, not just commodity headline noise
+
+### 4. LNG Stress Proxy
+
+- App key: `lng_proxy`
+- Source: `fred/PNGASJPUSDM`
+- Why tracked: broadens energy stress beyond crude
+- Contribution: shows whether the energy shock is widening across imported fuels
+
+### 5. EUR/USD Cross-Currency Basis
+
+- App key: `eur_usd_basis`
+- Source: `proxy/fred-eur-basis`
+- Why tracked: signals offshore dollar funding pressure in Europe
+- Contribution: helps identify transition from Sticky into Convex
+
+### 6. JPY/USD Cross-Currency Basis
+
+- App key: `jpy_usd_basis`
+- Source: `proxy/fred-jpy-basis`
+- Why tracked: sensitive signal of dollar scarcity and funding stress
+- Contribution: one of the fastest indicators of Convex transition risk
+
+### 7. SOFR Minus Target Midpoint
+
+- App key: `sofr_spread`
+- Source: `fred/SOFR-DFF`
+- Why tracked: measures domestic funding stress inside the policy corridor
+- Contribution: confirms whether stress is leaking into core money markets
+
+### 8. MOVE / Rates-Vol Proxy
+
+- App key: `move_index`
+- Source: `proxy/fred-rates-vol`
+- Why tracked: captures duration-clearing instability
+- Contribution: separates orderly repricing from stressed Treasury repricing
+
+### 9. Treasury Liquidity Proxy
+
+- App key: `treasury_liquidity_proxy`
+- Source: `market/yahoo-zn-depth`
+- Why tracked: measures deterioration in public-market Treasury liquidity conditions
+- Contribution: key input for Break / Repression risk
+
+### 10. Treasury Basis Stress Proxy
+
+- App key: `treasury_basis_proxy`
+- Source: `market/yahoo-zn-basis`
+- Why tracked: detects instability in leveraged cash-futures Treasury positioning
+- Contribution: flags basis-unwind style stress transmission
+
+### 11. UST Auction Stress
+
+- App key: `auction_stress`
+- Source: `treasury/auctions_query`
+- Why tracked: weak auctions show weakening marginal duration demand
+- Contribution: direct bridge from funding stress into sovereign-clearing stress
+
+### 12. FIMA Repo Usage
+
+- App key: `fima_repo_usage`
+- Source: `fred/SWPT`
+- Why tracked: indicates foreign official demand for dollar liquidity against Treasuries
+- Contribution: evidence of plumbing support demand and growing Break risk
+
+### 13. Fed Swap Line Usage
+
+- App key: `fed_swap_line_usage`
+- Source: `fred/WLCFLL`
+- Why tracked: public sign that offshore dollar pressure is leaning on central-bank support
+- Contribution: strong signal that Convex may be becoming Break
+
+### 14. 10Y Treasury Yield
+
+- App key: `ten_year_yield`
+- Source: `fred/DGS10`
+- Why tracked: anchor duration-clearing price
+- Contribution: helps separate inflation repricing from deeper duration stress
+
+### 15. 30Y Treasury Yield
+
+- App key: `thirty_year_yield`
+- Source: `fred/DGS30`
+- Why tracked: long-end fiscal credibility and repression-risk gauge
+- Contribution: strongest plain-vanilla read on long-duration indigestion
+
+## Current Regime Thresholds
+
+Regime interpretation is best handled with these confidence bands:
+
+- `0-44`: background
+- `45-59`: building
+- `60-74`: active
+- `75-100`: dominant
+
+The app labels the regime by highest score, but the best read combines:
+
+- highest score
+- 7-day change
+- 30-day change
+- fast-panel simultaneity
+
+## Manual Inputs And Event Overlays
+
+The app currently supports manual inputs for:
+
+- `marine_insurance_stress`
+- `tanker_disruption_score`
+- `private_credit_stress`
+- `geopolitical_escalation_toggle`
+- `central_bank_intervention_toggle`
+
+Use these when public data is too slow or when an event matters before it shows up in the quantitative series.
+
+## Known Limits
+
+- Cross-currency basis is still proxy-based, not a licensed direct market feed.
+- MOVE is still a public rates-volatility proxy, not a licensed index feed.
+- Treasury liquidity is a public derived proxy, not a proprietary order-book depth measure.
+- Auction and consumer-credit series can look stepwise or flat because they update less frequently.
+- Manual overlays remain necessary for marine insurance, tanker disruption, and private credit stress.

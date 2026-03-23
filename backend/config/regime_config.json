@@ -1,0 +1,1760 @@
+{
+  "thresholds": {
+    "brent_prompt_spread": {
+      "warning": 4.5,
+      "critical": 7.5,
+      "direction": "high"
+    },
+    "wti_prompt_spread": {
+      "warning": 4.0,
+      "critical": 6.5,
+      "direction": "high"
+    },
+    "tanker_freight_proxy": {
+      "warning": 60.0,
+      "critical": 78.0,
+      "direction": "high"
+    },
+    "hormuz_tanker_transit_stress": {
+      "warning": 55.0,
+      "critical": 75.0,
+      "direction": "high"
+    },
+    "lng_proxy": {
+      "warning": 58.0,
+      "critical": 75.0,
+      "direction": "high"
+    },
+    "eur_usd_basis": {
+      "warning": -20.0,
+      "critical": -35.0,
+      "direction": "low"
+    },
+    "jpy_usd_basis": {
+      "warning": -30.0,
+      "critical": -50.0,
+      "direction": "low"
+    },
+    "sofr_spread": {
+      "warning": 25.0,
+      "critical": 50.0,
+      "direction": "high"
+    },
+    "move_index": {
+      "warning": 125.0,
+      "critical": 150.0,
+      "direction": "high"
+    },
+    "treasury_liquidity_proxy": {
+      "warning": 58.0,
+      "critical": 74.0,
+      "direction": "high"
+    },
+    "treasury_basis_proxy": {
+      "warning": 55.0,
+      "critical": 72.0,
+      "direction": "high"
+    },
+    "auction_stress": {
+      "warning": 58.0,
+      "critical": 75.0,
+      "direction": "high"
+    },
+    "auction_clearing_stress": {
+      "warning": 58.0,
+      "critical": 75.0,
+      "direction": "high"
+    },
+    "auction_foreign_sponsorship_stress": {
+      "warning": 58.0,
+      "critical": 75.0,
+      "direction": "high"
+    },
+    "auction_issuance_mix_stress": {
+      "warning": 58.0,
+      "critical": 75.0,
+      "direction": "high"
+    },
+    "fima_repo_usage": {
+      "warning": 18.0,
+      "critical": 35.0,
+      "direction": "high"
+    },
+    "fed_swap_line_usage": {
+      "warning": 5.0,
+      "critical": 15.0,
+      "direction": "high"
+    },
+    "ten_year_yield": {
+      "warning": 4.4,
+      "critical": 4.9,
+      "direction": "high"
+    },
+    "thirty_year_yield": {
+      "warning": 4.6,
+      "critical": 5.1,
+      "direction": "high"
+    },
+    "term_premium_proxy": {
+      "warning": 55.0,
+      "critical": 80.0,
+      "direction": "high"
+    },
+    "consumer_credit_stress": {
+      "warning": 58.0,
+      "critical": 72.0,
+      "direction": "high"
+    },
+    "federal_receipts_quality": {
+      "warning": 45.0,
+      "critical": 35.0,
+      "direction": "low"
+    },
+    "deficit_trend": {
+      "warning": 55.0,
+      "critical": 72.0,
+      "direction": "high"
+    },
+    "spx_equal_weight": {
+      "warning": 470.0,
+      "critical": 430.0,
+      "direction": "low"
+    },
+    "tips_vs_nominals": {
+      "warning": 22.0,
+      "critical": 40.0,
+      "direction": "high"
+    },
+    "gold_price": {
+      "warning": 2380.0,
+      "critical": 2520.0,
+      "direction": "high"
+    },
+    "oil_price": {
+      "warning": 88.0,
+      "critical": 102.0,
+      "direction": "high"
+    },
+    "credit_spreads": {
+      "warning": 145.0,
+      "critical": 185.0,
+      "direction": "high"
+    },
+    "usd_index_proxy": {
+      "warning": 104.0,
+      "critical": 108.0,
+      "direction": "high"
+    },
+    "marine_insurance_stress": {
+      "warning": 60.0,
+      "critical": 80.0,
+      "direction": "high"
+    },
+    "tanker_disruption_score": {
+      "warning": 58.0,
+      "critical": 78.0,
+      "direction": "high"
+    },
+    "private_credit_stress": {
+      "warning": 55.0,
+      "critical": 75.0,
+      "direction": "high"
+    },
+    "geopolitical_escalation_toggle": {
+      "warning": 1.0,
+      "critical": 1.0,
+      "direction": "high"
+    },
+    "central_bank_intervention_toggle": {
+      "warning": 1.0,
+      "critical": 1.0,
+      "direction": "high"
+    },
+    "payroll_momentum": {
+      "warning": 100.0,
+      "critical": 0.0,
+      "direction": "low"
+    },
+    "unemployment_rate": {
+      "warning": 4.5,
+      "critical": 5.4,
+      "direction": "high"
+    },
+    "wage_stickiness": {
+      "warning": 4.0,
+      "critical": 4.8,
+      "direction": "high"
+    },
+    "hours_worked_momentum": {
+      "warning": -0.05,
+      "critical": -0.25,
+      "direction": "low"
+    },
+    "temp_help_stress": {
+      "warning": -2.0,
+      "critical": -8.0,
+      "direction": "low"
+    },
+    "employment_tax_base_proxy": {
+      "warning": 3.0,
+      "critical": 0.0,
+      "direction": "low"
+    },
+    "synthetic_usd_funding_pressure": {
+      "warning": 55.0,
+      "critical": 72.0,
+      "direction": "high"
+    },
+    "murban_wti_spread": {
+      "warning": 4.0,
+      "critical": 8.0,
+      "direction": "high"
+    },
+    "oman_wti_spread": {
+      "warning": 3.0,
+      "critical": 7.0,
+      "direction": "high"
+    },
+    "gulf_crude_dislocation": {
+      "warning": 4.0,
+      "critical": 8.0,
+      "direction": "high"
+    },
+    "p_and_i_circular_stress": {
+      "warning": 58.0,
+      "critical": 82.0,
+      "direction": "high"
+    },
+    "iaea_nuclear_ambiguity": {
+      "warning": 55.0,
+      "critical": 78.0,
+      "direction": "high"
+    },
+    "interceptor_depletion": {
+      "warning": 55.0,
+      "critical": 78.0,
+      "direction": "high"
+    },
+    "governance_fragmentation": {
+      "warning": 50.0,
+      "critical": 72.0,
+      "direction": "high"
+    },
+    "expected_inflation_5y5y": {
+      "warning": 2.7,
+      "critical": 3.2,
+      "direction": "high"
+    },
+    "inflation_expectations_level": {
+      "warning": 2.55,
+      "critical": 3.0,
+      "direction": "high"
+    },
+    "inflation_expectations_slope": {
+      "warning": 40.0,
+      "critical": 85.0,
+      "direction": "high"
+    },
+    "inflation_expectations_curvature": {
+      "warning": 15.0,
+      "critical": 35.0,
+      "direction": "high"
+    },
+    "survey_market_expectations_gap": {
+      "warning": 35.0,
+      "critical": 80.0,
+      "direction": "high"
+    },
+    "expectations_entrenchment_score": {
+      "warning": 55.0,
+      "critical": 72.0,
+      "direction": "high"
+    },
+    "vix_index": {
+      "warning": 22.0,
+      "critical": 30.0,
+      "direction": "high"
+    },
+    "oil_in_yen_stress": {
+      "warning": 60.0,
+      "critical": 80.0,
+      "direction": "high"
+    },
+    "oil_in_eur_stress": {
+      "warning": 58.0,
+      "critical": 78.0,
+      "direction": "high"
+    },
+    "oil_in_cny_stress": {
+      "warning": 55.0,
+      "critical": 72.0,
+      "direction": "high"
+    },
+    "external_importer_stress": {
+      "warning": 58.0,
+      "critical": 78.0,
+      "direction": "high"
+    },
+    "household_real_income_squeeze": {
+      "warning": 55.0,
+      "critical": 72.0,
+      "direction": "high"
+    },
+    "tax_receipts_market_stress": {
+      "warning": 55.0,
+      "critical": 75.0,
+      "direction": "high"
+    }
+  },
+  "regimes": {
+    "sticky": [
+      {
+        "indicator": "brent_prompt_spread",
+        "weight": 0.18,
+        "mode": "stress",
+        "description": "Oil curve tightness remains visible across the M1-M6 window."
+      },
+      {
+        "indicator": "tanker_freight_proxy",
+        "weight": 0.08,
+        "mode": "stress",
+        "description": "Freight markets are transmitting the shipping shock."
+      },
+      {
+        "indicator": "gulf_crude_dislocation",
+        "weight": 0.06,
+        "mode": "stress",
+        "description": "Middle East export grades are dislocating versus WTI."
+      },
+      {
+        "indicator": "oman_wti_spread",
+        "weight": 0.05,
+        "mode": "stress",
+        "description": "Oman is richening versus U.S. crude, confirming regional dislocation."
+      },
+      {
+        "indicator": "murban_wti_spread",
+        "weight": 0.06,
+        "mode": "stress",
+        "description": "Murban is richening versus U.S. crude, showing Gulf export tightness."
+      },
+      {
+        "indicator": "hormuz_tanker_transit_stress",
+        "weight": 0.08,
+        "mode": "stress",
+        "description": "PortWatch shows tanker transit deterioration through the Strait of Hormuz."
+      },
+      {
+        "indicator": "marine_insurance_stress",
+        "weight": 0.14,
+        "mode": "stress",
+        "description": "Manual marine insurance stress overlay."
+      },
+      {
+        "indicator": "oil_price",
+        "weight": 0.08,
+        "mode": "stress",
+        "description": "Spot oil remains elevated."
+      },
+      {
+        "indicator": "jpy_usd_basis",
+        "weight": 0.08,
+        "mode": "stress",
+        "description": "Funding stress is visible but still contained."
+      },
+      {
+        "indicator": "consumer_credit_stress",
+        "weight": 0.1,
+        "mode": "stress",
+        "description": "Consumer balance sheets are deteriorating."
+      },
+      {
+        "indicator": "tips_vs_nominals",
+        "weight": 0.12,
+        "mode": "stress",
+        "description": "Inflation compensation is creeping higher."
+      },
+      {
+        "indicator": "auction_stress",
+        "weight": 0.08,
+        "mode": "stress",
+        "description": "Treasury demand is softer but not yet broken."
+      },
+      {
+        "indicator": "move_index",
+        "weight": 0.07,
+        "mode": "stress",
+        "description": "Rates volatility remains above calm levels."
+      },
+      {
+        "indicator": "sofr_spread",
+        "weight": 0.07,
+        "mode": "stress",
+        "description": "Repo plumbing is functional."
+      },
+      {
+        "indicator": "wage_stickiness",
+        "weight": 0.08,
+        "mode": "stress",
+        "description": "Wage growth remains sticky enough to keep inflation persistence alive."
+      },
+      {
+        "indicator": "employment_tax_base_proxy",
+        "weight": 0.05,
+        "mode": "stress",
+        "description": "The payroll-tax base is softening only gradually, keeping nominal demand alive."
+      },
+      {
+        "indicator": "synthetic_usd_funding_pressure",
+        "weight": 0.05,
+        "mode": "stress",
+        "description": "Direct FX spot and short-rate differentials show broad dollar funding pressure, but not a full break."
+      },
+      {
+        "indicator": "p_and_i_circular_stress",
+        "weight": 0.03,
+        "mode": "stress",
+        "description": "Official P&I notices show insurance withdrawal or reinstatement stress remains active."
+      },
+      {
+        "indicator": "iaea_nuclear_ambiguity",
+        "weight": 0.015,
+        "mode": "stress",
+        "description": "IAEA verification ambiguity is keeping the oil shock structurally alive."
+      },
+      {
+        "indicator": "expected_inflation_5y5y",
+        "weight": 0.06,
+        "mode": "stress",
+        "description": "Medium-term forward inflation expectations are no longer mean-reverting cleanly."
+      },
+      {
+        "indicator": "inflation_expectations_level",
+        "weight": 0.07,
+        "mode": "stress",
+        "description": "The expected-inflation curve is lifting across maturities."
+      },
+      {
+        "indicator": "expectations_entrenchment_score",
+        "weight": 0.07,
+        "mode": "stress",
+        "description": "Combined market and survey expectations point to persistence rather than transitory repricing."
+      },
+      {
+        "indicator": "survey_market_expectations_gap",
+        "weight": 0.03,
+        "mode": "stress",
+        "description": "Survey expectations are rising faster than the market-implied short end."
+      },
+      {
+        "indicator": "external_importer_stress",
+        "weight": 0.05,
+        "mode": "stress",
+        "description": "Local-currency oil stress in major importer regions is feeding imported inflation and current-account strain."
+      },
+      {
+        "indicator": "household_real_income_squeeze",
+        "weight": 0.06,
+        "mode": "stress",
+        "description": "Real household purchasing power is being squeezed before labor fully rolls over."
+      },
+      {
+        "indicator": "vix_index",
+        "weight": 0.02,
+        "mode": "stress",
+        "description": "Equity volatility is rising, hinting that the nominal shock is starting to tighten financial conditions."
+      }
+    ],
+    "convex": [
+      {
+        "indicator": "brent_prompt_spread",
+        "weight": 0.14,
+        "mode": "stress",
+        "description": "Brent M1-M6 backwardation is widening."
+      },
+      {
+        "indicator": "tanker_freight_proxy",
+        "weight": 0.12,
+        "mode": "stress",
+        "description": "Freight costs are accelerating."
+      },
+      {
+        "indicator": "gulf_crude_dislocation",
+        "weight": 0.06,
+        "mode": "stress",
+        "description": "Regional crude spreads are broadening as the shock migrates."
+      },
+      {
+        "indicator": "oman_wti_spread",
+        "weight": 0.04,
+        "mode": "stress",
+        "description": "Oman versus WTI is widening, reinforcing the Gulf supply shock."
+      },
+      {
+        "indicator": "murban_wti_spread",
+        "weight": 0.04,
+        "mode": "stress",
+        "description": "Murban versus WTI is widening, showing cross-basin dislocation."
+      },
+      {
+        "indicator": "hormuz_tanker_transit_stress",
+        "weight": 0.06,
+        "mode": "stress",
+        "description": "Hormuz tanker transit stress confirms the shipping shock is constraining flows."
+      },
+      {
+        "indicator": "jpy_usd_basis",
+        "weight": 0.14,
+        "mode": "stress",
+        "description": "JPY basis is materially more negative."
+      },
+      {
+        "indicator": "eur_usd_basis",
+        "weight": 0.08,
+        "mode": "stress",
+        "description": "EUR basis is also leaning into dollar scarcity."
+      },
+      {
+        "indicator": "sofr_spread",
+        "weight": 0.12,
+        "mode": "stress",
+        "description": "Repo stress is building."
+      },
+      {
+        "indicator": "move_index",
+        "weight": 0.12,
+        "mode": "stress",
+        "description": "Treasury volatility is elevated."
+      },
+      {
+        "indicator": "auction_stress",
+        "weight": 0.11,
+        "mode": "stress",
+        "description": "Long-end auction demand is slipping."
+      },
+      {
+        "indicator": "treasury_basis_proxy",
+        "weight": 0.09,
+        "mode": "stress",
+        "description": "Basis trade stress is visible."
+      },
+      {
+        "indicator": "fima_repo_usage",
+        "weight": 0.04,
+        "mode": "stress",
+        "description": "Foreign holders are drawing dollar liquidity."
+      },
+      {
+        "indicator": "private_credit_stress",
+        "weight": 0.04,
+        "mode": "stress",
+        "description": "Private credit marks are deteriorating."
+      },
+      {
+        "indicator": "payroll_momentum",
+        "weight": 0.04,
+        "mode": "stress",
+        "description": "Payroll growth is weakening as the shock reaches labor demand."
+      },
+      {
+        "indicator": "temp_help_stress",
+        "weight": 0.04,
+        "mode": "stress",
+        "description": "Temporary-help employment is deteriorating ahead of broader payroll weakness."
+      },
+      {
+        "indicator": "synthetic_usd_funding_pressure",
+        "weight": 0.11,
+        "mode": "stress",
+        "description": "Direct spot FX and rate differentials confirm broader dollar funding strain."
+      },
+      {
+        "indicator": "p_and_i_circular_stress",
+        "weight": 0.035,
+        "mode": "stress",
+        "description": "Insurance-market fragmentation is extending the physical shock into a longer-lived regime transition."
+      },
+      {
+        "indicator": "iaea_nuclear_ambiguity",
+        "weight": 0.045,
+        "mode": "stress",
+        "description": "Nuclear verification ambiguity is raising the odds of nonlinear repricing."
+      },
+      {
+        "indicator": "interceptor_depletion",
+        "weight": 0.035,
+        "mode": "stress",
+        "description": "Sustained defensive burn-rate pressure raises escalation convexity."
+      },
+      {
+        "indicator": "governance_fragmentation",
+        "weight": 0.03,
+        "mode": "stress",
+        "description": "Fragmented command signals reduce confidence in a clean reopening path."
+      },
+      {
+        "indicator": "expected_inflation_5y5y",
+        "weight": 0.05,
+        "mode": "stress",
+        "description": "Forward inflation expectations are climbing as the shock migrates into policy credibility."
+      },
+      {
+        "indicator": "inflation_expectations_curvature",
+        "weight": 0.04,
+        "mode": "stress",
+        "description": "The 5Y belly is richening versus the front and long end, signaling embedded persistence."
+      },
+      {
+        "indicator": "survey_market_expectations_gap",
+        "weight": 0.03,
+        "mode": "stress",
+        "description": "Survey-market expectation divergence is widening into a nonlinear repricing risk."
+      },
+      {
+        "indicator": "expectations_entrenchment_score",
+        "weight": 0.05,
+        "mode": "stress",
+        "description": "The combined expectations block shows persistence broadening beyond spot oil."
+      },
+      {
+        "indicator": "external_importer_stress",
+        "weight": 0.08,
+        "mode": "stress",
+        "description": "Japan, Europe, and China are absorbing a compounded local-currency energy shock."
+      },
+      {
+        "indicator": "vix_index",
+        "weight": 0.05,
+        "mode": "stress",
+        "description": "Equity volatility is broadening the tightening impulse beyond rates and oil."
+      },
+      {
+        "indicator": "household_real_income_squeeze",
+        "weight": 0.04,
+        "mode": "stress",
+        "description": "The real-income squeeze is increasing the chance that the oil shock migrates into broader demand and credit stress."
+      }
+    ],
+    "break": [
+      {
+        "indicator": "auction_stress",
+        "weight": 0.17,
+        "mode": "stress",
+        "description": "Repeated weak auctions are impairing duration clearing."
+      },
+      {
+        "indicator": "sofr_spread",
+        "weight": 0.13,
+        "mode": "stress",
+        "description": "Repo stress is persistent."
+      },
+      {
+        "indicator": "fima_repo_usage",
+        "weight": 0.15,
+        "mode": "stress",
+        "description": "Foreign official holders are pulling dollars against Treasuries."
+      },
+      {
+        "indicator": "fed_swap_line_usage",
+        "weight": 0.13,
+        "mode": "stress",
+        "description": "Fed swap lines are picking up."
+      },
+      {
+        "indicator": "treasury_liquidity_proxy",
+        "weight": 0.12,
+        "mode": "stress",
+        "description": "Treasury depth is deteriorating."
+      },
+      {
+        "indicator": "treasury_basis_proxy",
+        "weight": 0.1,
+        "mode": "stress",
+        "description": "Basis unwind pressure is visible."
+      },
+      {
+        "indicator": "move_index",
+        "weight": 0.05,
+        "mode": "stress",
+        "description": "Rates volatility is consistent with dysfunction."
+      },
+      {
+        "indicator": "consumer_credit_stress",
+        "weight": 0.05,
+        "mode": "stress",
+        "description": "Broader inflation inputs are leaking into credit."
+      },
+      {
+        "indicator": "private_credit_stress",
+        "weight": 0.05,
+        "mode": "stress",
+        "description": "Private credit is under markdown pressure."
+      },
+      {
+        "indicator": "central_bank_intervention_toggle",
+        "weight": 0.05,
+        "mode": "toggle",
+        "description": "Manual intervention headline flag is set."
+      },
+      {
+        "indicator": "unemployment_rate",
+        "weight": 0.06,
+        "mode": "stress",
+        "description": "Labor-market slack is rising and feeding household credit stress."
+      },
+      {
+        "indicator": "payroll_momentum",
+        "weight": 0.05,
+        "mode": "stress",
+        "description": "Payroll hiring is weakening, damaging withholding and growth confidence."
+      },
+      {
+        "indicator": "hours_worked_momentum",
+        "weight": 0.04,
+        "mode": "stress",
+        "description": "Hours worked are rolling over before broader job cuts fully show up."
+      },
+      {
+        "indicator": "employment_tax_base_proxy",
+        "weight": 0.08,
+        "mode": "stress",
+        "description": "The labor-income tax base is eroding, worsening fiscal strain."
+      },
+      {
+        "indicator": "temp_help_stress",
+        "weight": 0.04,
+        "mode": "stress",
+        "description": "White-collar-sensitive temporary employment is signaling credit spillover risk."
+      },
+      {
+        "indicator": "synthetic_usd_funding_pressure",
+        "weight": 0.09,
+        "mode": "stress",
+        "description": "Synthetic funding pressure remains elevated alongside broader plumbing stress."
+      },
+      {
+        "indicator": "p_and_i_circular_stress",
+        "weight": 0.02,
+        "mode": "stress",
+        "description": "Insurance cancellation and case-by-case write-back stress reinforce trade and funding dysfunction."
+      },
+      {
+        "indicator": "iaea_nuclear_ambiguity",
+        "weight": 0.05,
+        "mode": "stress",
+        "description": "A widening verification gap creates abrupt tail-risk repricing pressure."
+      },
+      {
+        "indicator": "interceptor_depletion",
+        "weight": 0.04,
+        "mode": "stress",
+        "description": "High interceptor burn rates raise the probability of forced escalation into a market break."
+      },
+      {
+        "indicator": "governance_fragmentation",
+        "weight": 0.04,
+        "mode": "stress",
+        "description": "Governance fragmentation lowers the odds that chokepoint and war-risk stress can be resolved quickly."
+      },
+      {
+        "indicator": "expected_inflation_5y5y",
+        "weight": 0.05,
+        "mode": "stress",
+        "description": "Medium-term inflation expectations are high enough to constrain clean policy easing."
+      },
+      {
+        "indicator": "inflation_expectations_level",
+        "weight": 0.04,
+        "mode": "stress",
+        "description": "The full expected-inflation curve is inconsistent with a temporary commodity shock only."
+      },
+      {
+        "indicator": "expectations_entrenchment_score",
+        "weight": 0.07,
+        "mode": "stress",
+        "description": "Entrenched expectations raise repression risk once market plumbing is under strain."
+      },
+      {
+        "indicator": "external_importer_stress",
+        "weight": 0.07,
+        "mode": "stress",
+        "description": "Foreign importer balance-sheet stress is raising the odds of unstable marginal UST demand and Fed-plumbing pressure."
+      },
+      {
+        "indicator": "tax_receipts_market_stress",
+        "weight": 0.07,
+        "mode": "stress",
+        "description": "Volatility, weaker equities, and softer receipts quality are worsening capital-gains-sensitive fiscal pressure."
+      },
+      {
+        "indicator": "vix_index",
+        "weight": 0.04,
+        "mode": "stress",
+        "description": "High equity volatility is consistent with a broader risk-premium shock and tighter financial conditions."
+      }
+    ]
+  },
+  "alert_rules": {
+    "systemic_warning_count": {
+      "warning": 3,
+      "critical": 4
+    },
+    "fima_rising_streak": {
+      "warning": 3,
+      "critical": 5
+    },
+    "swap_usage_rising": {
+      "warning": 2,
+      "critical": 3
+    }
+  },
+  "causal_groups": {
+    "marine_insurance_stress": [
+      "marine_insurance_stress",
+      "tanker_disruption_score",
+      "tanker_freight_proxy",
+      "geopolitical_escalation_toggle",
+      "p_and_i_circular_stress"
+    ],
+    "oil_physical_stress": [
+      "brent_prompt_spread",
+      "wti_prompt_spread",
+      "oil_price",
+      "lng_proxy",
+      "hormuz_tanker_transit_stress",
+      "murban_wti_spread",
+      "oman_wti_spread",
+      "gulf_crude_dislocation",
+      "iaea_nuclear_ambiguity"
+    ],
+    "dollar_funding_stress": [
+      "jpy_usd_basis",
+      "eur_usd_basis",
+      "sofr_spread",
+      "synthetic_usd_funding_pressure",
+      "external_importer_stress"
+    ],
+    "ust_demand_stress": [
+      "auction_stress",
+      "ten_year_yield",
+      "thirty_year_yield",
+      "term_premium_proxy",
+      "expected_inflation_5y5y",
+      "external_importer_stress"
+    ],
+    "repo_basis_stress": [
+      "treasury_liquidity_proxy",
+      "treasury_basis_proxy",
+      "move_index"
+    ],
+    "fed_intervention_stress": [
+      "fima_repo_usage",
+      "fed_swap_line_usage",
+      "central_bank_intervention_toggle"
+    ],
+    "inflation_repression_stress": [
+      "consumer_credit_stress",
+      "private_credit_stress",
+      "tips_vs_nominals",
+      "gold_price",
+      "unemployment_rate",
+      "employment_tax_base_proxy",
+      "payroll_momentum",
+      "temp_help_stress",
+      "wage_stickiness",
+      "expectations_entrenchment_score",
+      "household_real_income_squeeze",
+      "tax_receipts_market_stress"
+    ],
+    "geopolitical_trigger_stress": [
+      "p_and_i_circular_stress",
+      "iaea_nuclear_ambiguity",
+      "interceptor_depletion",
+      "governance_fragmentation",
+      "geopolitical_escalation_toggle"
+    ],
+    "expectations_credibility_stress": [
+      "expected_inflation_5y5y",
+      "inflation_expectations_level",
+      "inflation_expectations_slope",
+      "inflation_expectations_curvature",
+      "survey_market_expectations_gap",
+      "expectations_entrenchment_score"
+    ],
+    "external_importer_stress": [
+      "oil_in_yen_stress",
+      "oil_in_eur_stress",
+      "oil_in_cny_stress",
+      "external_importer_stress",
+      "usd_index_proxy"
+    ],
+    "household_tax_stress": [
+      "household_real_income_squeeze",
+      "tax_receipts_market_stress",
+      "federal_receipts_quality",
+      "employment_tax_base_proxy",
+      "payroll_momentum",
+      "vix_index"
+    ]
+  },
+  "propagation": {
+    "iterations": 4,
+    "memory": 0.35,
+    "activation_floor": 45.0,
+    "feedback_gain": 0.24,
+    "synergy_gain": 0.22,
+    "edges": [
+      {
+        "from": "geopolitical_trigger_stress",
+        "to": "marine_insurance_stress",
+        "weight": 0.46
+      },
+      {
+        "from": "geopolitical_trigger_stress",
+        "to": "oil_physical_stress",
+        "weight": 0.32
+      },
+      {
+        "from": "geopolitical_trigger_stress",
+        "to": "dollar_funding_stress",
+        "weight": 0.18
+      },
+      {
+        "from": "marine_insurance_stress",
+        "to": "oil_physical_stress",
+        "weight": 0.34
+      },
+      {
+        "from": "oil_physical_stress",
+        "to": "dollar_funding_stress",
+        "weight": 0.28
+      },
+      {
+        "from": "dollar_funding_stress",
+        "to": "ust_demand_stress",
+        "weight": 0.3
+      },
+      {
+        "from": "ust_demand_stress",
+        "to": "repo_basis_stress",
+        "weight": 0.34
+      },
+      {
+        "from": "repo_basis_stress",
+        "to": "ust_demand_stress",
+        "weight": 0.24
+      },
+      {
+        "from": "repo_basis_stress",
+        "to": "fed_intervention_stress",
+        "weight": 0.32
+      },
+      {
+        "from": "fed_intervention_stress",
+        "to": "inflation_repression_stress",
+        "weight": 0.24
+      },
+      {
+        "from": "inflation_repression_stress",
+        "to": "ust_demand_stress",
+        "weight": 0.18
+      },
+      {
+        "from": "dollar_funding_stress",
+        "to": "repo_basis_stress",
+        "weight": 0.22
+      },
+      {
+        "from": "oil_physical_stress",
+        "to": "inflation_repression_stress",
+        "weight": 0.18
+      },
+      {
+        "from": "oil_physical_stress",
+        "to": "expectations_credibility_stress",
+        "weight": 0.24
+      },
+      {
+        "from": "expectations_credibility_stress",
+        "to": "ust_demand_stress",
+        "weight": 0.24
+      },
+      {
+        "from": "expectations_credibility_stress",
+        "to": "inflation_repression_stress",
+        "weight": 0.3
+      },
+      {
+        "from": "expectations_credibility_stress",
+        "to": "dollar_funding_stress",
+        "weight": 0.08
+      },
+      {
+        "from": "oil_physical_stress",
+        "to": "external_importer_stress",
+        "weight": 0.34
+      },
+      {
+        "from": "external_importer_stress",
+        "to": "dollar_funding_stress",
+        "weight": 0.24
+      },
+      {
+        "from": "external_importer_stress",
+        "to": "ust_demand_stress",
+        "weight": 0.32
+      },
+      {
+        "from": "external_importer_stress",
+        "to": "fed_intervention_stress",
+        "weight": 0.12
+      },
+      {
+        "from": "external_importer_stress",
+        "to": "household_tax_stress",
+        "weight": 0.16
+      },
+      {
+        "from": "oil_physical_stress",
+        "to": "household_tax_stress",
+        "weight": 0.16
+      },
+      {
+        "from": "household_tax_stress",
+        "to": "inflation_repression_stress",
+        "weight": 0.26
+      },
+      {
+        "from": "household_tax_stress",
+        "to": "ust_demand_stress",
+        "weight": 0.18
+      }
+    ],
+    "regime_sensitivity": {
+      "sticky": {
+        "marine_insurance_stress": 0.02,
+        "oil_physical_stress": 0.04,
+        "inflation_repression_stress": 0.03,
+        "geopolitical_trigger_stress": 0.015,
+        "expectations_credibility_stress": 0.03,
+        "external_importer_stress": 0.025,
+        "household_tax_stress": 0.025
+      },
+      "convex": {
+        "oil_physical_stress": 0.04,
+        "dollar_funding_stress": 0.06,
+        "ust_demand_stress": 0.05,
+        "repo_basis_stress": 0.06,
+        "geopolitical_trigger_stress": 0.06,
+        "expectations_credibility_stress": 0.035,
+        "external_importer_stress": 0.05,
+        "household_tax_stress": 0.03
+      },
+      "break": {
+        "dollar_funding_stress": 0.04,
+        "ust_demand_stress": 0.06,
+        "repo_basis_stress": 0.08,
+        "fed_intervention_stress": 0.07,
+        "inflation_repression_stress": 0.05,
+        "geopolitical_trigger_stress": 0.075,
+        "expectations_credibility_stress": 0.04,
+        "external_importer_stress": 0.05,
+        "household_tax_stress": 0.06
+      }
+    }
+  },
+  "state_space": {
+    "states": [
+      "oil_shock",
+      "funding_stress",
+      "treasury_stress",
+      "intervention_pressure",
+      "repression_risk"
+    ],
+    "transition_matrix": [
+      [
+        0.82,
+        0.08,
+        0.0,
+        0.0,
+        0.04
+      ],
+      [
+        0.16,
+        0.76,
+        0.1,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.2,
+        0.79,
+        0.1,
+        0.1
+      ],
+      [
+        0.0,
+        0.1,
+        0.18,
+        0.78,
+        0.06
+      ],
+      [
+        0.1,
+        0.0,
+        0.12,
+        0.16,
+        0.8
+      ]
+    ],
+    "process_noise": [
+      18.0,
+      16.0,
+      16.0,
+      14.0,
+      14.0
+    ],
+    "initial_state": [
+      45.0,
+      40.0,
+      38.0,
+      25.0,
+      42.0
+    ],
+    "initial_covariance": [
+      80.0,
+      70.0,
+      70.0,
+      55.0,
+      60.0
+    ],
+    "measurement_noise_floor": 25.0,
+    "measurements": {
+      "brent_prompt_spread": [
+        0.78,
+        0.05,
+        0.0,
+        0.0,
+        0.08
+      ],
+      "wti_prompt_spread": [
+        0.72,
+        0.04,
+        0.0,
+        0.0,
+        0.05
+      ],
+      "tanker_freight_proxy": [
+        0.64,
+        0.06,
+        0.0,
+        0.0,
+        0.02
+      ],
+      "hormuz_tanker_transit_stress": [
+        0.74,
+        0.04,
+        0.0,
+        0.0,
+        0.04
+      ],
+      "lng_proxy": [
+        0.46,
+        0.0,
+        0.0,
+        0.0,
+        0.08
+      ],
+      "marine_insurance_stress": [
+        0.62,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "tanker_disruption_score": [
+        0.68,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "geopolitical_escalation_toggle": [
+        0.55,
+        0.12,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "jpy_usd_basis": [
+        0.04,
+        0.82,
+        0.08,
+        0.0,
+        0.0
+      ],
+      "eur_usd_basis": [
+        0.02,
+        0.7,
+        0.08,
+        0.0,
+        0.0
+      ],
+      "sofr_spread": [
+        0.0,
+        0.58,
+        0.28,
+        0.0,
+        0.0
+      ],
+      "move_index": [
+        0.0,
+        0.2,
+        0.64,
+        0.0,
+        0.06
+      ],
+      "treasury_liquidity_proxy": [
+        0.0,
+        0.1,
+        0.82,
+        0.04,
+        0.0
+      ],
+      "treasury_basis_proxy": [
+        0.0,
+        0.16,
+        0.78,
+        0.0,
+        0.0
+      ],
+      "auction_stress": [
+        0.0,
+        0.1,
+        0.74,
+        0.04,
+        0.0
+      ],
+      "ten_year_yield": [
+        0.1,
+        0.0,
+        0.44,
+        0.0,
+        0.28
+      ],
+      "thirty_year_yield": [
+        0.04,
+        0.0,
+        0.52,
+        0.0,
+        0.28
+      ],
+      "term_premium_proxy": [
+        0.0,
+        0.0,
+        0.54,
+        0.0,
+        0.32
+      ],
+      "fima_repo_usage": [
+        0.0,
+        0.18,
+        0.22,
+        0.58,
+        0.0
+      ],
+      "fed_swap_line_usage": [
+        0.0,
+        0.28,
+        0.12,
+        0.58,
+        0.0
+      ],
+      "central_bank_intervention_toggle": [
+        0.0,
+        0.1,
+        0.05,
+        0.7,
+        0.05
+      ],
+      "consumer_credit_stress": [
+        0.08,
+        0.08,
+        0.08,
+        0.0,
+        0.62
+      ],
+      "private_credit_stress": [
+        0.0,
+        0.16,
+        0.16,
+        0.0,
+        0.58
+      ],
+      "tips_vs_nominals": [
+        0.22,
+        0.0,
+        0.1,
+        0.0,
+        0.6
+      ],
+      "gold_price": [
+        0.12,
+        0.0,
+        0.04,
+        0.02,
+        0.52
+      ],
+      "oil_price": [
+        0.48,
+        0.0,
+        0.04,
+        0.0,
+        0.18
+      ],
+      "payroll_momentum": [
+        0.02,
+        0.04,
+        0.08,
+        0.0,
+        0.58
+      ],
+      "unemployment_rate": [
+        0.0,
+        0.06,
+        0.12,
+        0.0,
+        0.66
+      ],
+      "wage_stickiness": [
+        0.18,
+        0.0,
+        0.04,
+        0.0,
+        0.56
+      ],
+      "hours_worked_momentum": [
+        0.02,
+        0.02,
+        0.06,
+        0.0,
+        0.54
+      ],
+      "temp_help_stress": [
+        0.0,
+        0.12,
+        0.1,
+        0.0,
+        0.58
+      ],
+      "employment_tax_base_proxy": [
+        0.08,
+        0.02,
+        0.12,
+        0.0,
+        0.68
+      ],
+      "synthetic_usd_funding_pressure": [
+        0.02,
+        0.72,
+        0.12,
+        0.0,
+        0.04
+      ],
+      "murban_wti_spread": [
+        0.62,
+        0.08,
+        0.0,
+        0.0,
+        0.04
+      ],
+      "oman_wti_spread": [
+        0.58,
+        0.08,
+        0.0,
+        0.0,
+        0.04
+      ],
+      "gulf_crude_dislocation": [
+        0.7,
+        0.1,
+        0.0,
+        0.0,
+        0.05
+      ],
+      "p_and_i_circular_stress": [
+        0.66,
+        0.06,
+        0.0,
+        0.0,
+        0.04
+      ],
+      "iaea_nuclear_ambiguity": [
+        0.34,
+        0.18,
+        0.06,
+        0.02,
+        0.28
+      ],
+      "interceptor_depletion": [
+        0.28,
+        0.12,
+        0.08,
+        0.03,
+        0.12
+      ],
+      "governance_fragmentation": [
+        0.2,
+        0.16,
+        0.08,
+        0.02,
+        0.18
+      ],
+      "expected_inflation_5y5y": [
+        0.1,
+        0.0,
+        0.16,
+        0.0,
+        0.68
+      ],
+      "inflation_expectations_level": [
+        0.12,
+        0.0,
+        0.12,
+        0.0,
+        0.66
+      ],
+      "inflation_expectations_slope": [
+        0.18,
+        0.02,
+        0.1,
+        0.0,
+        0.42
+      ],
+      "inflation_expectations_curvature": [
+        0.1,
+        0.02,
+        0.08,
+        0.0,
+        0.46
+      ],
+      "survey_market_expectations_gap": [
+        0.08,
+        0.0,
+        0.04,
+        0.0,
+        0.56
+      ],
+      "expectations_entrenchment_score": [
+        0.12,
+        0.0,
+        0.12,
+        0.02,
+        0.72
+      ],
+      "vix_index": [
+        0.0,
+        0.12,
+        0.28,
+        0.0,
+        0.18
+      ],
+      "oil_in_yen_stress": [
+        0.18,
+        0.34,
+        0.16,
+        0.02,
+        0.1
+      ],
+      "oil_in_eur_stress": [
+        0.16,
+        0.22,
+        0.12,
+        0.0,
+        0.1
+      ],
+      "oil_in_cny_stress": [
+        0.12,
+        0.16,
+        0.08,
+        0.0,
+        0.08
+      ],
+      "external_importer_stress": [
+        0.1,
+        0.34,
+        0.24,
+        0.06,
+        0.1
+      ],
+      "household_real_income_squeeze": [
+        0.12,
+        0.08,
+        0.08,
+        0.0,
+        0.64
+      ],
+      "tax_receipts_market_stress": [
+        0.0,
+        0.12,
+        0.18,
+        0.02,
+        0.58
+      ]
+    },
+    "regime_loadings": {
+      "sticky": [
+        0.4,
+        0.1,
+        0.05,
+        0.0,
+        0.35
+      ],
+      "convex": [
+        0.25,
+        0.4,
+        0.2,
+        0.0,
+        0.1
+      ],
+      "break": [
+        0.05,
+        0.2,
+        0.35,
+        0.25,
+        0.15
+      ]
+    },
+    "iterative_estimation": {
+      "max_iterations": 5,
+      "tolerance": 0.08,
+      "relaxation": 0.35,
+      "noise_relaxation": 0.25,
+      "anchor_weight": 0.18,
+      "intercept_scale": 0.5,
+      "worsening_backoff": 0.6
+    },
+    "regime_calibration": {
+      "ridge": 24.0,
+      "anchor_strength": 72.0,
+      "max_blend_weight": 0.3,
+      "bias_weights": {
+        "sticky": 1.0,
+        "convex": 1.05,
+        "break": 1.1
+      },
+      "episode_weights": {
+        "dash_for_cash_2020": 1.1,
+        "uk_gilt_ldi_2022": 1.1,
+        "regional_bank_funding_2023": 1.0,
+        "red_sea_shipping_2024": 1.0,
+        "eurozone_dollar_shortage_2011": 1.1,
+        "repo_spike_2019": 1.05,
+        "european_energy_crisis_2022": 1.0
+      },
+      "validation_guardrail": {
+        "min_blend_weight": 0.05,
+        "rmse_tolerance_ratio": 1.02,
+        "hit_rate_tolerance": 0.0,
+        "floor_factor": 0.3
+      },
+      "cluster_weighting": {
+        "same_cluster_boost": 0.45,
+        "other_cluster_penalty": 0.12
+      }
+    },
+    "observation_conditioning": {
+      "cluster_weight": 0.65,
+      "regime_weight": 0.55,
+      "min_multiplier": 0.72,
+      "max_multiplier": 1.6,
+      "cluster_profiles": {
+        "shipping": {
+          "marine_insurance_stress": 1.45,
+          "tanker_disruption_score": 1.45,
+          "tanker_freight_proxy": 1.3,
+          "hormuz_tanker_transit_stress": 1.45,
+          "brent_prompt_spread": 1.15,
+          "wti_prompt_spread": 1.1,
+          "jpy_usd_basis": 0.92,
+          "eur_usd_basis": 0.92,
+          "treasury_liquidity_proxy": 0.9,
+          "murban_wti_spread": 1.2,
+          "oman_wti_spread": 1.18,
+          "gulf_crude_dislocation": 1.24,
+          "p_and_i_circular_stress": 1.4,
+          "iaea_nuclear_ambiguity": 1.08,
+          "interceptor_depletion": 1.06,
+          "governance_fragmentation": 1.08,
+          "expected_inflation_5y5y": 1.04,
+          "inflation_expectations_level": 1.04,
+          "external_importer_stress": 1.08,
+          "oil_in_yen_stress": 1.1,
+          "oil_in_eur_stress": 1.08
+        },
+        "funding": {
+          "jpy_usd_basis": 1.4,
+          "eur_usd_basis": 1.35,
+          "sofr_spread": 1.35,
+          "move_index": 1.1,
+          "fima_repo_usage": 1.1,
+          "fed_swap_line_usage": 1.15,
+          "treasury_basis_proxy": 1.15,
+          "marine_insurance_stress": 0.85,
+          "payroll_momentum": 1.05,
+          "temp_help_stress": 1.08,
+          "employment_tax_base_proxy": 1.04,
+          "synthetic_usd_funding_pressure": 1.25,
+          "iaea_nuclear_ambiguity": 1.08,
+          "governance_fragmentation": 1.08,
+          "interceptor_depletion": 1.04,
+          "expected_inflation_5y5y": 1.05,
+          "survey_market_expectations_gap": 1.08,
+          "expectations_entrenchment_score": 1.08,
+          "external_importer_stress": 1.18,
+          "oil_in_yen_stress": 1.16,
+          "oil_in_eur_stress": 1.1,
+          "oil_in_cny_stress": 1.08,
+          "vix_index": 1.08,
+          "tax_receipts_market_stress": 1.1
+        },
+        "plumbing": {
+          "auction_stress": 1.3,
+          "treasury_liquidity_proxy": 1.45,
+          "treasury_basis_proxy": 1.35,
+          "move_index": 1.25,
+          "fima_repo_usage": 1.2,
+          "fed_swap_line_usage": 1.15,
+          "sofr_spread": 1.15,
+          "brent_prompt_spread": 0.9,
+          "unemployment_rate": 1.08,
+          "employment_tax_base_proxy": 1.1,
+          "hours_worked_momentum": 1.05,
+          "synthetic_usd_funding_pressure": 1.1,
+          "iaea_nuclear_ambiguity": 1.05,
+          "governance_fragmentation": 1.06,
+          "interceptor_depletion": 1.05,
+          "expected_inflation_5y5y": 1.08,
+          "inflation_expectations_level": 1.06,
+          "expectations_entrenchment_score": 1.1,
+          "external_importer_stress": 1.14,
+          "tax_receipts_market_stress": 1.12,
+          "vix_index": 1.12
+        },
+        "energy": {
+          "brent_prompt_spread": 1.4,
+          "wti_prompt_spread": 1.35,
+          "tanker_freight_proxy": 1.15,
+          "hormuz_tanker_transit_stress": 1.28,
+          "marine_insurance_stress": 1.05,
+          "tips_vs_nominals": 1.18,
+          "private_credit_stress": 1.08,
+          "jpy_usd_basis": 0.95,
+          "eur_usd_basis": 0.95,
+          "wage_stickiness": 1.12,
+          "employment_tax_base_proxy": 1.06,
+          "synthetic_usd_funding_pressure": 0.95,
+          "murban_wti_spread": 1.28,
+          "oman_wti_spread": 1.24,
+          "gulf_crude_dislocation": 1.32,
+          "p_and_i_circular_stress": 1.25,
+          "iaea_nuclear_ambiguity": 1.18,
+          "interceptor_depletion": 1.12,
+          "governance_fragmentation": 1.08,
+          "expected_inflation_5y5y": 1.18,
+          "inflation_expectations_level": 1.16,
+          "inflation_expectations_slope": 1.1,
+          "inflation_expectations_curvature": 1.08,
+          "survey_market_expectations_gap": 1.06,
+          "expectations_entrenchment_score": 1.18,
+          "external_importer_stress": 1.22,
+          "oil_in_yen_stress": 1.28,
+          "oil_in_eur_stress": 1.16,
+          "oil_in_cny_stress": 1.1,
+          "household_real_income_squeeze": 1.14
+        }
+      },
+      "regime_profiles": {
+        "sticky": {
+          "brent_prompt_spread": 1.22,
+          "wti_prompt_spread": 1.18,
+          "tanker_freight_proxy": 1.12,
+          "hormuz_tanker_transit_stress": 1.18,
+          "marine_insurance_stress": 1.15,
+          "tanker_disruption_score": 1.15,
+          "oil_price": 1.1,
+          "tips_vs_nominals": 1.08,
+          "wage_stickiness": 1.16,
+          "employment_tax_base_proxy": 1.06,
+          "synthetic_usd_funding_pressure": 1.04,
+          "murban_wti_spread": 1.12,
+          "oman_wti_spread": 1.1,
+          "gulf_crude_dislocation": 1.14,
+          "p_and_i_circular_stress": 1.14,
+          "iaea_nuclear_ambiguity": 1.06,
+          "expected_inflation_5y5y": 1.16,
+          "inflation_expectations_level": 1.16,
+          "inflation_expectations_slope": 1.08,
+          "survey_market_expectations_gap": 1.08,
+          "expectations_entrenchment_score": 1.18,
+          "external_importer_stress": 1.12,
+          "oil_in_yen_stress": 1.14,
+          "household_real_income_squeeze": 1.12
+        },
+        "convex": {
+          "jpy_usd_basis": 1.22,
+          "eur_usd_basis": 1.18,
+          "sofr_spread": 1.2,
+          "move_index": 1.14,
+          "auction_stress": 1.08,
+          "treasury_basis_proxy": 1.12,
+          "private_credit_stress": 1.08,
+          "payroll_momentum": 1.08,
+          "temp_help_stress": 1.1,
+          "synthetic_usd_funding_pressure": 1.18,
+          "murban_wti_spread": 1.08,
+          "oman_wti_spread": 1.08,
+          "gulf_crude_dislocation": 1.12,
+          "p_and_i_circular_stress": 1.12,
+          "iaea_nuclear_ambiguity": 1.14,
+          "interceptor_depletion": 1.12,
+          "governance_fragmentation": 1.1,
+          "expected_inflation_5y5y": 1.12,
+          "inflation_expectations_curvature": 1.12,
+          "survey_market_expectations_gap": 1.1,
+          "expectations_entrenchment_score": 1.12,
+          "external_importer_stress": 1.18,
+          "oil_in_yen_stress": 1.18,
+          "oil_in_eur_stress": 1.1,
+          "vix_index": 1.1
+        },
+        "break": {
+          "auction_stress": 1.2,
+          "treasury_liquidity_proxy": 1.32,
+          "treasury_basis_proxy": 1.24,
+          "fima_repo_usage": 1.2,
+          "fed_swap_line_usage": 1.18,
+          "central_bank_intervention_toggle": 1.15,
+          "move_index": 1.12,
+          "unemployment_rate": 1.18,
+          "hours_worked_momentum": 1.12,
+          "employment_tax_base_proxy": 1.18,
+          "payroll_momentum": 1.12,
+          "synthetic_usd_funding_pressure": 1.12,
+          "p_and_i_circular_stress": 1.08,
+          "iaea_nuclear_ambiguity": 1.18,
+          "interceptor_depletion": 1.16,
+          "governance_fragmentation": 1.16,
+          "expected_inflation_5y5y": 1.14,
+          "inflation_expectations_level": 1.1,
+          "expectations_entrenchment_score": 1.16,
+          "external_importer_stress": 1.14,
+          "tax_receipts_market_stress": 1.18,
+          "vix_index": 1.14,
+          "household_real_income_squeeze": 1.12
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,543 @@
+# Macro Stress Dashboard for Daily Local Monitoring
+**Purpose:** Build a locally hosted dashboard app that updates daily and monitors the integrated macro stress chain:
+
+**marine war-risk / shipping disruption -> oil supply shock -> higher energy import bills -> global dollar funding stress -> weaker foreign marginal UST demand -> repo stress / basis trade unwind -> Treasury market dysfunction -> Fed backstop of repo, UST market, and offshore dollar plumbing -> higher medium-term inflation / repression risk**
+
+This spec is written for Codex to implement a practical desktop/local web app.
+
+---
+
+## 1. Product Goal
+
+Create a **locally hosted dashboard** that helps a user monitor whether the global macro system is moving from:
+1. **Sticky inflation**
+2. **Convex inflation / funding stress**
+3. **Break / repression**
+
+The app should refresh data **daily by default**, with optional manual refresh and optional intraday refresh for market data.
+
+The dashboard should answer:
+
+- Is the Hormuz / marine insurance shock becoming persistent?
+- Is physical oil scarcity spreading into freight and broader inflation inputs?
+- Are large energy importers scrambling for dollars?
+- Is foreign marginal demand for U.S. Treasuries weakening?
+- Is repo stress / basis trade stress building?
+- Is the Fed being forced to backstop both the Treasury market and offshore dollar funding?
+- Is the system shifting from ordinary inflation into a nonlinear repression regime?
+
+---
+
+## 2. Core Conceptual Chain To Encode
+
+The app should explicitly model this causal chain as a visible panel / flow diagram:
+
+1. **Marine war-risk cancellation / tanker disruption**
+2. **Oil and LNG supply shock**
+3. **Brent backwardation / freight spike**
+4. **Higher energy import bills for major U.S. creditors**
+5. **Global scramble for USD liquidity**
+6. **Reduced foreign willingness to add UST duration**
+7. **Dealer balance-sheet saturation / repo stress**
+8. **Hedge fund Treasury basis trade unwind**
+9. **UST auction weakness / Treasury volatility**
+10. **Fed support via SRF / repo / swap lines / FIMA / QE-style purchases**
+11. **Inflation persistence, repression risk, and asset-price regime shift**
+
+This chain should not be decorative. It should drive the app’s regime scoring.
+
+---
+
+## 3. Tech Stack
+
+Preferred stack:
+
+- **Backend:** Python + FastAPI
+- **Frontend:** React + TypeScript + Vite
+- **Charts:** Plotly or ECharts
+- **Data storage:** SQLite locally
+- **Task scheduler:** APScheduler or simple cron-compatible daily jobs
+- **Packaging:** Docker optional, but app must run locally without Docker
+- **Environment:** `.env` support for API keys
+
+The app must be easy for a non-engineer to run locally:
+- `uvicorn` or one-command start
+- clear README
+- clear `.env.example`
+
+---
+
+## 4. App Architecture
+
+Use a modular architecture:
+
+### Backend modules
+- `data_sources/`
+- `collectors/`
+- `transformers/`
+- `regime_engine/`
+- `api/`
+- `storage/`
+
+### Frontend modules
+- `pages/`
+- `components/`
+- `charts/`
+- `state/`
+- `types/`
+
+### Suggested folders
+- `backend/`
+- `frontend/`
+- `docs/`
+- `config/`
+- `scripts/`
+
+---
+
+## 5. Primary Dashboard Views
+
+### A. Executive Regime View
+Top-level status cards:
+- **Sticky**
+- **Convex**
+- **Break / Repression**
+
+Each should show:
+- current probability score
+- 7-day change
+- 30-day change
+- top drivers
+
+### B. Causal Chain View
+A left-to-right or top-to-bottom chain with nodes:
+- Marine insurance stress
+- Oil physical stress
+- Dollar funding stress
+- UST demand stress
+- Repo / basis stress
+- Fed intervention stress
+- Inflation / repression stress
+
+Each node should be color coded:
+- green = calm
+- yellow = building
+- orange = stressed
+- red = critical
+
+### C. Market Plumbing View
+Panels for:
+- repo
+- SOFR
+- SRF/FIMA/swap line usage
+- Treasury market depth proxy
+- MOVE
+- cross-currency basis
+
+### D. Oil / Shipping View
+Panels for:
+- Brent front spreads
+- WTI front spreads
+- tanker rates
+- AIS / tanker transit proxy (if available)
+- marine insurance / news stress indicator
+- LNG proxy if data accessible
+
+### E. UST / Funding View
+Panels for:
+- 2Y, 10Y, 30Y yields
+- term premium proxy
+- auction tails
+- bid-to-cover
+- indirect bidder share
+- TIC / foreign holdings trends
+- repo stress
+
+### F. Consumer / Credit / Fiscal View
+Panels for:
+- federal receipts quality
+- withholding / payroll taxes if accessible
+- credit card delinquencies
+- auto delinquencies
+- private credit stress tracker
+- deficit / debt trends
+
+### G. Asset Regime View
+Panels for:
+- long duration UST risk
+- TIPS vs nominals
+- S&P 500 / Nasdaq / equal-weight
+- gold
+- oil
+- credit spreads
+- USD broad index / DXY proxy
+
+---
+
+## 6. The 10 Most Important Daily / Near-Daily Indicators
+
+These should be the headline indicators and drive alerts.
+
+1. **Brent M1-M3 or M1-M2 spread**
+   - signal of prompt physical scarcity
+
+2. **VLCC / dirty tanker freight rate proxy**
+   - signal of physical shipping disruption
+
+3. **EUR/USD and JPY/USD cross-currency basis**
+   - signal of offshore dollar funding stress
+
+4. **SOFR minus effective Fed funds / target midpoint**
+   - signal of repo funding stress
+
+5. **MOVE index**
+   - signal of Treasury volatility
+
+6. **UST auction tails and bid-to-cover**
+   - signal of weak duration demand
+
+7. **FIMA repo facility usage**
+   - signal that foreign official holders need dollars against Treasuries
+
+8. **Fed swap line usage**
+   - signal of eurodollar/offshore dollar stress
+
+9. **Consumer credit deterioration**
+   - card delinquencies, auto delinquencies, bank charge-offs
+
+10. **Private credit markdown / gate stress index**
+   - manually maintained if fully automated feeds are unavailable
+
+---
+
+## 7. The 5 Intraday / Fast-Moving Stress Signals
+
+These should be grouped into a dedicated “Crisis Monitor” panel.
+
+1. **Treasury market depth / liquidity proxy**
+2. **SOFR vs Fed funds / target**
+3. **Cash-futures Treasury basis proxy**
+4. **FX swap-implied USD funding pressure**
+5. **Brent prompt spread**
+
+If 3 or more trigger simultaneously, show a **systemic stress alert**.
+
+---
+
+## 8. Regime Logic
+
+Build a rule-based regime engine first. Keep it simple and transparent.
+
+### Regime 1: Sticky
+Conditions:
+- Brent prompt spread elevated but not extreme
+- cross-currency basis mildly negative
+- repo functioning normally
+- UST auctions acceptable
+- FIMA/swap-line usage low
+
+Interpretation:
+- inflation shock visible
+- plumbing intact
+
+### Regime 2: Convex
+Conditions:
+- Brent backwardation widening sharply
+- tanker rates elevated
+- cross-currency basis materially more negative
+- SOFR/repo stress building
+- MOVE elevated
+- weak long-end auctions
+- basis trade stress visible
+
+Interpretation:
+- commodity shock is spreading into funding and duration markets
+
+### Regime 3: Break / Repression
+Conditions:
+- repeated weak auctions
+- persistent repo stress
+- FIMA or swap-line usage elevated
+- signs of Fed balance-sheet support increasing
+- inflation inputs broadening
+- real-return suppression likely
+
+Interpretation:
+- Fed is increasingly replacing private clearing in sovereign and dollar markets
+
+### Suggested implementation
+Create a weighted score from 0 to 100 for each regime.
+Allow user-editable weights in a config file.
+
+---
+
+## 9. Alert Engine
+
+The app should support alerts like:
+
+- “Brent prompt spread exceeded threshold”
+- “JPY basis widening and SOFR stress rising”
+- “Auction tail + MOVE + cross-currency basis = convex warning”
+- “FIMA usage rising: foreign holders seeking dollars”
+- “Repo stress + basis unwind + weak auction = break risk”
+
+Alert severities:
+- Info
+- Warning
+- Critical
+
+Include:
+- timestamp
+- affected indicators
+- short explanation
+- why it matters
+- likely next-stage consequence in the chain
+
+---
+
+## 10. Data Sources
+
+Use free public sources where possible; allow paid APIs optionally.
+
+### Treasury / rates / macro
+- U.S. Treasury Fiscal Data API
+- Treasury auction data
+- FRED
+- New York Fed SOFR data
+- New York Fed SRF / repo related publications if machine-readable
+- Federal Reserve H.4.1 / balance sheet data
+- Treasury TIC data
+
+### Global dollar / FX funding
+- BIS static data if available
+- central bank swap-line usage (Fed releases)
+- cross-currency basis from a market API if available
+- fallback manual CSV upload if no free API exists
+
+### Oil / shipping
+- EIA API
+- ICE/CME-compatible market data via optional paid provider
+- shipping / freight API if available
+- manual input support for insurance / AIS / tanker traffic stress variables
+
+### Credit / consumer
+- NY Fed household debt data
+- FDIC banking data
+- FRED consumer credit series
+- optional paid spreads / CDS / private credit data
+
+### News / narrative overlay
+- Optional RSS/news feed ingestion
+- user can flag stories as:
+  - insurance shock
+  - war escalation
+  - auction stress
+  - central bank intervention
+
+---
+
+## 11. Manual Override Inputs
+
+Because some critical series are hard to source cleanly, the app should support manual entries:
+
+- marine insurance stress score (0–100)
+- tanker transit disruption score
+- private credit markdown severity score
+- major geopolitical escalation toggle
+- central bank intervention headline toggle
+
+These can be entered through an admin panel and stored in SQLite.
+
+---
+
+## 12. Data Model
+
+Suggested entities:
+
+### `indicator_series`
+- id
+- name
+- category
+- source
+- frequency
+- last_updated
+
+### `indicator_values`
+- series_id
+- timestamp
+- value
+- normalized_value
+- zscore
+
+### `alerts`
+- id
+- timestamp
+- severity
+- title
+- body
+- related_indicators
+
+### `regime_scores`
+- timestamp
+- sticky_score
+- convex_score
+- break_score
+- explanation_json
+
+### `manual_inputs`
+- id
+- timestamp
+- key
+- value
+- notes
+
+---
+
+## 13. Key Calculations
+
+Implement:
+- rolling z-scores
+- percentile bands
+- moving averages
+- threshold breaches
+- spread calculations
+- change-over-change (2nd derivative style)
+- composite stress score
+
+Important:
+The app should not only measure levels. It should measure **acceleration**.
+
+Examples:
+- Is Brent backwardation increasing faster than before?
+- Is cross-currency basis moving more negative faster?
+- Is SOFR stress rising alongside MOVE?
+- Are weak auctions becoming more frequent?
+
+---
+
+## 14. Dashboard Narratives
+
+Each main view should include machine-generated narrative text.
+
+Example:
+> “Current regime is Convex. The largest contributors are: widening Brent prompt spread, more negative JPY cross-currency basis, elevated MOVE, and weaker 30Y auction metrics. This suggests the oil shock is migrating from physical scarcity into dollar funding and sovereign duration stress.”
+
+Write plain-English summaries for:
+- daily note
+- weekly note
+- stress escalation note
+
+---
+
+## 15. User Controls
+
+Allow user to:
+- set indicator thresholds
+- change regime weights
+- toggle alerts
+- import custom CSVs
+- annotate events on charts
+- export charts and daily summary to Markdown / PDF
+
+---
+
+## 16. Visual Design
+
+Keep it dark-mode friendly and desk-useful.
+
+Preferred design:
+- dense but readable
+- top-level cards
+- sparkline mini charts
+- expandable panels
+- crisis heat map
+- event markers on all main charts
+
+Critical panels should always be visible above the fold:
+- Brent spread
+- JPY basis
+- SOFR spread
+- MOVE
+- 10Y / 30Y yields
+- FIMA usage
+- regime score cards
+
+---
+
+## 17. Initial Indicator Threshold Suggestions
+
+These should be configurable.
+
+### Oil / shipping
+- Brent M1-M2 backwardation > 2 = warning
+- > 4 = critical
+
+### Dollar funding
+- JPY basis < -30 bps = warning
+- < -50 bps = critical
+
+### Repo
+- SOFR > target midpoint + 25 bps = warning
+- + 50 bps = critical
+
+### Volatility
+- MOVE > 125 = warning
+- > 150 = critical
+
+### Auctions
+- 10Y or 30Y tail above recent average + 1 std dev = warning
+- + 2 std dev = critical
+
+### Fed plumbing
+- FIMA usage rising 3 observations in a row = warning
+- swap-line usage non-trivial and rising = critical
+
+---
+
+## 18. MVP Scope
+
+Codex should first deliver an MVP with:
+
+- local FastAPI backend
+- local React frontend
+- SQLite storage
+- daily scheduled data refresh
+- 10 core indicators
+- regime scoring
+- alerts
+- export to Markdown
+
+Then expand to:
+- optional intraday updates
+- manual event overlays
+- richer news integration
+- better shipping and insurance data support
+
+---
+
+## 19. Deliverables
+
+Please generate:
+
+1. full project structure
+2. backend code
+3. frontend code
+4. SQLite setup
+5. `.env.example`
+6. seeded sample data for demo mode
+7. README with install/run instructions
+8. user guide for adding API keys and custom data
+9. basic tests
+10. example daily summary output
+
+---
+
+## 20. Final Design Principle
+
+This app should not be a generic macro dashboard.
+
+It should be explicitly designed to monitor this thesis:
+
+> **A marine-insurance-driven oil shock can persist long enough to create global dollar funding stress, weaken foreign marginal demand for U.S. Treasuries, stress repo and basis trades, force Fed intervention into both Treasury and offshore dollar plumbing, and produce a nonlinear inflation / repression regime.**
+
+Every chart, alert, and regime score should serve that purpose.

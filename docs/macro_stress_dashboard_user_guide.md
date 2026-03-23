@@ -1,0 +1,1016 @@
+# Macro Stress Dashboard: User Guide
+
+---
+
+## Why This Exists
+
+I built this dashboard out of necessity, not academic interest.
+
+I have been investing in commercial real estate and related capital markets for forty years. In that time I have been caught badly positioned twice by macro forces I did not see coming, and both times the lesson was the same: the standard economic frameworks I relied on were looking at the wrong things, or looking at the right things through a lens that had stopped working.
+
+The models that most economists and strategists use today were built for a world of stable globalization, predictable energy flows, and well-functioning Treasury markets. That world is under serious stress. The transmission channels that connect geopolitical disruption to energy markets to dollar funding to Treasury auctions to the cost of capital for every asset class are not optional reading anymore. They are the operating environment.
+
+This app does not try to predict the future. It tries to tell you where the stress is right now, how fast it is moving, and whether what started as a shipping or energy disruption is in the process of becoming something far more dangerous for asset prices across the board.
+
+If you are managing positions that depend on the cost of capital, credit availability, or the behavior of the Treasury market, this is the instrument panel you need to watch.
+
+---
+
+## The Core Thesis
+
+Everything in this dashboard is organized around a single stress chain. Understanding it is the key to reading everything else.
+
+The chain begins in the physical world of ships, chokepoints, and marine insurance, and it ends, in the worst case, in what economists call financial repression: a policy environment where the government holds interest rates below inflation for an extended period in order to gradually inflate away debt, destroying real returns for savers and holders of fixed-income assets.
+
+Here is the full progression:
+
+**Marine war-risk and shipping disruption** raises the cost and uncertainty of moving crude oil and LNG through the world's critical passages.
+
+**Oil physical stress** rises as the disruption translates from headlines into actual scarcity. The futures curve steepens. Regional crude prices dislocate from global benchmarks.
+
+**Higher energy bills** hit economies that import their energy. Japan, Europe, and China all pay more for oil in their local currencies. That drains dollars from the global system and raises demand for offshore dollar funding.
+
+**Dollar funding stress** emerges as that demand tightens cross-currency markets. The JPY/USD and EUR/USD basis spreads widen, signaling that dollars are becoming harder and more expensive to borrow outside the United States.
+
+**U.S. Treasury demand weakens** as foreign holders who are stretched on funding become less willing or less able to absorb new U.S. government debt at current yields.
+
+**Repo and basis stress** develops as Treasury market plumbing comes under pressure. The cash-futures basis, which leveraged hedge funds rely on to finance their positions, starts to destabilize. Liquidity in the Treasury market deteriorates.
+
+**The Fed is drawn in** as the market structure begins to fail. FIMA repo usage rises. Swap lines activate. The central bank becomes the buyer of last resort.
+
+**Inflation and repression risk** close the loop. If all of this happens while wages remain sticky, inflation expectations remain elevated, and the fiscal deficit is large, the policy options narrow. A clean disinflationary resolution requires the Fed to hold rates high and let the economy adjust. But if markets are dysfunctional and the debt load is too large, the incentive shifts toward holding rates below inflation, issuing more debt, and letting real returns erode over time.
+
+That is the scenario this dashboard is designed to detect early.
+
+---
+
+## The Four Summary Cards at the Top
+
+The four cards at the top of the dashboard are your first stop every time you open the app. Think of them as a flight deck display: they give you the current altitude, airspeed, heading, and whether any warning lights are on.
+
+All scores run from 0 to 100. They are independent of each other. They do not need to add up to anything.
+
+### Sticky Inflation
+
+This card measures whether the physical shock is still primarily an inflation problem, not yet a funding or market-structure problem.
+
+A score below 45 means background or localized pressure. Between 45 and 59, inflation is building and starting to look persistent. Between 60 and 74, you are in an active sticky-inflation regime. Above 75, it is dominant.
+
+The key contributors here are oil curve structure, tanker freight, Hormuz transit flows, marine insurance stress, and wage growth. When these align and stay elevated, it tells you the shock has real physical backing and inflation is not going away quickly.
+
+### Convex Inflation / Funding Stress
+
+This is the most important card to watch for asset allocators and credit investors. It marks the transition point where a physical commodity shock stops being just an inflation story and starts becoming a nonlinear funding and sovereign-debt problem.
+
+Below 45 means no meaningful migration. Between 45 and 59, the transition is forming. Between 60 and 74, you are in an active convex regime. Above 75, the funding pressure is dominant and nonlinear.
+
+The contributors here shift away from oil and toward cross-currency basis spreads, SOFR stress, Treasury rates volatility, auction deterioration, and the basis trade. When this card moves up while the Sticky card is also elevated, the stress chain is migrating in exactly the direction that historically precedes Treasury market dysfunction.
+
+### Break / Repression
+
+This card measures whether the system is moving from stress into outright dysfunction. Think of it as the instrument that tells you whether the problem has entered official-sector territory: the Fed is having to intervene, Treasury auctions are failing to clear normally, and the domestic economy is starting to crack.
+
+Below 45 means low risk. Between 45 and 59, dysfunction risk is building. Between 60 and 74, you are in an active break-risk regime. Above 75, it is dominant.
+
+The contributors here are persistent auction stress, Treasury liquidity deterioration, FIMA repo usage, Fed swap-line activation, rising unemployment, and tax-base erosion. When these move together, the macro chain has completed its journey from a shipping disruption into a genuine fiscal-credit problem.
+
+### Fast-Moving Stress Panel
+
+This card does not measure regime strength. It measures simultaneous deterioration. It watches five fast indicators at once:
+
+Treasury liquidity, SOFR versus the Fed's target, Treasury basis stress, JPY/USD basis, and Brent oil curve structure.
+
+If 0 to 2 are stressed, the situation is contained. If 3 are stressed simultaneously, that is a warning. If 4 or all 5 are stressed at the same time, that is critical.
+
+The reason this panel exists separately is that the stress chain tends to move in waves. Seeing multiple fast indicators stress simultaneously is a much stronger signal than any one of them moving on its own. It tells you the system is under broad pressure, not just isolated noise.
+
+Each card and panel uses standard color coding: green for normal, yellow for early caution, orange for warning, and red for critical.
+
+---
+
+## The Causal Chain Panel
+
+Below the summary cards is the causal chain. This is the structural core of the dashboard and the section that rewards the most attention.
+
+The chain is organized into seven nodes, in sequence:
+
+1. Marine insurance stress
+2. Oil physical stress
+3. Dollar funding stress
+4. U.S. Treasury demand stress
+5. Repo and basis stress
+6. Federal Reserve intervention stress
+7. Inflation and repression stress
+
+Each node shows three numbers: the base score, which reflects the direct stress of the indicators in that node; the propagated score, which is what the score becomes after the rest of the system feeds into it; and loop pressure, which tells you how much upstream stress is being pushed into that node from earlier in the chain.
+
+That distinction matters. If a node's propagated score is much higher than its base score, it is being stressed by the rest of the system, not just by its own indicators. That is often the more important signal. It means contagion is already underway.
+
+A few design choices worth understanding:
+
+The inflation and repression node includes labor market and domestic credit metrics. That is deliberate. When payrolls weaken and temp-help employment rolls over, federal withholding tax revenues fall and household credit stress rises at the same time. That combination feeds directly into the fiscal and repression risk story, which is why labor data belongs in this chain rather than in a separate macroeconomic sidebar.
+
+On the shipping side, the oil node uses direct Hormuz tanker transit data from the IMF's PortWatch system rather than relying only on oil prices or news overlays. This gives the dashboard an actual physical flow signal at one of the world's most critical chokepoints.
+
+The oil block also includes direct Gulf crude dislocation spreads. Murban versus WTI and Oman versus WTI tell you whether Middle East export barrels are pricing at a premium to U.S. crude. When those spreads widen alongside Hormuz transit deterioration, freight stress, and marine insurance stress, the evidence points to a physically regional shock that cannot be absorbed through normal market arbitrage. That is a much more serious development than a generalized oil rally.
+
+---
+
+## The Core Metrics in Plain Terms
+
+The dashboard tracks more than twenty data series. These fifteen are the ones that matter most for following the stress chain from physical disruption to repression risk.
+
+### Brent M1-M6 Spread
+
+This is the difference between the price of Brent crude for near-term delivery and the price six months forward. When the near-term price is significantly higher than the forward price, the oil market is in what traders call backwardation, which means physical oil is genuinely scarce right now. A wide, persistent Brent spread is the earliest reliable signal that the shock is real, not just a headline.
+
+### WTI M1-M6 Spread
+
+The same measurement for U.S. crude. When both the Brent and WTI spreads are elevated simultaneously, the physical scarcity signal is broad across benchmarks rather than isolated to one market.
+
+### Gulf Crude Dislocation Spreads
+
+Murban and Oman are the key crude grades exported from the Persian Gulf. When they price at a significant premium to WTI, it tells you the shock is basin-specific. Middle Eastern barrels are becoming harder to replace through other channels. This is a more granular and more actionable signal than headline oil prices alone.
+
+### Hormuz Tanker Transit Stress
+
+Derived from IMF and Oxford University's PortWatch system, this score measures actual tanker traffic through the Strait of Hormuz: the number of vessels, their cargo capacity, and their share of total transits. When this deteriorates, ships are not moving normally regardless of what any other indicator says. This is a direct physical confirmation signal.
+
+### Tanker Freight Proxy
+
+The cost of chartering a dirty tanker (one that carries crude oil). When freight rates rise alongside the other shipping indicators, it confirms that the disruption is affecting real transport economics, not just insurance pricing or market psychology.
+
+### Marine Insurance Stress
+
+This is a text-derived overlay built from marine and war-risk insurance news sources. Marine insurance is typically where geopolitical shipping stress first becomes explicitly visible in pricing and capacity language. Underwriters withdraw coverage, reimpose exclusion zones, or demand war-risk premiums that make certain routes economically unviable long before that shows up in freight rates or oil prices.
+
+### JPY/USD Cross-Currency Basis
+
+This measures how expensive it is to borrow U.S. dollars using Japanese yen as collateral in the currency swap market. When this spread turns deeply negative, it means dollar funding is tightening globally. Japan is one of the world's largest holders of U.S. Treasuries and one of the most dollar-dependent funding systems. JPY basis stress is often one of the earliest public signals that the funding chain is under real pressure.
+
+### EUR/USD Cross-Currency Basis
+
+The same measurement in euro. When both the JPY and EUR bases are deteriorating simultaneously, dollar scarcity is no longer a regional problem. It is becoming a global one.
+
+### SOFR Minus Fed Funds Target
+
+SOFR is the rate at which U.S. financial institutions actually borrow overnight against Treasury collateral. When SOFR runs significantly above the Fed's target midpoint, it means domestic repo plumbing is stressed. This is the signal that offshore funding problems have migrated into the core of the U.S. financial system.
+
+### MOVE Index
+
+The MOVE Index is the bond market's equivalent of the VIX: it measures implied volatility in U.S. Treasury options. When rates volatility rises sharply, it means large institutional investors are paying up for hedges against sudden yield moves. That reduces their balance-sheet capacity to hold duration, which in turn makes Treasury auctions harder to clear at stable yields. This is a key transition metric between the funding stress and Treasury demand nodes.
+
+### UST Auction Stress
+
+This is one of the most structurally important cards in the dashboard, and it is worth understanding exactly what it measures. The score is a weighted composite of three distinct subcomponents, each probing a different dimension of how the Treasury market is functioning.
+
+**Long-End Clearing Stress** carries 50% of the weight. This captures what most investors think of as classic auction deterioration: weak bid-to-cover ratios on 7-year and longer maturities, elevated stop-out yield stress, and heavier dealer absorption. When dealers are forced to take down a larger share of an auction at a concession, it means natural buyers are stepping back.
+
+**Foreign Sponsorship Stress** carries 30% of the weight. This measures whether the indirect bidder category, the channel through which foreign central banks and reserve managers participate, is weakening relative to recent norms. A sustained decline in indirect takedown at long-end auctions is one of the clearest publicly observable signals that foreign official demand for U.S. duration is eroding.
+
+**Issuance Mix Stress** carries the remaining 20%. This tracks the rolling 90-day share of Treasury issuance shifting toward bills and shorter-dated paper relative to long-end coupons. When the Treasury Department appears to be leaning more heavily on the front end of the curve, it is often a debt-management stress signal: longer-term buyers are either unavailable or too expensive to attract.
+
+Because Treasury auctions are events rather than continuous market data, the auction card behaves differently from other cards in the dashboard. It is event-native. Rather than a sparkline, it shows the window used to calculate the score, the date of the last score change, the number of stressed auction events in the prior three months and six months, and the most recent step changes with full dates.
+
+One nuance worth understanding: the card can show a current critical score alongside zero stressed events in the recent three-month window. That means the score is still elevated from prior auction deterioration, but no new qualifying stressed auctions have occurred lately. The condition is inherited, not fresh. That distinction matters when you are deciding whether the Treasury demand situation is actively getting worse or merely holding at a bad level.
+
+### Treasury Liquidity Proxy
+
+A market-derived measure of depth in the Treasury futures market. Thin markets mean small trades move prices disproportionately, which is a hallmark of stress. Poor liquidity in Treasuries is a precondition for the kind of disorderly moves that force official intervention.
+
+### Treasury Basis Stress Proxy
+
+Measures the divergence between Treasury cash prices and futures prices. Normally these are tightly linked by arbitrage. When they diverge, it signals that the leveraged basis trade, a core strategy of hedge funds that provides enormous amounts of Treasury market liquidity, is breaking down. A basis unwind can become a self-reinforcing feedback loop. This was one of the central dynamics in the March 2020 Treasury market dislocation.
+
+### FIMA Repo Usage
+
+The FIMA repo facility allows foreign central banks and official institutions to convert their Treasury holdings into dollars without selling the Treasuries into the market. Rising FIMA usage means foreign official holders need dollars urgently enough that they are tapping this backstop. It is a direct signal of weakening foreign marginal demand for U.S. government debt.
+
+### Fed Swap Line Usage
+
+When the Federal Reserve activates dollar swap lines with other central banks, it means the dollar funding problem has become severe enough that foreign central banks themselves cannot source dollars through normal market channels. Swap line usage is a late-stage signal. By the time it appears, the system is already deep into the stress chain.
+
+---
+
+## The Employment and Domestic Transmission Module
+
+This section of the dashboard tracks the downstream consequences of macro stress on the labor market, household finances, and federal tax revenues.
+
+These indicators move more slowly than market data. They are not crisis triggers in real time. Their role is to tell you whether the stress chain is broadening from financial markets into the real economy, and whether that broadening is starting to impair the government's fiscal capacity.
+
+**Payroll Momentum** measures the three-month average change in nonfarm payrolls. When hiring slows, the flow of payroll and withholding taxes into the federal government slows with it.
+
+**Unemployment Rate** is the clearest signal that macro stress is leaking into households and consumer credit. Rising unemployment raises default risk across the credit system.
+
+**Wage Stickiness** measures year-over-year average hourly earnings growth. Persistent wage growth keeps inflation alive even when financial conditions are tightening, which is precisely the toxic combination that raises repression risk. The Fed cannot ease aggressively if wages are still rising.
+
+**Hours Worked Momentum** is worth watching before payrolls turn. Employers typically cut hours before they eliminate jobs. A deterioration here is an early warning that labor demand is weakening.
+
+**Temporary Help Employment** rolls over early in labor slowdowns, particularly in white-collar and professional services sectors. It is a reliable leading indicator of broader payroll weakness and rising household credit stress.
+
+**Employment Tax Base Proxy** combines payrolls, wages, and hours into a single measure of the withholding and payroll-tax base. This is the direct bridge between labor market conditions and federal revenue quality. When it deteriorates, the government's fiscal room narrows precisely at the moment when market stress is creating pressure to spend more.
+
+---
+
+## The Funding Data Hierarchy
+
+Not all data sources in this dashboard are equal. The funding section in particular uses a clear hierarchy, which you should keep in mind when interpreting what you see.
+
+At the top are direct live market feeds: the MOVE Index from TradingView, EUR/USD and USD/JPY spot rates from Yahoo Finance.
+
+Below those are official supporting inputs: SOFR and the federal funds rate from the Federal Reserve's FRED database, the ECB deposit facility rate from the ECB's own publications, and the Japan short rate from FRED.
+
+The Synthetic USD Funding Pressure score is a composite built from those direct inputs. It gives you a live, non-proxy read on overall dollar funding pressure even in the absence of a clean public direct cross-currency basis feed.
+
+The EUR/USD basis and JPY/USD basis cards are explicit proxies constructed from public data. They are directionally useful but should be read alongside the direct support inputs. If the basis proxies and the support panel are pointing in the same direction, confidence in the funding read rises. If they diverge, treat the basis signals more cautiously until they realign.
+
+The practical check: look at the FX Funding Support panel, verify that EUR/USD spot, USD/JPY spot, SOFR, the ECB deposit rate, and the Japan short rate are consistent with the story the basis proxies are telling. If the dollar is strengthening, short-rate differentials are widening, and the Synthetic Funding Pressure score is elevated, then a wide JPY and EUR basis signal has real credibility. If those support inputs are calm and the proxies are elevated, treat the proxy read with skepticism.
+
+---
+
+## How the App Updates
+
+The dashboard refreshes automatically once per day at 6:00 a.m. UTC, and it also refreshes when you trigger a manual refresh.
+
+The timing matters because different data sources update at different speeds.
+
+Market-derived data from Yahoo Finance and TradingView is effectively daily. FRED daily series like SOFR are also daily but subject to Federal Reserve publication schedules. Monthly labor data from the Bureau of Labor Statistics only changes when new monthly releases are published, so the payroll and unemployment indicators will hold their last reading between releases. Treasury auction data is event-driven, updating only when auctions settle. The PortWatch Hormuz transit data updates daily when the platform publishes new chokepoint observations. Marine insurance and geopolitical text scans refresh daily but are fundamentally irregular because they depend on news and article publication.
+
+The practical implication: the fast market indicators (SOFR, MOVE, oil curves, FX rates) give you real-time stress detection. The slower official and text-derived indicators give you confirmation, context, and classification. Use the fast indicators to know when to pay attention. Use the slower ones to understand what kind of event you are actually watching.
+
+---
+
+## How the Feedback Loops Work
+
+One of the most important things this dashboard does that a simple collection of charts cannot is model the feedback loops.
+
+Stress in the real world does not flow in one direction and stop. An oil shock raises energy import bills, which tightens dollar funding, which weakens Treasury demand, which raises yields, which tightens financial conditions, which slows the economy, which weakens tax revenues, which raises fiscal pressure on the Treasury, which weakens Treasury demand further. The system feeds back on itself.
+
+The app handles this through a recursive propagation engine. Here is how it works in plain terms:
+
+First, every indicator is converted to a common stress scale of 0 to 100, regardless of its original units.
+
+Second, the indicators are grouped into causal nodes that reflect their economic function.
+
+Third, the propagation engine runs those nodes through a feedback loop. Stress in one node transmits downstream, amplified by a directional weight that reflects how historically strong that connection has been. But the transmission only activates once a node crosses a minimum stress threshold, so the system does not overreact to random noise. There is also a synergy effect: when both the sending and receiving nodes are stressed simultaneously, the transmission is amplified beyond what either would produce on its own.
+
+Fourth, the labor and tax-base metrics create a domestic feedback loop at the end of the chain. Market stress weakens labor demand. Weaker labor demand reduces federal withholding. Weaker withholding increases fiscal pressure. Increased fiscal pressure increases the incentive for policy to shift toward repression.
+
+Fifth, the propagated node scores feed back into the three regime cards, adding a recursive boost on top of the direct indicator contributions. The regime cards therefore reflect not just current indicator levels but also how much systemic pressure is building through second and third-round effects.
+
+---
+
+## Alert Logic: When the App Fires a Warning
+
+Beyond the continuous regime scores, the dashboard includes specific alert triggers that watch for the combinations most likely to signal meaningful regime migration.
+
+Three employment-transmission alerts deserve particular attention because they track whether financial market stress is beginning to damage the real economy in ways that close off the Fed's exit options.
+
+The first alert fires when payroll momentum and the employment tax-base proxy are both in warning or critical territory simultaneously. This combination tells you that labor demand is weakening and the federal withholding base is weakening with it. Fiscal room starts to disappear before any of the more visible official data confirms it.
+
+The second alert fires when temporary-help stress and consumer-credit stress are both elevated. Temp-help is a leading indicator because firms reduce their exposure to contract labor before they cut permanent headcount. When it deteriorates alongside consumer credit, labor weakness is no longer just a growth concern. It is becoming a credit concern.
+
+The third alert fires when unemployment is in warning or critical territory, still rising, and at least two break-risk signals are already elevated. By this point, market and plumbing stress is no longer isolated. Domestic labor conditions are weakening at the same time. The chain is moving toward the broader fiscal-credit-repression configuration that this dashboard was built to detect.
+
+The broader alert engine also combines threshold breaches with model-driven signals: latent-state acceleration, subfamily rotation, scenario-conditioned break-risk transitions, direct Hormuz transit threshold breaches, and widening Gulf crude dislocation spreads. The goal is to translate a complex multi-layer system back into discrete operational warnings rather than leaving you to infer escalation manually from every panel.
+
+---
+
+## The Econometric Layer
+
+Underneath the rule-based regime engine, the dashboard runs a statistical model designed to estimate stress states that cannot be observed directly from any single indicator.
+
+The five latent states the model estimates are: oil shock, funding stress, Treasury market stress, intervention pressure, and repression risk.
+
+Think of each indicator in the dashboard as a noisy measurement of one or more of these underlying states. The MOVE Index, for example, is partly a measurement of Treasury market stress and partly a measurement of funding stress. SOFR spread is primarily a funding and plumbing signal. The unemployment rate is primarily a repression risk indicator. The model combines all of these measurements simultaneously to estimate the most likely current level of each underlying state.
+
+The historical analog layer compares today's pattern of indicators against a curated library of past stress episodes. It assigns the current environment to the most similar past subfamily: a shipping and insurance shock, a dollar funding squeeze, a Treasury plumbing break, or an energy and inflation shock. That classification then conditions how the model weights indicators going forward. In a shipping-led environment, marine insurance and tanker data carry more weight. In a plumbing-led environment, repo and basis indicators carry more weight.
+
+The model also runs a validation check on itself. If the historical fit is poor, the statistical layer steps back and defers more weight to the rule-based engine. This prevents the sophisticated model from dominating the output in environments where its historical calibration does not apply well.
+
+The adaptive alert engine combines threshold alerts with model-driven alerts. When latent stress states are accelerating, when the cluster subfamily rotates suddenly, or when multiple transmission channels are activating simultaneously, the system generates explicit warnings rather than leaving you to infer escalation from raw numbers.
+
+---
+
+## Reading the Dashboard in Practice
+
+For day-to-day use, the most reliable sequence is:
+
+Start with the three regime cards and the fast-moving stress panel. Get the current altitude reading. What regime is active, and how strong is it?
+
+Move to the causal chain panel. Where is the base stress highest? Where is loop pressure building above the base stress? Is the chain advancing through the nodes or stalling early?
+
+Check the econometric layer. What are the latent state estimates saying? What cluster family is the system in? Are any latent states accelerating?
+
+Look at the historical analog panel. What past episode does this most resemble? Knowing the subfamily helps you anticipate how the stress is likely to propagate from here.
+
+Check the employment and domestic transmission panel. Is labor market weakness starting to show up? Are tax base and household credit indicators moving? If so, the stress chain is broadening beyond financial markets.
+
+Only after those five steps does it make sense to drill into the detailed panels. By then you have a thesis. The detailed panels either confirm or complicate it.
+
+---
+
+## A Note on Limitations
+
+No model is a perfect market oracle, and this one is no exception.
+
+The EUR/USD and JPY/USD basis cards are proxies, not direct licensed market feeds. Use them directionally, not as precise measurements.
+
+Official series including FIMA, swap-line data, and monthly labor prints are publication-lagged. They confirm events that have already occurred.
+
+The Murban and Oman crude spread histories are still building. They will become more statistically useful over time as the app accumulates observations.
+
+Marine insurance and geopolitical overlays are derived from text and news sources, not exchange-traded prices. They are qualitative signals with quantitative framing.
+
+The econometric layer is materially more sophisticated than a simple weighted average, but it is constrained by the size of the historical episode library and by the limits of public data.
+
+What the app does well is multi-layer stress migration monitoring. It is designed to tell you whether the system is still a contained physical oil shock, becoming a nonlinear funding event, or crossing into Treasury dysfunction, domestic fiscal strain, and repression risk. That is the navigation instrument this environment demands.
+
+---
+
+## March 2026 Update Notes
+
+This version introduces several refinements without changing the underlying thesis.
+
+Stagflation is now an explicit interpretation layer in the executive view, not just an implicit output of the regime engine.
+
+The sequencing of the stress chain is now shown directly: physical shock first, income squeeze next, labor and receipts next, financial tightening last. This ordering discipline is visible in the executive panel.
+
+The household income, tax base, and federal receipts channel now carries more explicit weight, through the household real income squeeze, employment tax base proxy, and tax receipts market stress indicators.
+
+The physical-to-financial migration spread is now a visible calculation in the executive layer, separating where physical stress sits versus where financial market stress sits. When the financial score is running well above the physical score, it signals that markets are pricing risk that the underlying fundamentals may not yet fully justify, or vice versa.
+
+The app now models oil in local currency stress explicitly, through separate series for Japan, Europe, and China. The Japan channel is treated as the sharpest observable transmission path given the scale of Japanese dollar funding and Treasury holdings. Europe is treated as a strong imported-inflation and funding amplifier. China is treated as lower confidence but relevant to the marginal U.S. Treasury demand story.
+
+The VIX is now a live propagation feature for risk appetite, tax receipts sensitivity, and the tightening of financial conditions, rather than a background indicator.
+
+The UST Auction Stress card has been restructured into three weighted subcomponents, each measuring a distinct dimension of Treasury market functioning: long-end clearing stress at 50%, foreign sponsorship stress at 30%, and issuance mix stress at 20%. The card now displays as an event-native tile showing step changes and stressed-event counts rather than a continuous sparkline.
+
+---
+
+# Technical Reference Appendix
+
+The sections below document the mathematical and statistical architecture underlying the dashboard. They are intended for users who want to understand exactly how the scoring, propagation, and state estimation are constructed. Non-technical readers do not need this section to use the dashboard effectively, but it is included here for full transparency.
+
+## How Indicators Are Normalized
+
+Every raw indicator, regardless of its original units, is converted to a common 0 to 100 stress score before it enters any calculation.
+
+For indicators where higher values represent more stress:
+
+```
+N(x) = clamp(50 + 50 * (x - warning) / (critical - warning), 0, 100)
+```
+
+For indicators where lower values represent more stress (such as cross-currency basis spreads):
+
+```
+N(x) = clamp(50 + 50 * (warning - x) / (warning - critical), 0, 100)
+```
+
+In both cases, a normalized score of 50 corresponds to the warning threshold, and 100 corresponds to or exceeds the critical threshold.
+
+## Regime Score Construction
+
+Each regime score is a weighted sum of normalized component scores plus a recursive propagation boost:
+
+```
+R_r = sum_i (w_(r,i) * N_i) + P_r
+```
+
+Where R_r is the regime score, w_(r,i) is the configured weight for indicator i in regime r, N_i is the normalized stress of indicator i, and P_r is the recursive propagation contribution to regime r.
+
+## Recursive Propagation
+
+The propagation engine models how stress in one node transmits to downstream nodes across multiple iterations.
+
+Upstream pressure on node j at iteration t:
+
+```
+pressure_j(t) = sum_k [ edge(k to j) * max(0, score_k(t) - activation_floor) ]
+```
+
+Node score update:
+
+```
+score_j(t+1) = clamp(
+    base_j * (1 - memory)
+    + score_j(t) * memory
+    + pressure_j(t) * feedback_gain
+    + max(0, base_j - activation_floor) * pressure_j(t) / 100 * synergy_gain,
+    0, 100
+)
+```
+
+## Executive Layer Calculations
+
+```
+Ordering stage score = average of stage component normalized scores
+Stagflation composite = (inflation_score + growth_score + policy_constraint_score) / 3
+Migration spread = financial_score - physical_score
+```
+
+## State-Space Model
+
+The latent state model follows a linear Gaussian state-space structure:
+
+```
+x_t = A x_(t-1) + w_t        (state transition)
+y_t = C x_t + v_t             (observation equation)
+```
+
+Where x_t is the vector of latent states (oil shock, funding stress, treasury stress, intervention pressure, repression risk), y_t is the vector of observed normalized indicator values, A is the transition matrix, C is the observation loading matrix, w_t is process noise, and v_t is measurement noise.
+
+The filter estimates the latent state distribution at each point in time using a standard Kalman recursion. Calibration uses iterative estimation with ridge regularization, damping, and a worsening guard to prevent divergence.
+
+---
+
+## Threshold Parameters
+
+| Indicator | Direction | Warning | Critical |
+| --- | --- | --- | --- |
+| auction_stress | high | 58 | 75 |
+| brent_prompt_spread | high | 4.5 | 7.5 |
+| central_bank_intervention_toggle | high | 1 | 1 |
+| consumer_credit_stress | high | 58 | 72 |
+| credit_spreads | high | 145 | 185 |
+| deficit_trend | high | 55 | 72 |
+| employment_tax_base_proxy | low | 3 | 0 |
+| eur_usd_basis | low | -20 | -35 |
+| expectations_entrenchment_score | high | 55 | 72 |
+| expected_inflation_5y5y | high | 2.7 | 3.2 |
+| external_importer_stress | high | 58 | 78 |
+| fed_swap_line_usage | high | 5 | 15 |
+| federal_receipts_quality | low | 45 | 35 |
+| fima_repo_usage | high | 18 | 35 |
+| geopolitical_escalation_toggle | high | 1 | 1 |
+| gold_price | high | 2380 | 2520 |
+| governance_fragmentation | high | 50 | 72 |
+| gulf_crude_dislocation | high | 4 | 8 |
+| hormuz_tanker_transit_stress | high | 55 | 75 |
+| hours_worked_momentum | low | -0.05 | -0.25 |
+| household_real_income_squeeze | high | 55 | 72 |
+| iaea_nuclear_ambiguity | high | 55 | 78 |
+| inflation_expectations_curvature | high | 15 | 35 |
+| inflation_expectations_level | high | 2.55 | 3 |
+| inflation_expectations_slope | high | 40 | 85 |
+| interceptor_depletion | high | 55 | 78 |
+| jpy_usd_basis | low | -30 | -50 |
+| lng_proxy | high | 58 | 75 |
+| marine_insurance_stress | high | 60 | 80 |
+| move_index | high | 125 | 150 |
+| murban_wti_spread | high | 4 | 8 |
+| oil_in_cny_stress | high | 55 | 72 |
+| oil_in_eur_stress | high | 58 | 78 |
+| oil_in_yen_stress | high | 60 | 80 |
+| oil_price | high | 88 | 102 |
+| oman_wti_spread | high | 3 | 7 |
+| p_and_i_circular_stress | high | 58 | 82 |
+| payroll_momentum | low | 100 | 0 |
+| private_credit_stress | high | 55 | 75 |
+| sofr_spread | high | 25 | 50 |
+| spx_equal_weight | low | 470 | 430 |
+| survey_market_expectations_gap | high | 35 | 80 |
+| synthetic_usd_funding_pressure | high | 55 | 72 |
+| tanker_disruption_score | high | 58 | 78 |
+| tanker_freight_proxy | high | 60 | 78 |
+| tax_receipts_market_stress | high | 55 | 75 |
+| temp_help_stress | low | -2 | -8 |
+| ten_year_yield | high | 4.4 | 4.9 |
+| term_premium_proxy | high | 55 | 80 |
+| thirty_year_yield | high | 4.6 | 5.1 |
+| tips_vs_nominals | high | 22 | 40 |
+| treasury_basis_proxy | high | 55 | 72 |
+| treasury_liquidity_proxy | high | 58 | 74 |
+| unemployment_rate | high | 4.5 | 5.4 |
+| usd_index_proxy | high | 104 | 108 |
+| vix_index | high | 22 | 30 |
+| wage_stickiness | high | 4 | 4.8 |
+| wti_prompt_spread | high | 4 | 6.5 |
+
+---
+
+## Rule Engine Weights
+
+### Sticky Regime Weights
+
+| Indicator | Weight | Description |
+| --- | --- | --- |
+| brent_prompt_spread | 0.18 | Oil curve tightness remains visible across the M1-M6 window. |
+| marine_insurance_stress | 0.14 | Manual marine insurance stress overlay. |
+| tips_vs_nominals | 0.12 | Inflation compensation is creeping higher. |
+| consumer_credit_stress | 0.10 | Consumer balance sheets are deteriorating. |
+| tanker_freight_proxy | 0.08 | Freight markets are transmitting the shipping shock. |
+| hormuz_tanker_transit_stress | 0.08 | PortWatch shows tanker transit deterioration through the Strait of Hormuz. |
+| oil_price | 0.08 | Spot oil remains elevated. |
+| jpy_usd_basis | 0.08 | Funding stress is visible but still contained. |
+| auction_stress | 0.08 | Treasury demand is softer but not yet broken. |
+| wage_stickiness | 0.08 | Wage growth remains sticky enough to keep inflation persistence alive. |
+| inflation_expectations_level | 0.07 | The expected-inflation curve is lifting across maturities. |
+| expectations_entrenchment_score | 0.07 | Combined market and survey expectations point to persistence rather than transitory repricing. |
+| move_index | 0.07 | Rates volatility remains above calm levels. |
+| sofr_spread | 0.07 | Repo plumbing is functional. |
+| murban_wti_spread | 0.06 | Murban is richening versus U.S. crude, showing Gulf export tightness. |
+| gulf_crude_dislocation | 0.06 | Middle East export grades are dislocating versus WTI. |
+| expected_inflation_5y5y | 0.06 | Medium-term forward inflation expectations are no longer mean-reverting cleanly. |
+| household_real_income_squeeze | 0.06 | Real household purchasing power is being squeezed before labor fully rolls over. |
+| employment_tax_base_proxy | 0.05 | The payroll-tax base is softening only gradually, keeping nominal demand alive. |
+| synthetic_usd_funding_pressure | 0.05 | Direct FX spot and short-rate differentials show broad dollar funding pressure, but not a full break. |
+| oman_wti_spread | 0.05 | Oman is richening versus U.S. crude, confirming regional dislocation. |
+| external_importer_stress | 0.05 | Local-currency oil stress in major importer regions is feeding imported inflation and current-account strain. |
+| p_and_i_circular_stress | 0.03 | Official P&I notices show insurance withdrawal or reinstatement stress remains active. |
+| survey_market_expectations_gap | 0.03 | Survey expectations are rising faster than the market-implied short end. |
+| vix_index | 0.02 | Equity volatility is rising, hinting that the nominal shock is starting to tighten financial conditions. |
+| iaea_nuclear_ambiguity | 0.015 | IAEA verification ambiguity is keeping the oil shock structurally alive. |
+
+### Convex Regime Weights
+
+| Indicator | Weight | Description |
+| --- | --- | --- |
+| brent_prompt_spread | 0.14 | Brent M1-M6 backwardation is widening. |
+| jpy_usd_basis | 0.14 | JPY basis is materially more negative. |
+| tanker_freight_proxy | 0.12 | Freight costs are accelerating. |
+| sofr_spread | 0.12 | Repo stress is building. |
+| move_index | 0.12 | Treasury volatility is elevated. |
+| synthetic_usd_funding_pressure | 0.11 | Direct spot FX and rate differentials confirm broader dollar funding strain. |
+| auction_stress | 0.11 | Long-end auction demand is slipping. |
+| treasury_basis_proxy | 0.09 | Basis trade stress is visible. |
+| external_importer_stress | 0.08 | Japan, Europe, and China are absorbing a compounded local-currency energy shock. |
+| eur_usd_basis | 0.08 | EUR basis is also leaning into dollar scarcity. |
+| hormuz_tanker_transit_stress | 0.06 | Hormuz tanker transit stress confirms the shipping shock is constraining flows. |
+| gulf_crude_dislocation | 0.06 | Regional crude spreads are broadening as the shock migrates. |
+| expectations_entrenchment_score | 0.05 | The combined expectations block shows persistence broadening beyond spot oil. |
+| expected_inflation_5y5y | 0.05 | Forward inflation expectations are climbing as the shock migrates into policy credibility. |
+| vix_index | 0.05 | Equity volatility is broadening the tightening impulse beyond rates and oil. |
+| fima_repo_usage | 0.04 | Foreign holders are drawing dollar liquidity. |
+| private_credit_stress | 0.04 | Private credit marks are deteriorating. |
+| payroll_momentum | 0.04 | Payroll growth is weakening as the shock reaches labor demand. |
+| temp_help_stress | 0.04 | Temporary-help employment is deteriorating ahead of broader payroll weakness. |
+| oman_wti_spread | 0.04 | Oman versus WTI is widening, reinforcing the Gulf supply shock. |
+| murban_wti_spread | 0.04 | Murban versus WTI is widening, showing cross-basin dislocation. |
+| inflation_expectations_curvature | 0.04 | The 5Y belly is richening versus the front and long end, signaling embedded persistence. |
+| household_real_income_squeeze | 0.04 | The real-income squeeze is increasing the chance that the oil shock migrates into broader demand and credit stress. |
+| iaea_nuclear_ambiguity | 0.045 | Nuclear verification ambiguity is raising the odds of nonlinear repricing. |
+| p_and_i_circular_stress | 0.035 | Insurance-market fragmentation is extending the physical shock into a longer-lived regime transition. |
+| interceptor_depletion | 0.035 | Sustained defensive burn-rate pressure raises escalation convexity. |
+| governance_fragmentation | 0.03 | Fragmented command signals reduce confidence in a clean reopening path. |
+| survey_market_expectations_gap | 0.03 | Survey-market expectation divergence is widening into a nonlinear repricing risk. |
+
+### Break Regime Weights
+
+| Indicator | Weight | Description |
+| --- | --- | --- |
+| auction_stress | 0.17 | Repeated weak auctions are impairing duration clearing. |
+| fima_repo_usage | 0.15 | Foreign official holders are pulling dollars against Treasuries. |
+| sofr_spread | 0.13 | Repo stress is persistent. |
+| fed_swap_line_usage | 0.13 | Fed swap lines are picking up. |
+| treasury_liquidity_proxy | 0.12 | Treasury depth is deteriorating. |
+| treasury_basis_proxy | 0.10 | Basis unwind pressure is visible. |
+| synthetic_usd_funding_pressure | 0.09 | Synthetic funding pressure remains elevated alongside broader plumbing stress. |
+| employment_tax_base_proxy | 0.08 | The labor-income tax base is eroding, worsening fiscal strain. |
+| expectations_entrenchment_score | 0.07 | Entrenched expectations raise repression risk once market plumbing is under strain. |
+| external_importer_stress | 0.07 | Foreign importer balance-sheet stress is raising the odds of unstable marginal UST demand and Fed-plumbing pressure. |
+| tax_receipts_market_stress | 0.07 | Volatility, weaker equities, and softer receipts quality are worsening capital-gains-sensitive fiscal pressure. |
+| unemployment_rate | 0.06 | Labor-market slack is rising and feeding household credit stress. |
+| move_index | 0.05 | Rates volatility is consistent with dysfunction. |
+| consumer_credit_stress | 0.05 | Broader inflation inputs are leaking into credit. |
+| private_credit_stress | 0.05 | Private credit is under markdown pressure. |
+| central_bank_intervention_toggle | 0.05 | Manual intervention headline flag is set. |
+| payroll_momentum | 0.05 | Payroll hiring is weakening, damaging withholding and growth confidence. |
+| expected_inflation_5y5y | 0.05 | Medium-term inflation expectations are high enough to constrain clean policy easing. |
+| iaea_nuclear_ambiguity | 0.05 | A widening verification gap creates abrupt tail-risk repricing pressure. |
+| hours_worked_momentum | 0.04 | Hours worked are rolling over before broader job cuts fully show up. |
+| temp_help_stress | 0.04 | White-collar-sensitive temporary employment is signaling credit spillover risk. |
+| interceptor_depletion | 0.04 | High interceptor burn rates raise the probability of forced escalation into a market break. |
+| governance_fragmentation | 0.04 | Governance fragmentation lowers the odds that chokepoint and war-risk stress can be resolved quickly. |
+| inflation_expectations_level | 0.04 | The full expected-inflation curve is inconsistent with a temporary commodity shock only. |
+| vix_index | 0.04 | High equity volatility is consistent with a broader risk-premium shock and tighter financial conditions. |
+| p_and_i_circular_stress | 0.02 | Insurance cancellation and case-by-case write-back stress reinforce trade and funding dysfunction. |
+
+---
+
+## Propagation Parameters
+
+| Parameter | Value |
+| --- | --- |
+| iterations | 4 |
+| memory | 0.35 |
+| activation_floor | 45 |
+| feedback_gain | 0.24 |
+| synergy_gain | 0.22 |
+
+---
+
+## Propagation Edge Weights
+
+| From | To | Weight |
+| --- | --- | --- |
+| geopolitical_trigger_stress | marine_insurance_stress | 0.46 |
+| geopolitical_trigger_stress | oil_physical_stress | 0.32 |
+| geopolitical_trigger_stress | dollar_funding_stress | 0.18 |
+| marine_insurance_stress | oil_physical_stress | 0.34 |
+| oil_physical_stress | dollar_funding_stress | 0.28 |
+| dollar_funding_stress | ust_demand_stress | 0.30 |
+| ust_demand_stress | repo_basis_stress | 0.34 |
+| repo_basis_stress | ust_demand_stress | 0.24 |
+| repo_basis_stress | fed_intervention_stress | 0.32 |
+| fed_intervention_stress | inflation_repression_stress | 0.24 |
+| inflation_repression_stress | ust_demand_stress | 0.18 |
+| dollar_funding_stress | repo_basis_stress | 0.22 |
+| oil_physical_stress | inflation_repression_stress | 0.18 |
+| oil_physical_stress | expectations_credibility_stress | 0.24 |
+| expectations_credibility_stress | ust_demand_stress | 0.24 |
+| expectations_credibility_stress | inflation_repression_stress | 0.30 |
+| expectations_credibility_stress | dollar_funding_stress | 0.08 |
+| oil_physical_stress | external_importer_stress | 0.34 |
+| external_importer_stress | dollar_funding_stress | 0.24 |
+| external_importer_stress | ust_demand_stress | 0.32 |
+| external_importer_stress | fed_intervention_stress | 0.12 |
+| external_importer_stress | household_tax_stress | 0.16 |
+| oil_physical_stress | household_tax_stress | 0.16 |
+| household_tax_stress | inflation_repression_stress | 0.26 |
+| household_tax_stress | ust_demand_stress | 0.18 |
+
+---
+
+## Propagation-to-Regime Sensitivity
+
+### Sticky
+
+| Node | Weight |
+| --- | --- |
+| marine_insurance_stress | 0.020 |
+| oil_physical_stress | 0.040 |
+| inflation_repression_stress | 0.030 |
+| geopolitical_trigger_stress | 0.015 |
+| expectations_credibility_stress | 0.030 |
+| external_importer_stress | 0.025 |
+| household_tax_stress | 0.025 |
+
+### Convex
+
+| Node | Weight |
+| --- | --- |
+| oil_physical_stress | 0.040 |
+| dollar_funding_stress | 0.060 |
+| ust_demand_stress | 0.050 |
+| repo_basis_stress | 0.060 |
+| geopolitical_trigger_stress | 0.060 |
+| expectations_credibility_stress | 0.035 |
+| external_importer_stress | 0.050 |
+| household_tax_stress | 0.030 |
+
+### Break
+
+| Node | Weight |
+| --- | --- |
+| dollar_funding_stress | 0.040 |
+| ust_demand_stress | 0.060 |
+| repo_basis_stress | 0.080 |
+| fed_intervention_stress | 0.070 |
+| inflation_repression_stress | 0.050 |
+| geopolitical_trigger_stress | 0.075 |
+| expectations_credibility_stress | 0.040 |
+| external_importer_stress | 0.050 |
+| household_tax_stress | 0.060 |
+
+---
+
+## State-Space Transition Matrix
+
+| From / To | oil_shock | funding_stress | treasury_stress | intervention_pressure | repression_risk |
+| --- | --- | --- | --- | --- | --- |
+| oil_shock | 0.82 | 0.08 | 0 | 0 | 0.04 |
+| funding_stress | 0.16 | 0.76 | 0.10 | 0 | 0 |
+| treasury_stress | 0 | 0.20 | 0.79 | 0.10 | 0.10 |
+| intervention_pressure | 0 | 0.10 | 0.18 | 0.78 | 0.06 |
+| repression_risk | 0.10 | 0 | 0.12 | 0.16 | 0.80 |
+
+---
+
+## State-Space Noise and Initial Conditions
+
+- Measurement noise floor: 25
+- Iterative estimation maximum iterations: 5
+- Iterative estimation tolerance: 0.08
+- Iterative estimation relaxation: 0.35
+- Iterative estimation noise relaxation: 0.25
+- Iterative estimation anchor weight: 0.18
+- Iterative estimation intercept scale: 0.5
+- Iterative estimation worsening backoff: 0.6
+
+| State | Process Noise | Initial State | Initial Covariance |
+| --- | --- | --- | --- |
+| oil_shock | 18 | 45 | 80 |
+| funding_stress | 16 | 40 | 70 |
+| treasury_stress | 16 | 38 | 70 |
+| intervention_pressure | 14 | 25 | 55 |
+| repression_risk | 14 | 42 | 60 |
+
+---
+
+## State-Space Measurement Loadings
+
+| Indicator | Oil Shock | Funding Stress | Treasury Stress | Intervention Pressure | Repression Risk |
+| --- | --- | --- | --- | --- | --- |
+| brent_prompt_spread | 0.78 | 0.05 | 0 | 0 | 0.08 |
+| wti_prompt_spread | 0.72 | 0.04 | 0 | 0 | 0.05 |
+| tanker_freight_proxy | 0.64 | 0.06 | 0 | 0 | 0.02 |
+| hormuz_tanker_transit_stress | 0.74 | 0.04 | 0 | 0 | 0.04 |
+| lng_proxy | 0.46 | 0 | 0 | 0 | 0.08 |
+| marine_insurance_stress | 0.62 | 0 | 0 | 0 | 0 |
+| tanker_disruption_score | 0.68 | 0 | 0 | 0 | 0 |
+| geopolitical_escalation_toggle | 0.55 | 0.12 | 0 | 0 | 0 |
+| jpy_usd_basis | 0.04 | 0.82 | 0.08 | 0 | 0 |
+| eur_usd_basis | 0.02 | 0.70 | 0.08 | 0 | 0 |
+| sofr_spread | 0 | 0.58 | 0.28 | 0 | 0 |
+| move_index | 0 | 0.20 | 0.64 | 0 | 0.06 |
+| treasury_liquidity_proxy | 0 | 0.10 | 0.82 | 0.04 | 0 |
+| treasury_basis_proxy | 0 | 0.16 | 0.78 | 0 | 0 |
+| auction_stress | 0 | 0.10 | 0.74 | 0.04 | 0 |
+| ten_year_yield | 0.10 | 0 | 0.44 | 0 | 0.28 |
+| thirty_year_yield | 0.04 | 0 | 0.52 | 0 | 0.28 |
+| term_premium_proxy | 0 | 0 | 0.54 | 0 | 0.32 |
+| fima_repo_usage | 0 | 0.18 | 0.22 | 0.58 | 0 |
+| fed_swap_line_usage | 0 | 0.28 | 0.12 | 0.58 | 0 |
+| central_bank_intervention_toggle | 0 | 0.10 | 0.05 | 0.70 | 0.05 |
+| consumer_credit_stress | 0.08 | 0.08 | 0.08 | 0 | 0.62 |
+| private_credit_stress | 0 | 0.16 | 0.16 | 0 | 0.58 |
+| tips_vs_nominals | 0.22 | 0 | 0.10 | 0 | 0.60 |
+| gold_price | 0.12 | 0 | 0.04 | 0.02 | 0.52 |
+| oil_price | 0.48 | 0 | 0.04 | 0 | 0.18 |
+| payroll_momentum | 0.02 | 0.04 | 0.08 | 0 | 0.58 |
+| unemployment_rate | 0 | 0.06 | 0.12 | 0 | 0.66 |
+| wage_stickiness | 0.18 | 0 | 0.04 | 0 | 0.56 |
+| hours_worked_momentum | 0.02 | 0.02 | 0.06 | 0 | 0.54 |
+| temp_help_stress | 0 | 0.12 | 0.10 | 0 | 0.58 |
+| employment_tax_base_proxy | 0.08 | 0.02 | 0.12 | 0 | 0.68 |
+| synthetic_usd_funding_pressure | 0.02 | 0.72 | 0.12 | 0 | 0.04 |
+| murban_wti_spread | 0.62 | 0.08 | 0 | 0 | 0.04 |
+| oman_wti_spread | 0.58 | 0.08 | 0 | 0 | 0.04 |
+| gulf_crude_dislocation | 0.70 | 0.10 | 0 | 0 | 0.05 |
+| p_and_i_circular_stress | 0.66 | 0.06 | 0 | 0 | 0.04 |
+| iaea_nuclear_ambiguity | 0.34 | 0.18 | 0.06 | 0.02 | 0.28 |
+| interceptor_depletion | 0.28 | 0.12 | 0.08 | 0.03 | 0.12 |
+| governance_fragmentation | 0.20 | 0.16 | 0.08 | 0.02 | 0.18 |
+| expected_inflation_5y5y | 0.10 | 0 | 0.16 | 0 | 0.68 |
+| inflation_expectations_level | 0.12 | 0 | 0.12 | 0 | 0.66 |
+| inflation_expectations_slope | 0.18 | 0.02 | 0.10 | 0 | 0.42 |
+| inflation_expectations_curvature | 0.10 | 0.02 | 0.08 | 0 | 0.46 |
+| survey_market_expectations_gap | 0.08 | 0 | 0.04 | 0 | 0.56 |
+| expectations_entrenchment_score | 0.12 | 0 | 0.12 | 0.02 | 0.72 |
+| vix_index | 0 | 0.12 | 0.28 | 0 | 0.18 |
+| oil_in_yen_stress | 0.18 | 0.34 | 0.16 | 0.02 | 0.10 |
+| oil_in_eur_stress | 0.16 | 0.22 | 0.12 | 0 | 0.10 |
+| oil_in_cny_stress | 0.12 | 0.16 | 0.08 | 0 | 0.08 |
+| external_importer_stress | 0.10 | 0.34 | 0.24 | 0.06 | 0.10 |
+| household_real_income_squeeze | 0.12 | 0.08 | 0.08 | 0 | 0.64 |
+| tax_receipts_market_stress | 0 | 0.12 | 0.18 | 0.02 | 0.58 |
+
+---
+
+## State-Space Regime Loadings
+
+### Sticky
+
+| State | Loading |
+| --- | --- |
+| oil_shock | 0.40 |
+| funding_stress | 0.10 |
+| treasury_stress | 0.05 |
+| intervention_pressure | 0 |
+| repression_risk | 0.35 |
+
+### Convex
+
+| State | Loading |
+| --- | --- |
+| oil_shock | 0.25 |
+| funding_stress | 0.40 |
+| treasury_stress | 0.20 |
+| intervention_pressure | 0 |
+| repression_risk | 0.10 |
+
+### Break
+
+| State | Loading |
+| --- | --- |
+| oil_shock | 0.05 |
+| funding_stress | 0.20 |
+| treasury_stress | 0.35 |
+| intervention_pressure | 0.25 |
+| repression_risk | 0.15 |
+
+---
+
+## Observation Conditioning Parameters
+
+- Cluster weight: 0.65
+- Regime weight: 0.55
+- Minimum multiplier: 0.72
+- Maximum multiplier: 1.60
+
+### Cluster: Shipping
+
+| Indicator | Multiplier |
+| --- | --- |
+| brent_prompt_spread | 1.15 |
+| eur_usd_basis | 0.92 |
+| expected_inflation_5y5y | 1.04 |
+| external_importer_stress | 1.08 |
+| governance_fragmentation | 1.08 |
+| gulf_crude_dislocation | 1.24 |
+| hormuz_tanker_transit_stress | 1.45 |
+| iaea_nuclear_ambiguity | 1.08 |
+| inflation_expectations_level | 1.04 |
+| interceptor_depletion | 1.06 |
+| jpy_usd_basis | 0.92 |
+| marine_insurance_stress | 1.45 |
+| murban_wti_spread | 1.20 |
+| oil_in_eur_stress | 1.08 |
+| oil_in_yen_stress | 1.10 |
+| oman_wti_spread | 1.18 |
+| p_and_i_circular_stress | 1.40 |
+| tanker_disruption_score | 1.45 |
+| tanker_freight_proxy | 1.30 |
+| treasury_liquidity_proxy | 0.90 |
+| wti_prompt_spread | 1.10 |
+
+### Cluster: Funding
+
+| Indicator | Multiplier |
+| --- | --- |
+| employment_tax_base_proxy | 1.04 |
+| eur_usd_basis | 1.35 |
+| expectations_entrenchment_score | 1.08 |
+| expected_inflation_5y5y | 1.05 |
+| external_importer_stress | 1.18 |
+| fed_swap_line_usage | 1.15 |
+| fima_repo_usage | 1.10 |
+| governance_fragmentation | 1.08 |
+| iaea_nuclear_ambiguity | 1.08 |
+| interceptor_depletion | 1.04 |
+| jpy_usd_basis | 1.40 |
+| marine_insurance_stress | 0.85 |
+| move_index | 1.10 |
+| oil_in_cny_stress | 1.08 |
+| oil_in_eur_stress | 1.10 |
+| oil_in_yen_stress | 1.16 |
+| payroll_momentum | 1.05 |
+| sofr_spread | 1.35 |
+| survey_market_expectations_gap | 1.08 |
+| synthetic_usd_funding_pressure | 1.25 |
+| tax_receipts_market_stress | 1.10 |
+| temp_help_stress | 1.08 |
+| treasury_basis_proxy | 1.15 |
+| vix_index | 1.08 |
+
+### Cluster: Plumbing
+
+| Indicator | Multiplier |
+| --- | --- |
+| auction_stress | 1.30 |
+| brent_prompt_spread | 0.90 |
+| employment_tax_base_proxy | 1.10 |
+| expectations_entrenchment_score | 1.10 |
+| expected_inflation_5y5y | 1.08 |
+| external_importer_stress | 1.14 |
+| fed_swap_line_usage | 1.15 |
+| fima_repo_usage | 1.20 |
+| governance_fragmentation | 1.06 |
+| hours_worked_momentum | 1.05 |
+| iaea_nuclear_ambiguity | 1.05 |
+| inflation_expectations_level | 1.06 |
+| interceptor_depletion | 1.05 |
+| move_index | 1.25 |
+| sofr_spread | 1.15 |
+| synthetic_usd_funding_pressure | 1.10 |
+| tax_receipts_market_stress | 1.12 |
+| treasury_basis_proxy | 1.35 |
+| treasury_liquidity_proxy | 1.45 |
+| unemployment_rate | 1.08 |
+| vix_index | 1.12 |
+
+### Cluster: Energy
+
+| Indicator | Multiplier |
+| --- | --- |
+| brent_prompt_spread | 1.40 |
+| employment_tax_base_proxy | 1.06 |
+| eur_usd_basis | 0.95 |
+| expectations_entrenchment_score | 1.18 |
+| expected_inflation_5y5y | 1.18 |
+| external_importer_stress | 1.22 |
+| governance_fragmentation | 1.08 |
+| gulf_crude_dislocation | 1.32 |
+| hormuz_tanker_transit_stress | 1.28 |
+| household_real_income_squeeze | 1.14 |
+| iaea_nuclear_ambiguity | 1.18 |
+| inflation_expectations_curvature | 1.08 |
+| inflation_expectations_level | 1.16 |
+| inflation_expectations_slope | 1.10 |
+| interceptor_depletion | 1.12 |
+| jpy_usd_basis | 0.95 |
+| marine_insurance_stress | 1.05 |
+| murban_wti_spread | 1.28 |
+| oil_in_cny_stress | 1.10 |
+| oil_in_eur_stress | 1.16 |
+| oil_in_yen_stress | 1.28 |
+| oman_wti_spread | 1.24 |
+| p_and_i_circular_stress | 1.25 |
+| private_credit_stress | 1.08 |
+| survey_market_expectations_gap | 1.06 |
+| synthetic_usd_funding_pressure | 0.95 |
+| tanker_freight_proxy | 1.15 |
+| tips_vs_nominals | 1.18 |
+| wage_stickiness | 1.12 |
+| wti_prompt_spread | 1.35 |
+
+---
+
+### Regime: Sticky
+
+| Indicator | Multiplier |
+| --- | --- |
+| brent_prompt_spread | 1.22 |
+| employment_tax_base_proxy | 1.06 |
+| expectations_entrenchment_score | 1.18 |
+| expected_inflation_5y5y | 1.16 |
+| external_importer_stress | 1.12 |
+| gulf_crude_dislocation | 1.14 |
+| hormuz_tanker_transit_stress | 1.18 |
+| household_real_income_squeeze | 1.12 |
+| iaea_nuclear_ambiguity | 1.06 |
+| inflation_expectations_level | 1.16 |
+| inflation_expectations_slope | 1.08 |
+| marine_insurance_stress | 1.15 |
+| murban_wti_spread | 1.12 |
+| oil_in_yen_stress | 1.14 |
+| oil_price | 1.10 |
+| oman_wti_spread | 1.10 |
+| p_and_i_circular_stress | 1.14 |
+| survey_market_expectations_gap | 1.08 |
+| synthetic_usd_funding_pressure | 1.04 |
+| tanker_disruption_score | 1.15 |
+| tanker_freight_proxy | 1.12 |
+| tips_vs_nominals | 1.08 |
+| wage_stickiness | 1.16 |
+| wti_prompt_spread | 1.18 |
+
+### Regime: Convex
+
+| Indicator | Multiplier |
+| --- | --- |
+| auction_stress | 1.08 |
+| eur_usd_basis | 1.18 |
+| expectations_entrenchment_score | 1.12 |
+| expected_inflation_5y5y | 1.12 |
+| external_importer_stress | 1.18 |
+| governance_fragmentation | 1.10 |
+| gulf_crude_dislocation | 1.12 |
+| iaea_nuclear_ambiguity | 1.14 |
+| inflation_expectations_curvature | 1.12 |
+| interceptor_depletion | 1.12 |
+| jpy_usd_basis | 1.22 |
+| move_index | 1.14 |
+| murban_wti_spread | 1.08 |
+| oil_in_eur_stress | 1.10 |
+| oil_in_yen_stress | 1.18 |
+| oman_wti_spread | 1.08 |
+| p_and_i_circular_stress | 1.12 |
+| payroll_momentum | 1.08 |
+| private_credit_stress | 1.08 |
+| sofr_spread | 1.20 |
+| survey_market_expectations_gap | 1.10 |
+| synthetic_usd_funding_pressure | 1.18 |
+| temp_help_stress | 1.10 |
+| treasury_basis_proxy | 1.12 |
+| vix_index | 1.10 |
+
+### Regime: Break
+
+| Indicator | Multiplier |
+| --- | --- |
+| auction_stress | 1.20 |
+| central_bank_intervention_toggle | 1.15 |
+| employment_tax_base_proxy | 1.18 |
+| expectations_entrenchment_score | 1.16 |
+| expected_inflation_5y5y | 1.14 |
+| external_importer_stress | 1.14 |
+| fed_swap_line_usage | 1.18 |
+| fima_repo_usage | 1.20 |
+| governance_fragmentation | 1.16 |
+| hours_worked_momentum | 1.12 |
+| household_real_income_squeeze | 1.12 |
+| iaea_nuclear_ambiguity | 1.18 |
+| inflation_expectations_level | 1.10 |
+| interceptor_depletion | 1.16 |
+| move_index | 1.12 |
+| p_and_i_circular_stress | 1.08 |
+| payroll_momentum | 1.12 |
+| synthetic_usd_funding_pressure | 1.12 |
+| tax_receipts_market_stress | 1.18 |
+| treasury_basis_proxy | 1.24 |
+| treasury_liquidity_proxy | 1.32 |
+| unemployment_rate | 1.18 |
+| vix_index | 1.14 |
