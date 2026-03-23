@@ -4,7 +4,7 @@ region: nyc
 services:
   - name: backend
     github:
-      repo: YOUR_GITHUB_USERNAME/macro_indicator_dashboard
+      repo: DouglasT61/macro_indicator_dashboard
       branch: main
       deploy_on_push: true
     source_dir: .
@@ -49,7 +49,7 @@ services:
 static_sites:
   - name: frontend
     github:
-      repo: YOUR_GITHUB_USERNAME/macro_indicator_dashboard
+      repo: DouglasT61/macro_indicator_dashboard
       branch: main
       deploy_on_push: true
     source_dir: frontend
