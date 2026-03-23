@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends
 from fastapi.responses import PlainTextResponse
 from sqlalchemy.orm import Session
 
@@ -11,7 +11,7 @@ from app.schemas.common import ApiMessage
 from app.schemas.dashboard import DashboardOverview
 from app.services.dashboard_service import get_dashboard_overview
 from app.services.export_service import build_daily_summary_markdown
-from app.services.refresh_service import run_refresh
+from app.services.refresh_service import run_refresh_in_new_session
 
 router = APIRouter()
 
@@ -22,9 +22,9 @@ def dashboard_overview(db: Session = Depends(get_db)) -> DashboardOverview:
 
 
 @router.post("/refresh", response_model=ApiMessage)
-def refresh_dashboard(db: Session = Depends(get_db)) -> ApiMessage:
-    run_refresh(db)
-    return ApiMessage(message="Dashboard refresh completed.", timestamp=datetime.now(timezone.utc))
+def refresh_dashboard(background_tasks: BackgroundTasks) -> ApiMessage:
+    background_tasks.add_task(run_refresh_in_new_session)
+    return ApiMessage(message="Dashboard refresh queued.", timestamp=datetime.now(timezone.utc))
 
 
 @router.get("/export/daily-summary", response_class=PlainTextResponse)

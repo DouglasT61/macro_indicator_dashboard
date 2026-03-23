@@ -87,6 +87,7 @@ class ContractSpec:
 class PublicDataCollector:
     def __init__(self, timeout_seconds: float = 20.0) -> None:
         self.timeout_seconds = timeout_seconds
+        self.fred_timeout_seconds = min(timeout_seconds, 6.0)
 
     def collect(self, days: int = 180, end_date: date | None = None) -> CollectionResult:
         end = end_date or date.today()
@@ -143,6 +144,9 @@ class PublicDataCollector:
         collected: dict[str, CollectedSeries] = {}
         failures: list[str] = []
 
+        def _record_failure(label: str, exc: Exception) -> None:
+            failures.append(f'{label}({exc.__class__.__name__})')
+
         for key, (series_id, transform) in FRED_DIRECT_SERIES.items():
             try:
                 observations = self._fetch_fred_csv(client, series_id, start, end, transform=transform)
@@ -150,8 +154,8 @@ class PublicDataCollector:
                 if history:
                     collected[key] = CollectedSeries(key=key, source=f'fred/{series_id}', history=history)
                     raw_cache[series_id] = observations
-            except Exception:
-                failures.append(series_id)
+            except Exception as exc:
+                _record_failure(series_id, exc)
 
         try:
             sofr = raw_cache.get('SOFR') or self._fetch_fred_csv(client, 'SOFR', start, end)
@@ -164,8 +168,8 @@ class PublicDataCollector:
             )
             if sofr_history:
                 collected['sofr_spread'] = CollectedSeries('sofr_spread', 'fred/SOFR-DFF', sofr_history)
-        except Exception:
-            failures.extend(['SOFR', 'DFF'])
+        except Exception as exc:
+            _record_failure('SOFR-DFF', exc)
 
         try:
             dgs10 = raw_cache.get('DGS10') or self._fetch_fred_csv(client, 'DGS10', start, end)
@@ -178,15 +182,15 @@ class PublicDataCollector:
             )
             if term_history:
                 collected['term_premium_proxy'] = CollectedSeries('term_premium_proxy', 'fred/DGS10-DGS2', term_history)
-        except Exception:
-            failures.extend(['DGS10', 'DGS2'])
+        except Exception as exc:
+            _record_failure('DGS10-DGS2', exc)
 
         try:
             move_history = self._build_move_proxy_history(client, start, end, raw_cache)
             if move_history:
                 collected['move_index'] = CollectedSeries('move_index', 'proxy/fred-rates-vol', move_history)
-        except Exception:
-            failures.append('MOVE_PROXY')
+        except Exception as exc:
+            _record_failure('MOVE_PROXY', exc)
 
         try:
             eur_basis, jpy_basis = self._build_basis_proxy_histories(client, start, end, raw_cache)
@@ -194,26 +198,31 @@ class PublicDataCollector:
                 collected['eur_usd_basis'] = CollectedSeries('eur_usd_basis', 'proxy/fred-eur-basis', eur_basis)
             if jpy_basis:
                 collected['jpy_usd_basis'] = CollectedSeries('jpy_usd_basis', 'proxy/fred-jpy-basis', jpy_basis)
-        except Exception:
-            failures.append('BASIS_PROXY')
+        except Exception as exc:
+            _record_failure('BASIS_PROXY', exc)
 
         try:
             labor_series = self._build_labor_module_histories(client, start, end, raw_cache)
             collected.update(labor_series)
-        except Exception:
-            failures.append('BLS_LABOR')
+        except Exception as exc:
+            _record_failure('BLS_LABOR', exc)
 
         try:
             expectations_series = self._build_inflation_expectations_histories(client, start, end, raw_cache)
             collected.update(expectations_series)
-        except Exception:
-            failures.append('EXPECTATIONS_CURVE')
+        except Exception as exc:
+            _record_failure('EXPECTATIONS_CURVE', exc)
 
         live_count = len(collected)
         if live_count == 0:
-            return {}, 'FRED live download unavailable; using demo fallback for market series.'
+            detail = '; '.join(failures[:8]) if failures else 'no FRED responses returned'
+            return {}, f'FRED live download unavailable; using demo fallback for market series. Failures: {detail}.'
         if failures:
-            return collected, f'FRED live and proxy series active for {live_count} indicators; demo fallback remains for unavailable series.'
+            detail = '; '.join(failures[:8])
+            return collected, (
+                f'FRED live and proxy series active for {live_count} indicators; '
+                f'demo fallback remains for unavailable series. Failures: {detail}.'
+            )
         return collected, f'FRED live and proxy series active for {live_count} indicators.'
 
     def _collect_ecb_series(
@@ -815,6 +824,7 @@ class PublicDataCollector:
                 'cosd': start.isoformat(),
                 'coed': end.isoformat(),
             },
+            timeout=self.fred_timeout_seconds,
         )
         response.raise_for_status()
         reader = csv.DictReader(io.StringIO(response.text))

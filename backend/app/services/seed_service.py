@@ -328,6 +328,9 @@ def _build_series_payloads(end_date: date | None = None) -> tuple[dict[str, list
         'yahoo_market',
         provider_messages['futures_market'],
     )
+    for key, message in collection.provider_status.items():
+        if key in {'fred', 'ecb', 'treasury', 'yahoo_market', 'support'}:
+            provider_messages[f'{key}_status'] = message
     try:
         hormuz = collect_hormuz_transit_assessment()
         baseline['hormuz_tanker_transit_stress'] = hormuz.history
