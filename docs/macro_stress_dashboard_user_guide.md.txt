@@ -4,9 +4,9 @@
 
 ## Why This Exists
 
-I built this dashboard out of necessity, not academic interest.
+I built this dashboard out of necessity driven by personal failure.  The dashboard should not be interpreted as a tool that tells you what will happen.  There are no guarantees for successful outcomes – there never are.  Instead, I built this tool to help me be better prepared for the direction global events are taking and thereby giving me a better chance for being prepared for what does happen over the next few months, quarters and years.
 
-I have been investing in commercial real estate and related capital markets for forty years. In that time I’ve been caught badly positioned twice by macro forces I did not see coming, nor did I understand, and both times the lesson was the same: significant shocks to the monetary system made standard economic frameworks obsolete.  Recent Western sovereign debt bubbles and their corresponding debt to GDP and deficits to GDP largely explain why.
+I have been investing in commercial real estate and related capital markets for forty years. In that time I’ve been caught badly positioned twice by macro forces I did not see coming, and did not understand.  Both times the lesson was the same: significant shocks to the monetary system made standard economic frameworks obsolete.  Recent Western sovereign debt bubbles and their corresponding debt to GDP and deficits to GDP largely explain why.
 
 The models that most economists and strategists use today were built for a world of stable globalization, predictable energy flows, and well-functioning Treasury markets. That world is under serious stress, not only from current shocks but also from shocks occurring over the past 25 years never fully resolved. The transmission channels that connect geopolitical disruption to energy markets to dollar funding to Treasury auctions to the cost of capital for every asset class are not optional reading anymore. They are the real operating environment we are all required to operate within.
 
@@ -44,6 +44,20 @@ That is the scenario this dashboard is designed to detect early. Here's how to r
 
 ---
 
+Monitor the dashboard daily to get a sense of daily movements – events are moving rapidly right now.  You will intuitively begin to see movements and the direction the global system is going in.  Your goal is not to make predictions – that’s a fools errand.  By understanding the direction the system is moving you then have the opportunity to positioning your own financial portfolio in a way that you have the opportunity for asymmetric returns – you have a greater expected value (“EV”) for upside than downside returns.  The most effective (no guarantee) way to accomplish this is to read the dashboard in the following sequence:
+
+Start with the three regime cards and the fast-moving stress panel. Get the current altitude reading – overall sense of things. What regime is active, and how strong is it?
+
+Move to the causal chain panel. Observe where the base stress highest? Where is loop pressure building above the base stress? Is the chain advancing through the nodes or stalling early?
+
+Then check the econometric layer. What are the latent state estimates saying? What cluster family is the system in? Are any latent states accelerating?  What hidden forces are building and likely to drive the system in one direction or another?
+
+Next, look at the historical analog panel. What past episode does this most resemble? Knowing the subfamily helps you anticipate how the stress is likely to propagate from here – up or down.
+
+Check the employment and domestic transmission panel. Is labor market weakness starting to show up? Are tax base and household credit indicators moving? If so, the stress chain is broadening beyond financial markets.
+
+Only after those five steps does it make sense to drill into the detailed panels. By then you have a thesis – not a prediction but an intuition. The detailed panels either confirm or complicate that intuition.
+
 ## The Four Summary Cards at the Top
 
 The four cards at the top of the dashboard are your first stop every time you open the app. Think of them as a flight deck display: they give you the current altitude, airspeed, heading, and whether any warning lights are on. These cards are predicting nothing, just showing the growing progression if it happens from one regime to another.
@@ -60,15 +74,15 @@ The key contributors here are oil curve structure, tanker freight, Hormuz transi
 
 ### Convex Inflation / Funding Stress
 
-This is the most important card to watch for asset allocators and credit investors. It marks the transition point where a physical commodity shock stops being just an inflation story and starts becoming a nonlinear funding and sovereign-debt problem. Be most wary of non-linear events. They hit you before you realize it and give you no time to react once you do. This was my personal experience in 2001 and again in 2008-09.
+This is the most important card to watch for asset allocators and credit investors. It marks the transition point where a physical commodity shock stops being just an inflation story and starts becoming a nonlinear funding and sovereign-debt problem. Be most wary of non-linear (convex function) events. They hit you before you realize it and give you no time to react once you do. This was my personal experience in 2001 and again in 2008-09.
 
 Below 45 means no meaningful migration. Between 45 and 59, the transition is forming. Between 60 and 74, you are in an active convex regime. Above 75, the funding pressure is dominant and nonlinear.
 
-The contributors here shift away from oil and toward cross-currency basis spreads, SOFR stress, Treasury rates volatility, auction deterioration, and the basis trade. When this card moves up while the Sticky card is also elevated, the stress chain is migrating in exactly the direction that historically precedes Treasury market dysfunction. If you're looking for historical analogs here, focus on what happened in the repo market in September 2019 and also what happened in the UK in 2022 and ushered Liz Truss out of office.
+The contributors here shift away from oil and toward cross-currency basis spreads, SOFR stress, Treasury rates volatility, auction deterioration, and the basis trade. When this card moves up while the Sticky card is also elevated, the stress chain is migrating in exactly the direction that historically precedes Treasury market dysfunction. If you're looking for historical analogs here, focus on what happened in the repo market in September 2019 and in the UK in 2022 which ushered Liz Truss out of office.
 
 ### Break / Repression
 
-This card measures whether the system is moving from stress into outright dysfunction. Think of it as the instrument that tells you whether the problem has entered official-sector territory: the Fed is having to intervene, Treasury auctions are failing to clear normally, and the domestic economy is starting to crack.
+This card measures whether the system is moving from stress into outright dysfunction. Think of it as the instrument that tells you whether the problem has entered official-sector territory: the Fed is having to intervene, Treasury auctions are failing to clear normally, and the domestic economy is starting to crack. The economy is entering a stagflationary regime – the Fed’s worst nightmare.  The reason is the simultaneity of rising funding costs (inflation driven rise in bond yields), and falling tax receipts, widening deficits and driving higher new Treasury issuance.  A condition often referred to as a debt death spiral, until policymakers intervene with artificial funding cost controls and massive liquidity injections.
 
 Below 45 means low risk. Between 45 and 59, dysfunction risk is building. Between 60 and 74, you are in an active break-risk regime. Above 75, it is dominant.
 
@@ -82,7 +96,7 @@ Treasury liquidity, SOFR versus the Fed's target, Treasury basis stress, JPY/USD
 
 If 0 to 2 are stressed, the situation is contained. If 3 are stressed simultaneously, that is a warning. If 4 or all 5 are stressed at the same time, that is critical.
 
-The reason this panel exists separately is that the stress chain tends to move in waves. Seeing multiple fast indicators stress simultaneously is a much stronger signal than any one of them moving on its own. It tells you the system is under broad pressure, not just isolated noise.
+The reason this panel exists separately is that the stress chain tends to move in waves. Seeing multiple fast indicators enter the stress node simultaneously is a much stronger signal than any one of them moving on its own. It tells you the system is under broad pressure, not just isolated noise.
 
 Each card and panel uses standard color coding: green for normal, yellow for early caution, orange for warning, and red for critical.
 
@@ -90,7 +104,7 @@ Each card and panel uses standard color coding: green for normal, yellow for ear
 
 ## The Causal Chain Panel
 
-Below the summary cards is the causal chain. This is the structural core of the dashboard and the section that rewards the most attention.
+Below the summary cards is the causal chain. This is the structural core of the dashboard and the section that you should spend the most on.
 
 The chain is organized into seven nodes, in sequence:
 
@@ -108,11 +122,11 @@ That distinction matters. If a node's propagated score is much higher than its b
 
 A few design choices worth understanding:
 
-The inflation and repression node includes labor market and domestic credit metrics. That is deliberate. When payrolls weaken and temp-help employment rolls over, federal withholding tax revenues fall and household credit stress rises at the same time. That combination feeds directly into the fiscal and repression risk story, which is why labor data belongs in this chain rather than in a separate macroeconomic sidebar. This is especially important today given the trend of AI related job losses for white-collar workers.  And those job losses propagating into consumer credit stress. What happens when banks' balance sheets begin to erode when a significant portion of consumer credits go bad?
+The inflation and repression node deliberately includes labor market and domestic credit metrics. When payrolls weaken and temp-help employment rolls over, federal withholding tax revenues fall (nearly 50% of federal tax receipts come from employment) and household credit stress rises at the same time. That combination feeds directly into the fiscal and repression risk story, which is why labor data belongs in this chain rather than in a separate macroeconomic sidebar. This is especially important today given the trend of AI-related job losses for white-collar workers – likely in its early stages.  Job losses propagate into consumer credit stress. What happens when banks' balance sheets when a significant portion of consumer credits go bad?
 
 On the shipping side, the oil node uses direct Hormuz tanker transit data from the IMF's PortWatch system rather than relying only on oil prices or news overlays. This gives the dashboard an actual physical flow signal at one of the world's most critical chokepoints.
 
-The oil block also includes direct Gulf crude dislocation spreads. Murban versus WTI and Oman versus WTI tell you whether Middle East export barrels are pricing at a premium to U.S. crude. When those spreads widen alongside Hormuz transit deterioration, freight stress, and marine insurance stress, the evidence points to a physically regional shock that cannot be absorbed through normal market arbitrage. That is a much more serious development than a generalized oil rally.
+The oil block also includes direct Gulf crude dislocation spreads. Murban versus WTI and Oman versus WTI tell you whether Middle East export barrels are pricing at a premium to U.S. crude. When those spreads widen alongside Hormuz transit deterioration, freight stress, and marine insurance stress, the evidence points to a regional shock of physical supply that cannot be absorbed through normal market arbitrage. That is a much more serious development than a generalized oil rally.
 
 ---
 
@@ -122,7 +136,7 @@ The dashboard tracks more than twenty data series. The following fifteen are the
 
 ### Brent M1-M6 Spread
 
-This is the difference between the price of Brent crude (non-US oil production) for near-term delivery and the price six months forward. When the near-term price is significantly higher than the forward price, the oil market is in what traders call backwardation, which means physical oil is genuinely scarce right now. A wide, persistent Brent spread is the earliest reliable signal that the shock is real, not just a headline.
+This is the difference between the price of Brent crude (non-US oil production) for near-term delivery and the price six months forward. When the near-term price is significantly higher than the forward price, the oil market is in what traders call backwardation, which means physical oil is genuinely scarce right now and is expected to be less scarce in a few months. A wide, persistent Brent spread is the earliest reliable signal that the shock is real, not just a headline.
 
 ### WTI M1-M6 Spread
 
@@ -138,7 +152,7 @@ Derived from IMF and Oxford University's PortWatch system, this score measures a
 
 ### Tanker Freight Proxy
 
-The cost of chartering a dirty tanker (one that carries crude oil). When freight rates rise alongside the other shipping indicators, it confirms that the disruption is affecting real transport economics, not just insurance pricing or market psychology. I haven't resolved yet in my own mind whether the tank or freight proxy is a confirmation element or if it's a driver of tank or transit stress. For tanker insurance companies and even more importantly the re-insurance companies have seen their underwriting parameters skyrocket in recent weeks period this is causing premiums to rise above the profits derived from delivery of each tanker.
+The cost of chartering a dirty tanker (one that carries crude oil). When freight rates rise alongside the other shipping indicators, it confirms that the disruption is affecting real transport economics, not just insurance pricing or market psychology. I haven't resolved yet in my own mind whether the tanker or freight proxy is a confirmation element or if it's a driver of tanker or transit stress. For tanker insurance companies, and even more importantly the re-insurance companies, have seen their underwriting parameters skyrocket in recent weeks causing premiums to rise above the profits derived from delivery of each tanker.
 
 ### Marine Insurance Stress
 
@@ -146,15 +160,15 @@ This is a text-derived overlay built from marine and war-risk insurance news sou
 
 ### JPY/USD Cross-Currency Basis
 
-This measures how expensive it is to borrow U.S. dollars using Japanese yen as collateral in the currency swap market. When this spread turns deeply negative, it means dollar funding is tightening globally. Japan is one of the world's largest holders of U.S. Treasuries and one of the most dollar-dependent funding systems. JPY basis stress is often one of the earliest public signals that the funding chain is under real pressure.
+This measures how expensive it is to borrow U.S. dollars using Japanese yen as collateral in the currency swap market. When this spread turns deeply negative, it means dollar funding is tightening globally. Japan is one of the world's largest holders of U.S. Treasuries and one of the most dollar-dependent funding systems. JPY basis stress is often one of the earliest public signals that the funding chain is under real pressure.  When the JPY falls against USD, concurrently with rising energy prices (nearly 90% of oil trades globally are priced in USD)it means Japan is forced into selling assets (largely UST holdings) to pay for rising costs.  This forced selling of UST’s recursively enters the US fiscal stress and the need to issue more UST’s.
 
 ### EUR/USD Cross-Currency Basis
 
-The same measurement in euro. When both the JPY and EUR bases are deteriorating simultaneously, dollar scarcity is no longer a regional problem. It is becoming a global one.
+The same measurement in euro, with the same recursive loop. When both the JPY and EUR bases are deteriorating simultaneously, dollar scarcity is no longer a regional problem. It is becoming a global one.
 
 ### SOFR Minus Fed Funds Target
 
-SOFR is the rate at which U.S. financial institutions actually borrow overnight against Treasury collateral. When SOFR runs significantly above the Fed's target midpoint, it means domestic repo plumbing is stressed. This is the signal that offshore funding problems have migrated into the core of the U.S. financial system.
+SOFR is the rate at which U.S. financial institutions borrow overnight against Treasury collateral as an alternative to selling that collateral. When SOFR runs significantly above the Fed's target midpoint, it means domestic repo plumbing is stressed. This is the signal that offshore funding problems have migrated into the core of the U.S. financial system.
 
 ### MOVE Index
 
@@ -168,7 +182,7 @@ This is one of the most structurally important cards in the dashboard, and it is
 
 **Foreign Sponsorship Stress** carries 30% of the weight. This measures whether the indirect bidder category, the channel through which foreign central banks and reserve managers participate, is weakening relative to recent norms. A sustained decline in indirect takedown at long-end auctions is one of the clearest publicly observable signals that foreign official demand for U.S. duration is eroding.
 
-**Issuance Mix Stress** carries the remaining 20%. This tracks the rolling 90-day share of Treasury issuance shifting toward bills and shorter-dated paper relative to long-end coupons. When the Treasury Department appears to be leaning more heavily on the front end of the curve, it is often a debt-management stress signal: longer-term buyers are either unavailable or too expensive to attract.
+**Issuance Mix Stress** carries the remaining 20%. This tracks the rolling 90-day share of Treasury issuance shifting toward bills and shorter-dated paper relative to long-end coupons. When the Treasury Department appears to be leaning more heavily on the front end of the curve, it is often a debt-management stress signal: longer-term buyers are either unavailable or too expensive to attract.  They are actively avoiding duration.
 
 Because Treasury auctions are events rather than continuous market data, the auction card behaves differently from other cards in the dashboard. It is event-native. Rather than a sparkline, it shows the window used to calculate the score, the date of the last score change, the number of stressed auction events in the prior three months and six months, and the most recent step changes with full dates.
 
@@ -180,7 +194,7 @@ A market-derived measure of depth in the Treasury futures market. Thin markets m
 
 ### Treasury Basis Stress Proxy
 
-Measures the divergence between Treasury cash prices and futures prices. Normally these are tightly linked by arbitrage. When they diverge, it signals that the leveraged basis trade, a core strategy of hedge funds that provides enormous amounts of Treasury market liquidity, is breaking down. A basis unwind can become a self-reinforcing feedback loop. This was one of the central dynamics in the March 2020 Treasury market dislocation.
+Measures the divergence between Treasury cash prices and futures prices. Normally these are tightly linked by arbitrage. When they diverge, it signals that the leveraged basis trade, a core strategy of hedge funds that provide enormous amounts of Treasury market liquidity, is breaking down. A basis unwind can become a self-reinforcing feedback loop. This was one of the central dynamics in the March 2020 Treasury market dislocation.
 
 ### FIMA Repo Usage
 
@@ -350,7 +364,7 @@ The UST Auction Stress card has been restructured into three weighted subcompone
 
 # Technical Reference Appendix
 
-The sections below document the mathematical and statistical architecture underlying the dashboard. They are intended for users who want to understand exactly how the scoring, propagation, and state estimation are constructed. Non-technical readers do not need this section to use the dashboard effectively, but it is included here for full transparency.
+The sections below document the mathematical and statistical architecture underlying the dashboard. They are intended for users who want to understand exactly how the scoring, propagation, and state estimation are constructed. Non-technical readers do not need this section to use the dashboard effectively, but it is included here for full transparency.  The parameters and weightings are purely theoretical and are mine.  For users statistically and geopolitically inclined, your opinion for the choices I’ve made are important and valuable to me.  Give me your feedback for what I’ve done wrong, and right.  Let’s discuss what you think should be done differently.
 
 ## How Indicators Are Normalized
 
