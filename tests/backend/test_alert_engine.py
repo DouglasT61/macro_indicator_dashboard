@@ -95,7 +95,7 @@ def test_state_space_alerts_fire_on_break_risk_and_latent_acceleration() -> None
     alerts = build_state_space_alerts(state_space, backtest, NOW)
     titles = {alert['title'] for alert in alerts}
 
-    assert 'Econometric break-risk transition is building' in titles
+    assert 'Latent-state break-risk transition is building' in titles
     assert 'Latent Treasury stress is accelerating' in titles
     assert 'Stress scenario points to a break-risk path' in titles
 
@@ -121,7 +121,7 @@ def test_state_space_alerts_emit_info_when_validation_guardrail_binds() -> None:
     alerts = build_state_space_alerts(state_space, backtest, NOW)
 
     assert any(alert['severity'] == 'info' for alert in alerts)
-    assert any(alert['title'] == 'Econometric confidence is constrained by validation guardrails' for alert in alerts)
+    assert any(alert['title'] == 'Latent-state confidence is constrained by model guardrails' for alert in alerts)
 
 
 def test_employment_transmission_alerts_fire_on_labor_and_tax_stress() -> None:

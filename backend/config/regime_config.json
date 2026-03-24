@@ -900,9 +900,11 @@
   "propagation": {
     "iterations": 4,
     "memory": 0.35,
-    "activation_floor": 45.0,
-    "feedback_gain": 0.24,
-    "synergy_gain": 0.22,
+    "activation_floor": 55.0,
+    "feedback_gain": 0.22,
+    "synergy_gain": 0.0,
+    "max_node_boost": 12.0,
+    "regime_bonus_cap": 10.0,
     "edges": [
       {
         "from": "geopolitical_trigger_stress",

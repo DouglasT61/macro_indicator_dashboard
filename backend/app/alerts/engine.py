@@ -256,8 +256,8 @@ def build_state_space_alerts(
         severity = 'critical' if float(break_10d.get('break', 0.0)) >= 45.0 else 'warning'
         add_alert(
             severity,
-            'Econometric break-risk transition is building',
-            f"10-day break probability is {float(break_10d['break']):.1f}% under {forecast.get('conditioning_label', 'current')} conditioning.",
+            'Latent-state break-risk transition is building',
+            f"10-day break confidence is {float(break_10d['break']):.1f}% under {forecast.get('conditioning_label', 'current')} conditioning.",
             ['forecast_break_probability', forecast.get('conditioning_cluster', 'forecast_conditioning')],
             'The system can rotate from convex stress into Treasury market dysfunction and Fed backstop usage.',
         )
@@ -292,10 +292,10 @@ def build_state_space_alerts(
     if trust_gate.get('status') == 'Reduced' and diagnostics.get('confidence_band') == 'Fragile':
         add_alert(
             'info',
-            'Econometric confidence is constrained by validation guardrails',
-            trust_gate.get('summary', 'Validation guardrails reduced the econometric blend.'),
+            'Latent-state confidence is constrained by model guardrails',
+            trust_gate.get('summary', 'Model guardrails reduced the live latent-state blend.'),
             ['trust_gate', 'validation'],
-            'Treat the current regime read as tentative until the signal broadens or forecast conviction rises.',
+            'Treat the current latent-state read as tentative until the signal broadens or forecast conviction rises.',
         )
 
     scenarios = forecast.get('scenarios', [])
@@ -305,7 +305,7 @@ def build_state_space_alerts(
             add_alert(
                 'critical' if float(top_scenario.get('break', 0.0)) >= 50.0 else 'warning',
                 'Stress scenario points to a break-risk path',
-                f"{top_scenario.get('label', 'Top scenario')} implies {float(top_scenario.get('break', 0.0)):.1f}% break probability over the scenario horizon.",
+                f"{top_scenario.get('label', 'Top scenario')} implies {float(top_scenario.get('break', 0.0)):.1f}% break confidence over the scenario horizon.",
                 [top_scenario.get('key', 'scenario'), 'forecast'],
                 'If the scenario begins to align with live data, expect intervention pressure and repression risk to rise quickly.',
             )

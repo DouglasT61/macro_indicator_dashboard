@@ -10,13 +10,10 @@ CONFIG = json.loads(Path('backend/config/regime_config.json').read_text(encoding
 
 
 def _series(start: datetime, values: list[float]) -> list[dict[str, float | datetime]]:
-    return [
-        {'timestamp': start + timedelta(days=index), 'value': value}
-        for index, value in enumerate(values)
-    ]
+    return [{'timestamp': start + timedelta(days=index), 'value': value} for index, value in enumerate(values)]
 
 
-def test_calibration_layer_builds_episode_fit_and_comparison() -> None:
+def test_latent_state_layer_uses_configured_monitor_and_descriptive_cluster_context() -> None:
     start = datetime(2026, 2, 1, tzinfo=timezone.utc)
     snapshots = {
         'brent_prompt_spread': {'history': _series(start, [4.8, 5.0, 5.4, 5.9, 6.4, 6.9, 7.3, 7.7])},
@@ -48,50 +45,13 @@ def test_calibration_layer_builds_episode_fit_and_comparison() -> None:
 
     result = evaluate_state_space(snapshots, CONFIG, 'Convex Inflation / Funding Stress')
 
-    assert result['calibration']['sample_size'] >= 7
-    assert result['calibration']['episodes']
+    assert result['calibration']['method'] == 'configured latent-state monitor'
+    assert result['calibration']['blend_weight'] == 0.0
+    assert result['calibration']['base_blend_weight'] == 0.0
+    assert result['calibration']['trust_gate']['status'] == 'Disabled'
+    assert result['calibration']['transition']['quality'] == 'Configured'
+    assert result['calibration']['filter']['quality'] == 'Configured'
+    assert result['calibration']['iteration']['iterations_run'] == 0
+    assert result['calibration']['cluster_focus']['key'] in {'shipping', 'funding', 'plumbing', 'energy'}
+    assert result['calibration']['cluster_focus']['supporting_episodes']
     assert len(result['calibration']['configured_probability_history']) == len(result['probability_history'])
-    assert len(result['calibration']['calibrated_probability_history']) == len(result['probability_history'])
-    assert result['calibration']['quality'] in {'Strong', 'Usable', 'Fragile'}
-    assert result['calibration']['blend_weight'] > 0
-    assert result['calibration']['base_blend_weight'] >= result['calibration']['blend_weight']
-    cluster_focus = result['calibration']['cluster_focus']
-    assert cluster_focus['key'] in {'shipping', 'funding', 'plumbing', 'energy'}
-    assert cluster_focus['confidence'] >= 0
-    assert cluster_focus['supporting_episodes']
-    trust_gate = result['calibration']['trust_gate']
-    assert trust_gate['status'] in {'Open', 'Reduced', 'Tight', 'Unavailable'}
-    assert trust_gate['effective_blend_weight'] == result['calibration']['blend_weight']
-    assert trust_gate['base_blend_weight'] == result['calibration']['base_blend_weight']
-    transition = result['calibration']['transition']
-    assert transition['quality'] in {'Strong', 'Usable', 'Fragile', 'Unavailable'}
-    assert transition['blend_weight'] >= 0
-    assert 'persistence' in transition['summary'].lower()
-    assert transition['links']
-    assert transition['blended_persistence'] != 0
-
-    filter_fit = result['calibration']['filter']
-    assert filter_fit['quality'] in {'Strong', 'Usable', 'Fragile', 'Unavailable'}
-    assert filter_fit['blend_weight'] >= 0
-    assert 'noise' in filter_fit['summary'].lower()
-    assert filter_fit['blended_noise_floor'] > 0
-    assert filter_fit['blended_process_noise'] > 0
-    observation_conditioning = filter_fit['observation_conditioning']
-    assert observation_conditioning['cluster_key'] in {'shipping', 'funding', 'plumbing', 'energy'}
-    assert observation_conditioning['average_trust'] > 0
-    assert observation_conditioning['summary']
-
-    iteration = result['calibration']['iteration']
-    assert iteration['iterations_run'] >= 1
-    assert iteration['max_iterations'] >= iteration['iterations_run']
-    assert iteration['tolerance'] > 0
-    assert iteration['final_parameter_delta'] >= 0
-    assert iteration['path']
-    assert iteration['final_parameter_delta'] <= iteration['path'][0]['parameter_delta']
-
-    validation = result['calibration']['validation']
-    assert validation['configured_hit_rate'] >= 0
-    assert validation['calibrated_hit_rate'] >= 0
-    assert validation['iterative_hit_rate'] >= 0
-    assert validation['episodes']
-    assert validation['summary']

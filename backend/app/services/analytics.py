@@ -12,8 +12,11 @@ def clamp(value: float, lower: float = 0.0, upper: float = 100.0) -> float:
 def compute_percentile(window: Sequence[float], value: float) -> float:
     if not window:
         return 50.0
-    less_than = sum(1 for item in window if item <= value)
-    return round((less_than / len(window)) * 100.0, 2)
+    ordered = sorted(float(item) for item in window)
+    less = sum(1 for item in ordered if item < value)
+    equal = sum(1 for item in ordered if item == value)
+    rank = (less + 0.5 * equal) / len(ordered)
+    return round(rank * 100.0, 2)
 
 
 def normalize_value(value: float, threshold: dict[str, Any] | None) -> float | None:
@@ -26,11 +29,11 @@ def normalize_value(value: float, threshold: dict[str, Any] | None) -> float | N
 
     if direction == "high":
         span = critical - warning if critical != warning else 1.0
-        score = 50.0 + ((value - warning) / span) * 50.0
+        score = ((value - warning) / span) * 100.0
         return round(clamp(score), 2)
 
     span = warning - critical if critical != warning else 1.0
-    score = 50.0 + ((warning - value) / span) * 50.0
+    score = ((warning - value) / span) * 100.0
     return round(clamp(score), 2)
 
 
@@ -43,19 +46,23 @@ def determine_status(value: float, threshold: dict[str, Any] | None) -> str:
     direction = threshold.get("direction", "high")
 
     if direction == "high":
+        span = abs(critical - warning) if critical != warning else max(abs(warning), 1.0)
+        caution = warning - (0.5 * span)
         if value >= critical:
             return "red"
         if value >= warning:
             return "orange"
-        if value >= warning * 0.7:
+        if value >= caution:
             return "yellow"
         return "green"
 
+    span = abs(warning - critical) if critical != warning else max(abs(warning), 1.0)
+    caution = warning + (0.5 * span)
     if value <= critical:
         return "red"
     if value <= warning:
         return "orange"
-    if value <= warning * 0.7:
+    if value <= caution:
         return "yellow"
     return "green"
 

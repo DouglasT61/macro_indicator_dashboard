@@ -55,6 +55,8 @@ def test_state_space_flags_convex_when_oil_and_funding_stress_align() -> None:
     assert latent['oil_shock'] > 55
     assert latent['funding_stress'] > 50
     assert result['diagnostics']['confidence_band'] in {'Watch', 'Dominant', 'Fragile'}
+    assert result['calibration']['method'] == 'configured latent-state monitor'
+    assert result['calibration']['trust_gate']['status'] == 'Disabled'
 
 
 def test_state_space_break_probability_rises_when_plumbing_and_intervention_deteriorate() -> None:
@@ -105,7 +107,7 @@ def test_state_space_break_probability_rises_when_plumbing_and_intervention_dete
     assert stressed_result['diagnostics']['dominant_regime_flips'] >= 0
 
 
-def test_state_space_trust_gate_reduces_blend_when_validation_hit_rate_lags() -> None:
+def test_state_space_uses_configured_layer_without_live_calibration_blend() -> None:
     start = datetime(2026, 3, 1, tzinfo=timezone.utc)
     snapshots = {
         'auction_stress': {'history': _series(start, [65, 70, 74, 78, 82, 86, 88])},
@@ -129,12 +131,18 @@ def test_state_space_trust_gate_reduces_blend_when_validation_hit_rate_lags() ->
 
     result = evaluate_state_space(snapshots, CONFIG, 'Sticky Inflation')
 
-    assert result['current_regime'] == 'sticky'
+    assert result['current_regime'] == 'convex'
     assert result['diagnostics']['confidence_band'] == 'Fragile'
-    assert result['calibration']['trust_gate']['status'] in {'Open', 'Reduced'}
+    assert result['calibration']['method'] == 'configured latent-state monitor'
+    assert result['calibration']['blend_weight'] == 0.0
+    assert result['calibration']['base_blend_weight'] == 0.0
+    assert result['calibration']['trust_gate']['status'] == 'Disabled'
     assert result['calibration']['cluster_focus']['key'] in {'shipping', 'energy', 'funding', 'plumbing'}
     assert result['calibration']['cluster_focus']['confidence'] >= 0
-    assert result['disagreement_history'][-1]['aligned_with_rule'] is True
+    assert result['calibration']['transition']['quality'] == 'Configured'
+    assert result['calibration']['filter']['quality'] == 'Configured'
+    assert result['calibration']['iteration']['iterations_run'] == 0
+    assert result['disagreement_history'][-1]['aligned_with_rule'] is False
 
 
 

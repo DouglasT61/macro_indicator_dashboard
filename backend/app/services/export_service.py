@@ -22,7 +22,7 @@ def build_daily_summary_markdown(db: Session) -> str:
         '',
         f"Generated: {overview['generated_at'].isoformat()}",
         f"Current rule regime: **{regime['current_regime']}**",
-        f"Current econometric regime: **{state_space['current_regime'].replace('_', ' ').title()}** ({state_space['current_probability']:.1f}%)",
+        f"Current latent-state regime: **{state_space['current_regime'].replace('_', ' ').title()}** ({state_space['current_probability']:.1f}% relative confidence)",
         '',
         '## Executive Interpretation',
         f"- Ordering discipline: {ordering['summary']}",
@@ -35,7 +35,7 @@ def build_daily_summary_markdown(db: Session) -> str:
         f"- Convex Inflation / Funding Stress: {regime['convex']['score']:.1f} ({regime['convex']['change_7d']:+.1f} over 7d)",
         f"- Break / Repression: {regime['break']['score']:.1f} ({regime['break']['change_7d']:+.1f} over 7d)",
         '',
-        '## Econometric Layer',
+        '## Latent-State Layer',
         f"- Agreement with rule engine: {'yes' if state_space['rule_agreement'] else 'no'}",
         f"- Observation coverage: {state_space['observation_coverage']:.1f}%",
         f"- Innovation stress: {state_space['innovation_stress']:.2f}",
@@ -43,10 +43,10 @@ def build_daily_summary_markdown(db: Session) -> str:
         f"- Tracking quality: {diagnostics['tracking_quality']}",
         f"- Regime flips in sample: {diagnostics['dominant_regime_flips']}",
         '',
-        '## Calibration Layer',
+        '## Model Notes',
         f"- {calibration['summary']}",
-        f"- Configured regime: {calibration['configured_regime'].replace('_', ' ').title()} {calibration['configured_probability']:.1f}%",
-        f"- Calibrated regime: {calibration['calibrated_regime'].replace('_', ' ').title()} {calibration['calibrated_probability']:.1f}%",
+        f"- Configured regime: {calibration['configured_regime'].replace('_', ' ').title()} {calibration['configured_probability']:.1f}% relative confidence",
+        f"- Comparison regime: {calibration['calibrated_regime'].replace('_', ' ').title()} {calibration['calibrated_probability']:.1f}% relative confidence",
         f"- Episode subfamily focus: {calibration['cluster_focus']['summary']}",
         f"- Validation trust gate: {calibration['trust_gate']['summary']}",
         f"- Transition fit: {calibration['transition']['summary']}",
@@ -57,13 +57,13 @@ def build_daily_summary_markdown(db: Session) -> str:
         f"- Iterative estimation: {calibration['iteration']['summary']}",
         f"- Validation: {calibration['validation']['summary']}",
         '',
-        '## Forecast Layer',
+        '## Forward Confidence',
         f"- {forecast['summary']}",
         f"- Forecast conditioning: {forecast['conditioning_summary']}",
     ]
     for horizon in forecast['horizons']:
         lines.append(
-            f"- {horizon['days']}d: {horizon['dominant_regime'].replace('_', ' ').title()} {horizon['dominant_probability']:.1f}% "
+            f"- {horizon['days']}d: {horizon['dominant_regime'].replace('_', ' ').title()} {horizon['dominant_probability']:.1f}% relative confidence "
             f"(Sticky {horizon['sticky']:.1f} / Convex {horizon['convex']:.1f} / Break {horizon['break']:.1f})"
         )
 

@@ -65,7 +65,8 @@ def _evaluate_propagation(
     activation_floor = float(propagation_config.get('activation_floor', 45.0))
     memory = float(propagation_config.get('memory', 0.35))
     feedback_gain = float(propagation_config.get('feedback_gain', 0.24))
-    synergy_gain = float(propagation_config.get('synergy_gain', 0.22))
+    max_node_boost = float(propagation_config.get('max_node_boost', 12.0))
+    regime_bonus_cap = float(propagation_config.get('regime_bonus_cap', max_node_boost))
     iterations = int(propagation_config.get('iterations', 4))
 
     edges_by_target: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -73,23 +74,32 @@ def _evaluate_propagation(
         edges_by_target[edge['to']].append(edge)
 
     current_scores = {node: state['base_score'] for node, state in base_states.items()}
+    current_amplification = {node: 0.0 for node in base_states}
     latest_upstream: dict[str, list[dict[str, Any]]] = {node: [] for node in base_states}
     latest_incoming: dict[str, float] = {node: 0.0 for node in base_states}
     iteration_history: list[dict[str, Any]] = []
 
     for iteration in range(iterations):
         next_scores: dict[str, float] = {}
+        next_amplification: dict[str, float] = {}
         next_upstream: dict[str, list[dict[str, Any]]] = {}
         next_incoming: dict[str, float] = {}
         for node, state in base_states.items():
             base_score = float(state['base_score'])
             upstream: list[dict[str, Any]] = []
+            weighted_signal = 0.0
+            total_weight = 0.0
             for edge in edges_by_target.get(node, []):
                 source = edge['from']
                 source_score = current_scores.get(source, base_states.get(source, {}).get('base_score', 0.0))
-                pressure = max(0.0, source_score - activation_floor) * float(edge['weight'])
-                if pressure <= 0:
+                weight = float(edge['weight'])
+                activation_span = max(1.0, 100.0 - activation_floor)
+                excess_ratio = clamp((source_score - activation_floor) / activation_span, 0.0, 1.0)
+                if excess_ratio <= 0:
                     continue
+                pressure = excess_ratio * 100.0
+                weighted_signal += pressure * weight
+                total_weight += weight
                 upstream.append(
                     {
                         'source': source,
@@ -97,16 +107,19 @@ def _evaluate_propagation(
                         'source_score': round(source_score, 2),
                     }
                 )
-            incoming_pressure = sum(item['pressure'] for item in upstream)
-            direct_component = base_score * (1.0 - memory)
-            memory_component = current_scores.get(node, base_score) * memory
-            feedback_component = incoming_pressure * feedback_gain
-            synergy_component = max(0.0, base_score - activation_floor) * incoming_pressure / 100.0 * synergy_gain
-            propagated_score = clamp(direct_component + memory_component + feedback_component + synergy_component)
+            incoming_pressure = (weighted_signal / total_weight) if total_weight > 0 else 0.0
+            target_boost = min(max_node_boost, incoming_pressure * feedback_gain)
+            amplification = min(
+                max_node_boost,
+                (current_amplification.get(node, 0.0) * memory) + (target_boost * (1.0 - memory)),
+            )
+            propagated_score = clamp(base_score + amplification)
             next_scores[node] = round(propagated_score, 2)
+            next_amplification[node] = round(amplification, 2)
             next_incoming[node] = round(incoming_pressure, 2)
             next_upstream[node] = sorted(upstream, key=lambda item: item['pressure'], reverse=True)[:3]
         current_scores = next_scores
+        current_amplification = next_amplification
         latest_incoming = next_incoming
         latest_upstream = next_upstream
         iteration_history.append({'iteration': iteration + 1, 'states': current_scores.copy()})
@@ -115,7 +128,7 @@ def _evaluate_propagation(
     for node, state in base_states.items():
         base_score = float(state['base_score'])
         propagated_score = float(current_scores.get(node, base_score))
-        amplification = round(max(0.0, propagated_score - base_score), 2)
+        amplification = round(float(current_amplification.get(node, max(0.0, propagated_score - base_score))), 2)
         node_states[node] = {
             'base_score': round(base_score, 2),
             'propagated_score': round(propagated_score, 2),
@@ -129,12 +142,13 @@ def _evaluate_propagation(
     for regime_name, sensitivities in (propagation_config.get('regime_sensitivity') or {}).items():
         total = 0.0
         drivers: list[dict[str, Any]] = []
+        weight_total = sum(float(weight) for weight in sensitivities.values()) or 1.0
         for node, weight in sensitivities.items():
             state = node_states.get(node)
             if state is None:
                 continue
             amplification = float(state['amplification'])
-            contribution = amplification * float(weight)
+            contribution = amplification * (float(weight) / weight_total)
             total += contribution
             top_upstream = ', '.join(_labelize(item['source']) for item in state['top_upstream'][:2])
             if not top_upstream:
@@ -149,7 +163,7 @@ def _evaluate_propagation(
                 }
             )
         regime_effects[regime_name] = {
-            'total': round(total, 2),
+            'total': round(min(regime_bonus_cap, total), 2),
             'drivers': sorted(drivers, key=lambda item: item['contribution'], reverse=True),
         }
 
@@ -170,14 +184,17 @@ def evaluate_regimes(
     drivers_by_regime: dict[str, list[dict[str, Any]]] = {}
 
     for regime_name, rules in config['regimes'].items():
-        total = 0.0
+        direct_total = 0.0
+        total_weight = 0.0
         drivers: list[dict[str, Any]] = []
         for rule in rules:
             indicator = rule['indicator']
             value = float(merged.get(indicator, 0.0))
             component = _component_score(indicator, value, rule, thresholds)
-            contribution = component * float(rule['weight'])
-            total += contribution
+            weight = float(rule['weight'])
+            contribution = component * weight
+            direct_total += contribution
+            total_weight += weight
             drivers.append(
                 {
                     'indicator': indicator,
@@ -189,10 +206,21 @@ def evaluate_regimes(
             )
 
         regime_propagation = propagation.get('regime_effects', {}).get(regime_name, {'total': 0.0, 'drivers': []})
-        total += float(regime_propagation.get('total', 0.0))
-        drivers.extend(regime_propagation.get('drivers', []))
+        direct_score = (direct_total / total_weight) if total_weight > 0 else 0.0
+        propagation_bonus = float(regime_propagation.get('total', 0.0))
+        total = clamp(direct_score + propagation_bonus)
+        normalized_direct_drivers = []
+        for driver in drivers:
+            normalized_driver = dict(driver)
+            normalized_driver['contribution'] = round(
+                (driver['score'] * float(next(rule['weight'] for rule in rules if rule['indicator'] == driver['indicator'])) / total_weight)
+                if total_weight > 0 else 0.0,
+                2,
+            )
+            normalized_direct_drivers.append(normalized_driver)
+        all_drivers = normalized_direct_drivers + regime_propagation.get('drivers', [])
         scores[regime_name] = round(total, 2)
-        drivers_by_regime[regime_name] = sorted(drivers, key=lambda item: item['contribution'], reverse=True)
+        drivers_by_regime[regime_name] = sorted(all_drivers, key=lambda item: item['contribution'], reverse=True)
 
     current_regime = max(scores, key=scores.get)
     return {

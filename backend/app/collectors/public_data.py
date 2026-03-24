@@ -1940,8 +1940,9 @@ def _percentile_rank(values: list[float], current: float, *, inverse: bool = Fal
     if len(values) == 1:
         return 50.0
     ordered = sorted(values)
-    index = ordered.index(current)
-    rank = index / (len(ordered) - 1)
+    less = sum(1 for item in ordered if item < current)
+    equal = sum(1 for item in ordered if item == current)
+    rank = (less + 0.5 * equal) / len(ordered)
     percentile = rank * 100.0
     return 100.0 - percentile if inverse else percentile
 
@@ -1965,15 +1966,21 @@ def _compute_auction_stress_histories(rows: list[dict[str, str]], start: date, e
         indirect_accepted = _safe_float(row.get('indirect_bidder_accepted'))
         direct_accepted = _safe_float(row.get('direct_bidder_accepted'))
         dealer_accepted = _safe_float(row.get('primary_dealer_accepted'))
+        allotment_total = sum(
+            amount
+            for amount in [indirect_accepted, direct_accepted, dealer_accepted]
+            if amount is not None and amount > 0
+        )
+        share_denominator = allotment_total or offering_amt
         indirect_share = None
         direct_share = None
         dealer_share = None
-        if offering_amt and offering_amt > 0 and indirect_accepted is not None:
-            indirect_share = indirect_accepted / offering_amt
-        if offering_amt and offering_amt > 0 and direct_accepted is not None:
-            direct_share = direct_accepted / offering_amt
-        if offering_amt and offering_amt > 0 and dealer_accepted is not None:
-            dealer_share = dealer_accepted / offering_amt
+        if share_denominator and share_denominator > 0 and indirect_accepted is not None:
+            indirect_share = indirect_accepted / share_denominator
+        if share_denominator and share_denominator > 0 and direct_accepted is not None:
+            direct_share = direct_accepted / share_denominator
+        if share_denominator and share_denominator > 0 and dealer_accepted is not None:
+            dealer_share = dealer_accepted / share_denominator
 
         auctions.append(
             {
@@ -2023,6 +2030,7 @@ def _compute_auction_stress_histories(rows: list[dict[str, str]], start: date, e
         sponsorship_points.append((item['auction_date'], sponsorship_score))
 
     issuance_points: list[tuple[date, float]] = []
+    issuance_gaps: list[float] = []
     ordered_auctions = sorted(auctions, key=lambda item: item['auction_date'])  # type: ignore[arg-type]
     for item in ordered_auctions:
         auction_day = item['auction_date']
@@ -2050,7 +2058,9 @@ def _compute_auction_stress_histories(rows: list[dict[str, str]], start: date, e
                 long_end_amt += offering_amt
         front_end_share = front_end_amt / total_amt
         long_end_share = long_end_amt / total_amt if total_amt > 0 else 0.0
-        issuance_stress = max(0.0, min(100.0, 50.0 + ((front_end_share - long_end_share) * 100.0)))
+        issuance_gap = front_end_share - long_end_share
+        issuance_gaps.append(issuance_gap)
+        issuance_stress = _percentile_rank(issuance_gaps, issuance_gap)
         issuance_points.append((auction_day, round(issuance_stress, 4)))
 
     clearing_history = _densify_daily(clearing_points, start, end)

@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.alerts.engine import build_state_space_alerts
 from app.models import Alert, EventAnnotation, IndicatorSeries, IndicatorValue, ManualInput, RegimeScore
 from app.regime_engine.config_loader import load_effective_config
-from app.services.analytics import determine_status, rolling_change
+from app.services.analytics import determine_status, normalize_value, rolling_change
 from app.services.backtest_service import build_backtest_overview
 from app.services.seed_service import seed_demo_data
 from app.services.settings_service import get_alerts_enabled, get_source_status
@@ -145,6 +145,14 @@ CAUSAL_LABELS = {
     'geopolitical_trigger_stress': 'Geopolitical trigger stress',
     'external_importer_stress': 'External importer stress',
     'household_tax_stress': 'Household / tax stress',
+}
+
+SOURCE_CONFIDENCE = {
+    'live': 1.0,
+    'proxy': 0.85,
+    'auto': 0.75,
+    'manual': 0.65,
+    'demo': 0.0,
 }
 
 
@@ -439,21 +447,21 @@ def _format_stage_label(score: float) -> str:
 
 
 def _indicator_score(snapshot: dict[str, Any]) -> float:
-    if snapshot.get('normalized_value') is not None:
-        return float(snapshot['normalized_value'])
-    warning = snapshot.get('warning_threshold')
-    critical = snapshot.get('critical_threshold')
-    if warning is not None and critical is not None:
-        raw = float(snapshot['latest_value'])
+    source_class = snapshot.get('source_class') or 'demo'
+    confidence = SOURCE_CONFIDENCE.get(source_class, 0.0)
+    normalized = snapshot.get('normalized_value')
+    if normalized is None:
+        warning = snapshot.get('warning_threshold')
+        critical = snapshot.get('critical_threshold')
         direction = snapshot.get('direction', 'high')
-        if direction == 'high':
-            if critical == warning:
-                return 100.0 if raw >= critical else 0.0
-            return max(0.0, min(100.0, 50.0 + ((raw - warning) / (critical - warning)) * 50.0))
-        if warning == critical:
-            return 100.0 if raw <= critical else 0.0
-        return max(0.0, min(100.0, 50.0 + ((warning - raw) / (warning - critical)) * 50.0))
-    return 0.0
+        if warning is not None and critical is not None:
+            normalized = normalize_value(
+                float(snapshot['latest_value']),
+                {'warning': warning, 'critical': critical, 'direction': direction},
+            )
+    if normalized is None:
+        return 0.0
+    return round(float(normalized) * confidence, 2)
 
 
 def _build_stage_scores(snapshots: dict[str, dict[str, Any]]) -> dict[str, float]:
@@ -629,19 +637,14 @@ def _build_interpretation_chart(snapshots: dict[str, dict[str, Any]]) -> dict[st
             warning = snapshot['warning_threshold']
             critical = snapshot['critical_threshold']
             direction = snapshot['direction']
-            normalized = 50.0
+            normalized = 0.0
             if warning is not None and critical is not None:
-                if direction == 'high':
-                    if critical == warning:
-                        normalized = 100.0 if value >= critical else 0.0
-                    else:
-                        normalized = ((value - warning) / (critical - warning)) * 50.0 + 50.0
-                else:
-                    if critical == warning:
-                        normalized = 100.0 if value <= critical else 0.0
-                    else:
-                        normalized = ((warning - value) / (warning - critical)) * 50.0 + 50.0
-            normalized = max(0.0, min(100.0, normalized))
+                normalized = normalize_value(
+                    value,
+                    {'warning': warning, 'critical': critical, 'direction': direction},
+                ) or 0.0
+            confidence = SOURCE_CONFIDENCE.get(snapshot.get('source_class') or 'demo', 0.0)
+            normalized = round(normalized * confidence, 2)
             current[key] = {'normalized_value': normalized}
         sticky_score = _avg_normalized(current, sticky_keys)
         convex_score = _avg_normalized(current, convex_keys)

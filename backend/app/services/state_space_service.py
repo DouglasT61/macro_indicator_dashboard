@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta
-from math import exp
 from typing import Any
 
 from app.services.analytics import clamp, normalize_value
@@ -92,13 +91,139 @@ def _diag(values: list[float]) -> list[list[float]]:
 
 
 def _softmax(scores: dict[str, float], temperature: float = 18.0) -> dict[str, float]:
-    scaled = {key: exp(max(-50.0, min(50.0, value / temperature))) for key, value in scores.items()}
-    total = sum(scaled.values()) or 1.0
-    return {key: round((value / total) * 100.0, 2) for key, value in scaled.items()}
+    del temperature
+    positive_scores = {key: max(0.0, float(value)) for key, value in scores.items()}
+    total = sum(positive_scores.values())
+    if total <= 0:
+        equal_share = round(100.0 / max(1, len(positive_scores)), 2)
+        return {key: equal_share for key in positive_scores}
+    return {key: round((value / total) * 100.0, 2) for key, value in positive_scores.items()}
 
 
 def _dominant_regime(probabilities: dict[str, float]) -> str:
     return max(REGIME_ORDER, key=lambda key: float(probabilities[key]))
+
+
+def _empty_state_space(rule_regime: str, message: str) -> dict[str, Any]:
+    fallback_regime = 'break' if rule_regime.lower().startswith('break') else rule_regime.lower().split()[0]
+    return {
+        'current_regime': fallback_regime,
+        'current_probability': 0.0,
+        'rule_agreement': True,
+        'agreement_summary': message,
+        'observation_coverage': 0.0,
+        'innovation_stress': 0.0,
+        'states': [],
+        'state_history': [],
+        'probability_history': [],
+        'diagnostics': {
+            'recent_disagreement_streak': 0,
+            'dominant_regime_flips': 0,
+            'max_probability_gap': 0.0,
+            'latest_probability_gap': 0.0,
+            'confidence_band': 'Unavailable',
+            'tracking_quality': 'No aligned history',
+        },
+        'disagreement_history': [],
+        'forecast': {
+            'summary': 'No forward confidence path is available because aligned measurement history is missing.',
+            'conditioning_cluster': 'unavailable',
+            'conditioning_label': 'Unavailable',
+            'conditioning_confidence': 0.0,
+            'conditioning_summary': 'Forecast conditioning unavailable because aligned measurement history is missing.',
+            'baseline_path': [],
+            'horizons': [],
+            'scenarios': [],
+        },
+        'calibration': {
+            'method': 'configured latent-state monitor',
+            'sample_size': 0,
+            'fit_rmse': 0.0,
+            'quality': 'Unavailable',
+            'blend_weight': 0.0,
+            'base_blend_weight': 0.0,
+            'summary': 'Historical fit layers are disabled because aligned measurement history is missing.',
+            'configured_regime': fallback_regime,
+            'configured_probability': 0.0,
+            'calibrated_regime': fallback_regime,
+            'calibrated_probability': 0.0,
+            'configured_probability_history': [],
+            'calibrated_probability_history': [],
+            'episodes': [],
+            'cluster_focus': {
+                'key': 'unavailable',
+                'label': 'Unavailable',
+                'confidence': 0.0,
+                'summary': 'Episode subfamily classification unavailable because aligned measurement history is missing.',
+                'supporting_episodes': [],
+            },
+            'trust_gate': {
+                'status': 'Disabled',
+                'base_blend_weight': 0.0,
+                'effective_blend_weight': 0.0,
+                'guardrail_factor': 0.0,
+                'configured_avg_rmse': 0.0,
+                'iterative_avg_rmse': 0.0,
+                'configured_hit_rate': 0.0,
+                'iterative_hit_rate': 0.0,
+                'summary': 'Historical validation guardrails are disabled in the configured latent-state monitor.',
+            },
+            'transition': {
+                'fit_rmse': 0.0,
+                'quality': 'Unavailable',
+                'blend_weight': 0.0,
+                'summary': 'Configured transition matrix unavailable because aligned measurement history is missing.',
+                'configured_persistence': 0.0,
+                'fitted_persistence': 0.0,
+                'blended_persistence': 0.0,
+                'drift_strength': 0.0,
+                'links': [],
+            },
+            'filter': {
+                'fit_rmse': 0.0,
+                'quality': 'Unavailable',
+                'blend_weight': 0.0,
+                'summary': 'Configured observation filter unavailable because aligned measurement history is missing.',
+                'configured_noise_floor': 0.0,
+                'fitted_noise_floor': 0.0,
+                'blended_noise_floor': 0.0,
+                'configured_process_noise': 0.0,
+                'fitted_process_noise': 0.0,
+                'blended_process_noise': 0.0,
+                'observations': [],
+                'observation_conditioning': {
+                    'cluster_key': 'unavailable',
+                    'cluster_label': 'Unavailable',
+                    'cluster_confidence': 0.0,
+                    'regime_key': fallback_regime,
+                    'regime_probability': 0.0,
+                    'average_trust': 1.0,
+                    'boosted_indicators': [],
+                    'reduced_indicators': [],
+                    'summary': 'Observation conditioning unavailable because aligned measurement history is missing.',
+                },
+            },
+            'iteration': {
+                'iterations_run': 0,
+                'max_iterations': 0,
+                'tolerance': 0.0,
+                'converged': False,
+                'final_parameter_delta': 0.0,
+                'summary': 'Iterative estimation is disabled in the configured latent-state monitor.',
+                'path': [],
+            },
+            'validation': {
+                'summary': 'Historical validation is disabled in the configured latent-state monitor.',
+                'configured_hit_rate': 0.0,
+                'calibrated_hit_rate': 0.0,
+                'iterative_hit_rate': 0.0,
+                'configured_avg_rmse': 0.0,
+                'calibrated_avg_rmse': 0.0,
+                'iterative_avg_rmse': 0.0,
+                'episodes': [],
+            },
+        },
+    }
 
 
 def _build_measurement_histories(
@@ -832,7 +957,7 @@ def _run_filter(
                 for col in range(len(state_keys))
             )
             trust_multiplier = float((observation_trust or {}).get(indicator, 1.0))
-            measurement_noise = (measurement_noise_floor / max(0.45, trust_multiplier)) + max(0.0, 100.0 - abs(observed_value - 50.0)) * 0.1
+            measurement_noise = measurement_noise_floor / max(0.55, trust_multiplier)
             innovation_variance = projected_variance + measurement_noise
             if innovation_variance <= 0:
                 continue
@@ -1199,7 +1324,7 @@ def _project_probabilities(
     transition_intercepts: list[float] | None,
     state_config: dict[str, Any],
     latest_timestamp: datetime,
-    calibration_coefficients: dict[str, list[float]],
+    calibration_coefficients: dict[str, list[float]] | None,
     blend_weight: float,
     impulse: list[float] | None = None,
     steps: int = 10,
@@ -1217,9 +1342,12 @@ def _project_probabilities(
             applied = [impulse_vector[index] * (decay ** (step - 1)) for index in range(len(state))]
             state = [clamp(state[index] + applied[index]) for index in range(len(state))]
         configured_scores = _configured_regime_scores(state, state_config)
-        calibrated_scores = _predict_regime_scores_from_coefficients(state, calibration_coefficients)
-        blended_scores = _blend_scores(configured_scores, calibrated_scores, blend_weight)
-        probabilities = _softmax(blended_scores)
+        if calibration_coefficients:
+            comparison_scores = _predict_regime_scores_from_coefficients(state, calibration_coefficients)
+            output_scores = _blend_scores(configured_scores, comparison_scores, blend_weight)
+        else:
+            output_scores = configured_scores
+        probabilities = _softmax(output_scores)
         path.append(
             {
                 'step': step,
@@ -1236,7 +1364,7 @@ def _build_forecast(
     transition_intercepts: list[float] | None,
     state_config: dict[str, Any],
     latest_timestamp: datetime,
-    calibration_coefficients: dict[str, list[float]],
+    calibration_coefficients: dict[str, list[float]] | None,
     blend_weight: float,
     state_keys: list[str],
     cluster_focus: dict[str, Any],
@@ -1315,10 +1443,10 @@ def _build_forecast(
     baseline_label = REGIME_LABELS.get(baseline_terminal['dominant_regime'], baseline_terminal['dominant_regime'].title())
     summary = (
         f"{conditioning_label} conditioning is active at {conditioning_confidence * 100:.0f}% confidence. "
-        f"Baseline 10-day path keeps {baseline_label} as the lead regime at {baseline_terminal['dominant_probability']:.1f}%. "
-        f"Largest stressed-scenario break risk comes from {scenarios[0]['label']} at {scenarios[0]['break']:.1f}% break probability."
+        f"Baseline 10-day path keeps {baseline_label} as the lead regime at {baseline_terminal['dominant_probability']:.1f}% relative confidence. "
+        f"Largest stressed-scenario break signal comes from {scenarios[0]['label']} at {scenarios[0]['break']:.1f}% break confidence."
         if scenarios
-        else f"{conditioning_label} conditioning is active at {conditioning_confidence * 100:.0f}% confidence. Baseline 10-day path keeps {baseline_label} as the lead regime at {baseline_terminal['dominant_probability']:.1f}%."
+        else f"{conditioning_label} conditioning is active at {conditioning_confidence * 100:.0f}% confidence. Baseline 10-day path keeps {baseline_label} as the lead regime at {baseline_terminal['dominant_probability']:.1f}% relative confidence."
     )
     return {
         'summary': summary,
@@ -1345,125 +1473,7 @@ def evaluate_state_space(
 
     timestamps, measurement_histories = _build_measurement_histories(snapshots, config['thresholds'], measurements)
     if not timestamps:
-        fallback_regime = rule_regime.lower().split()[0]
-        return {
-            'current_regime': fallback_regime,
-            'current_probability': 0.0,
-            'rule_agreement': True,
-            'agreement_summary': 'Econometric layer unavailable because no aligned measurement history was found.',
-            'observation_coverage': 0.0,
-            'innovation_stress': 0.0,
-            'states': [],
-            'state_history': [],
-            'probability_history': [],
-            'diagnostics': {
-                'recent_disagreement_streak': 0,
-                'dominant_regime_flips': 0,
-                'max_probability_gap': 0.0,
-                'latest_probability_gap': 0.0,
-                'confidence_band': 'Unavailable',
-                'tracking_quality': 'No aligned history',
-            },
-            'disagreement_history': [],
-            'forecast': {
-                'summary': 'No forecast available because aligned measurement history is missing.',
-                'conditioning_cluster': 'unavailable',
-                'conditioning_label': 'Unavailable',
-                'conditioning_confidence': 0.0,
-                'conditioning_summary': 'Forecast conditioning unavailable because aligned measurement history is missing.',
-                'baseline_path': [],
-                'horizons': [],
-                'scenarios': [],
-            },
-            'calibration': {
-                'method': 'ridge fit on historical episode library',
-                'sample_size': 0,
-                'fit_rmse': 0.0,
-                'quality': 'Unavailable',
-                'blend_weight': 0.0,
-                'base_blend_weight': 0.0,
-                'summary': 'Calibration unavailable because aligned measurement history is missing.',
-                'configured_regime': fallback_regime,
-                'configured_probability': 0.0,
-                'calibrated_regime': fallback_regime,
-                'calibrated_probability': 0.0,
-                'configured_probability_history': [],
-                'calibrated_probability_history': [],
-                'episodes': [],
-                'cluster_focus': {
-                    'key': 'unavailable',
-                    'label': 'Unavailable',
-                    'confidence': 0.0,
-                    'summary': 'Episode subfamily classification unavailable because aligned measurement history is missing.',
-                    'supporting_episodes': [],
-                },
-                'trust_gate': {
-                    'status': 'Unavailable',
-                    'base_blend_weight': 0.0,
-                    'effective_blend_weight': 0.0,
-                    'guardrail_factor': 0.0,
-                    'configured_avg_rmse': 0.0,
-                    'iterative_avg_rmse': 0.0,
-                    'configured_hit_rate': 0.0,
-                    'iterative_hit_rate': 0.0,
-                    'summary': 'Validation trust gate unavailable because aligned measurement history is missing.',
-                },
-                'transition': {
-                    'fit_rmse': 0.0,
-                    'quality': 'Unavailable',
-                    'blend_weight': 0.0,
-                    'summary': 'Transition calibration unavailable because aligned measurement history is missing.',
-                    'configured_persistence': 0.0,
-                    'fitted_persistence': 0.0,
-                    'blended_persistence': 0.0,
-                    'drift_strength': 0.0,
-                    'links': [],
-                },
-                'filter': {
-                    'fit_rmse': 0.0,
-                    'quality': 'Unavailable',
-                    'blend_weight': 0.0,
-                    'summary': 'Filter calibration unavailable because aligned measurement history is missing.',
-                    'configured_noise_floor': 0.0,
-                    'fitted_noise_floor': 0.0,
-                    'blended_noise_floor': 0.0,
-                    'configured_process_noise': 0.0,
-                    'fitted_process_noise': 0.0,
-                    'blended_process_noise': 0.0,
-                    'observations': [],
-                    'observation_conditioning': {
-                        'cluster_key': 'unavailable',
-                        'cluster_label': 'Unavailable',
-                        'cluster_confidence': 0.0,
-                        'regime_key': fallback_regime,
-                        'regime_probability': 0.0,
-                        'average_trust': 1.0,
-                        'boosted_indicators': [],
-                        'reduced_indicators': [],
-                        'summary': 'Observation conditioning unavailable because aligned measurement history is missing.',
-                    },
-                },
-                'iteration': {
-                    'iterations_run': 0,
-                    'max_iterations': 0,
-                    'tolerance': 0.0,
-                    'converged': False,
-                    'final_parameter_delta': 0.0,
-                    'summary': 'Iterative estimation unavailable because aligned measurement history is missing.',
-                    'path': [],
-                },
-                'validation': {
-                    'summary': 'Validation unavailable because aligned measurement history is missing.',
-                    'configured_hit_rate': 0.0,
-                    'calibrated_hit_rate': 0.0,
-                    'iterative_hit_rate': 0.0,
-                    'configured_avg_rmse': 0.0,
-                    'calibrated_avg_rmse': 0.0,
-                    'iterative_avg_rmse': 0.0,
-                    'episodes': [],
-                },
-            },
-        }
+        return _empty_state_space(rule_regime, 'Latent-state layer unavailable because no aligned measurement history was found.')
 
     observations_by_time = _carry_forward_observations(timestamps, measurement_histories)
     configured_transition = [[float(cell) for cell in row] for row in state_config['transition_matrix']]
@@ -1471,51 +1481,27 @@ def evaluate_state_space(
     initial_state = [float(value) for value in state_config['initial_state']]
     initial_covariance = [float(value) for value in state_config['initial_covariance']]
     measurement_noise_floor = float(state_config.get('measurement_noise_floor', 25.0))
-
-    iterative_estimation = _iterate_estimation(
+    cluster_focus = infer_episode_cluster(extract_snapshot_profile(snapshots))
+    initial_pass = _run_filter(
         timestamps,
         observations_by_time,
         state_keys,
-        state_config,
         configured_transition,
+        None,
         configured_process_noise,
         initial_state,
         initial_covariance,
         measurement_noise_floor,
         measurements,
-    )
-
-    state_history = iterative_estimation['final_pass']['state_history']
-    configured_scores_history = iterative_estimation['final_pass']['configured_scores_history']
-    configured_probability_history = iterative_estimation['final_pass']['configured_probability_history']
-    innovations = iterative_estimation['final_pass']['innovations']
-    latest_measurements = iterative_estimation['final_pass']['latest_measurements']
-    latest_measurement_timestamp = iterative_estimation['final_pass']['latest_measurement_timestamp']
-    covariance = iterative_estimation['final_pass']['covariance']
-    blended_measurements = iterative_estimation['measurements']
-    blended_transition = iterative_estimation['transition']
-    blended_intercepts = iterative_estimation['transition_intercepts']
-
-    latest_states = state_history[-1]
-    latest_state_vector = [float(latest_states[key]) for key in state_keys]
-    calibration, calibration_coefficients, probability_history, blend_weight = _build_calibration(
-        snapshots,
-        state_keys,
-        blended_measurements,
         state_config,
-        state_history,
-        configured_probability_history,
-        configured_scores_history,
-        latest_state_vector,
     )
-
-    initial_probabilities = probability_history[-1]
+    initial_probabilities = initial_pass['configured_probability_history'][-1]
     initial_regime = _dominant_regime({key: float(initial_probabilities[key]) for key in REGIME_ORDER})
     initial_probability = round(float(initial_probabilities[initial_regime]), 2)
     observation_context = _build_observation_context(
-        blended_measurements,
+        measurements,
         state_config,
-        calibration['cluster_focus'],
+        cluster_focus,
         initial_regime,
         initial_probability,
     )
@@ -1523,72 +1509,24 @@ def evaluate_state_space(
         timestamps,
         observations_by_time,
         state_keys,
-        blended_transition,
-        blended_intercepts,
-        iterative_estimation['process_noise'],
+        configured_transition,
+        None,
+        configured_process_noise,
         initial_state,
         initial_covariance,
-        iterative_estimation['noise_floor'],
-        blended_measurements,
+        measurement_noise_floor,
+        measurements,
         state_config,
         observation_trust=observation_context['indicator_trust'],
     )
     state_history = conditioned_pass['state_history']
     configured_scores_history = conditioned_pass['configured_scores_history']
-    configured_probability_history = conditioned_pass['configured_probability_history']
+    probability_history = conditioned_pass['configured_probability_history']
     innovations = conditioned_pass['innovations']
     latest_measurements = conditioned_pass['latest_measurements']
     latest_measurement_timestamp = conditioned_pass['latest_measurement_timestamp']
     covariance = conditioned_pass['covariance']
     latest_states = state_history[-1]
-    latest_state_vector = [float(latest_states[key]) for key in state_keys]
-    calibration, calibration_coefficients, probability_history, blend_weight = _build_calibration(
-        snapshots,
-        state_keys,
-        blended_measurements,
-        state_config,
-        state_history,
-        configured_probability_history,
-        configured_scores_history,
-        latest_state_vector,
-    )
-
-    calibration['transition'] = iterative_estimation['transition_overview']
-    calibration['filter'] = iterative_estimation['filter_overview']
-    calibration['filter']['observation_conditioning'] = {
-        'cluster_key': observation_context['cluster_key'],
-        'cluster_label': observation_context['cluster_label'],
-        'cluster_confidence': observation_context['cluster_confidence'],
-        'regime_key': observation_context['regime_key'],
-        'regime_probability': observation_context['regime_probability'],
-        'average_trust': observation_context['average_trust'],
-        'boosted_indicators': observation_context['boosted_indicators'],
-        'reduced_indicators': observation_context['reduced_indicators'],
-        'summary': observation_context['summary'],
-    }
-    calibration['iteration'] = iterative_estimation['iteration_overview']
-    calibration['validation'] = _build_validation(state_keys, blended_measurements, state_config)
-    trust_gate, effective_blend_weight = _build_validation_trust_gate(
-        calibration['validation'],
-        blend_weight,
-        state_config,
-    )
-    calibration['trust_gate'] = trust_gate
-    calibration['base_blend_weight'] = round(blend_weight, 2)
-    calibration['blend_weight'] = round(effective_blend_weight, 2)
-    calibration['summary'] = (
-        f"Episode-fit calibration is {calibration['quality'].lower()} with RMSE {calibration['fit_rmse']:.1f} across {calibration['sample_size']} historical stress windows. "
-        f"Validation trust gating keeps the effective calibrated contribution at {effective_blend_weight * 100:.0f}% versus a base cap of {blend_weight * 100:.0f}%."
-    )
-    if abs(effective_blend_weight - blend_weight) >= 0.01:
-        _, probability_history = _build_probability_histories(
-            state_history,
-            configured_scores_history,
-            state_keys,
-            calibration_coefficients,
-            effective_blend_weight,
-        )
-        blend_weight = effective_blend_weight
 
     previous_index = max(0, len(state_history) - 8)
     prior_states = state_history[previous_index]
@@ -1606,7 +1544,7 @@ def evaluate_state_space(
         dominant_measurements = [
             indicator.replace('_', ' ')
             for indicator, _ in top_measurements
-            if abs(blended_measurements.get(indicator, [0.0] * len(state_keys))[state_index]) >= 0.4
+            if abs(measurements.get(indicator, [0.0] * len(state_keys))[state_index]) >= 0.4
         ][:3]
         uncertainty = round(covariance[state_index][state_index] ** 0.5, 2)
         state_cards.append(
@@ -1620,28 +1558,118 @@ def evaluate_state_space(
             }
         )
 
-    configured_current = configured_probability_history[-1]
-    configured_regime = _dominant_regime({key: float(configured_current[key]) for key in REGIME_ORDER})
+    configured_current = probability_history[-1]
+    configured_regime = current_regime
     diagnostics, disagreement_history = _derive_diagnostics(probability_history, rule_key, innovation_stress)
     agreement_summary = (
-        f"Episode-calibrated econometric layer agrees with the rule engine on {REGIME_LABELS.get(current_regime, current_regime.title())} stress."
+        f"Configured latent-state layer agrees with the rule engine on {REGIME_LABELS.get(current_regime, current_regime.title())} stress."
         if rule_agreement
-        else f"Episode-calibrated econometric layer leans {REGIME_LABELS.get(current_regime, current_regime.title())} while the rule engine remains {rule_regime}."
+        else f"Configured latent-state layer leans {REGIME_LABELS.get(current_regime, current_regime.title())} while the rule engine remains {rule_regime}."
     )
-    if configured_regime != current_regime:
-        agreement_summary += f" Configured loadings alone would still read {REGIME_LABELS.get(configured_regime, configured_regime.title())}."
 
     forecast = _build_forecast(
-        latest_state_vector,
-        blended_transition,
-        blended_intercepts,
+        [float(state_history[-1][key]) for key in state_keys],
+        configured_transition,
+        None,
         state_config,
         latest_measurement_timestamp,
-        calibration_coefficients,
-        blend_weight,
+        None,
+        0.0,
         state_keys,
-        calibration['cluster_focus'],
+        cluster_focus,
     )
+    configured_persistence = round(
+        sum(configured_transition[index][index] for index in range(len(state_keys))) / max(1, len(state_keys)),
+        2,
+    )
+    calibration = {
+        'method': 'configured latent-state monitor',
+        'sample_size': len(EPISODE_TEMPLATES),
+        'fit_rmse': 0.0,
+        'quality': 'Configured',
+        'blend_weight': 0.0,
+        'base_blend_weight': 0.0,
+        'summary': 'Live scoring uses the configured latent-state filter only. Historical episode templates remain descriptive and are not used to fit or blend live scores.',
+        'configured_regime': configured_regime,
+        'configured_probability': current_probability,
+        'calibrated_regime': configured_regime,
+        'calibrated_probability': current_probability,
+        'configured_probability_history': probability_history[-90:],
+        'calibrated_probability_history': probability_history[-90:],
+        'episodes': [],
+        'cluster_focus': {
+            'key': cluster_focus['key'],
+            'label': cluster_focus['label'],
+            'confidence': round(float(cluster_focus['confidence']), 2),
+            'summary': f"Nearest historical subfamily is {cluster_focus['label']}. This is descriptive context, not a fitted calibration.",
+            'supporting_episodes': [template.label for template in EPISODE_TEMPLATES if template.cluster == cluster_focus['key']][:4],
+        },
+        'trust_gate': {
+            'status': 'Disabled',
+            'base_blend_weight': 0.0,
+            'effective_blend_weight': 0.0,
+            'guardrail_factor': 0.0,
+            'configured_avg_rmse': 0.0,
+            'iterative_avg_rmse': 0.0,
+            'configured_hit_rate': 0.0,
+            'iterative_hit_rate': 0.0,
+            'summary': 'Validation trust gating is disabled because live scoring does not use fitted calibration weights.',
+        },
+        'transition': {
+            'fit_rmse': 0.0,
+            'quality': 'Configured',
+            'blend_weight': 0.0,
+            'summary': 'Live scoring uses the configured transition matrix only; no fitted transition weights are applied.',
+            'configured_persistence': configured_persistence,
+            'fitted_persistence': configured_persistence,
+            'blended_persistence': configured_persistence,
+            'drift_strength': 0.0,
+            'links': [],
+        },
+        'filter': {
+            'fit_rmse': 0.0,
+            'quality': 'Configured',
+            'blend_weight': 0.0,
+            'summary': 'Live scoring uses the configured observation model with trust-based noise adjustment only; no fitted observation loadings are applied.',
+            'configured_noise_floor': round(measurement_noise_floor, 2),
+            'fitted_noise_floor': round(measurement_noise_floor, 2),
+            'blended_noise_floor': round(measurement_noise_floor, 2),
+            'configured_process_noise': round(sum(configured_process_noise) / max(1, len(configured_process_noise)), 2),
+            'fitted_process_noise': round(sum(configured_process_noise) / max(1, len(configured_process_noise)), 2),
+            'blended_process_noise': round(sum(configured_process_noise) / max(1, len(configured_process_noise)), 2),
+            'observations': [],
+            'observation_conditioning': {
+                'cluster_key': observation_context['cluster_key'],
+                'cluster_label': observation_context['cluster_label'],
+                'cluster_confidence': observation_context['cluster_confidence'],
+                'regime_key': observation_context['regime_key'],
+                'regime_probability': observation_context['regime_probability'],
+                'average_trust': observation_context['average_trust'],
+                'boosted_indicators': observation_context['boosted_indicators'],
+                'reduced_indicators': observation_context['reduced_indicators'],
+                'summary': observation_context['summary'],
+            },
+        },
+        'iteration': {
+            'iterations_run': 0,
+            'max_iterations': 0,
+            'tolerance': 0.0,
+            'converged': False,
+            'final_parameter_delta': 0.0,
+            'summary': 'Iterative estimation is disabled in the live configured latent-state monitor.',
+            'path': [],
+        },
+        'validation': {
+            'summary': 'Historical episode validation is descriptive only and is not used to fit or blend the live latent-state scores.',
+            'configured_hit_rate': 0.0,
+            'calibrated_hit_rate': 0.0,
+            'iterative_hit_rate': 0.0,
+            'configured_avg_rmse': 0.0,
+            'calibrated_avg_rmse': 0.0,
+            'iterative_avg_rmse': 0.0,
+            'episodes': [],
+        },
+    }
 
     return {
         'current_regime': current_regime,
