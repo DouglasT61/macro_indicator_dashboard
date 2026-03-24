@@ -257,22 +257,31 @@ def _build_indicator_snapshot(
         latest = values[-1]
         source_class = _classify_source(series.source)
         status = determine_status(float(latest.value), thresholds)
-        narrative = f"{series.name} is {status} at {float(latest.value):.2f} {series.unit}."
+        display_name = series.name
+        display_unit = series.unit
+        if key == 'jpy_usd_basis' and series.source.startswith('support/'):
+            display_name = 'JPY/USD Funding Stress'
+        narrative = f"{display_name} is {status} at {float(latest.value):.2f} {display_unit}."
         if source_class == 'demo':
-            narrative = f'{series.name} live feed is unavailable. Demo fallback values are suppressed in the UI.'
+            narrative = f'{display_name} live feed is unavailable. Demo fallback values are suppressed in the UI.'
         elif source_class == 'proxy':
-            narrative = f'{series.name} is a proxy-derived signal at {float(latest.value):.2f} {series.unit}.'
+            narrative = f'{display_name} is a proxy-derived signal at {float(latest.value):.2f} {display_unit}.'
+        elif key == 'jpy_usd_basis' and series.source.startswith('support/'):
+            narrative = (
+                f'{display_name} is {status} at {float(latest.value):.2f} {display_unit}. '
+                'This is a live funding-stress construct built from direct spot FX and official short-rate inputs.'
+            )
         elif is_auction_series:
             narrative = (
-                f'{series.name} is {status} at {float(latest.value):.2f} {series.unit}. '
+                f'{display_name} is {status} at {float(latest.value):.2f} {display_unit}. '
                 f'This is an event-driven stepped series and only changes when qualifying auctions occur. '
                 f'The card is showing a {chart_window_label} window.'
             )
         return {
             'key': key,
-            'name': series.name,
+            'name': display_name,
             'category': series.category,
-            'unit': series.unit,
+            'unit': display_unit,
             'source': series.source,
             'source_class': source_class,
             'latest_value': round(float(latest.value), 2),

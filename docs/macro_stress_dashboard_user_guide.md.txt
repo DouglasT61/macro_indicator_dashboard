@@ -341,6 +341,18 @@ This matters because importer stress in Japan, Europe, and China can propagate i
 
 Japan is currently treated as the cleanest and most important transmission path of the three.
 
+### JPY/USD Headline Card
+
+The headline JPY/USD card is now presented as `JPY/USD Funding Stress`.
+
+Internally, the model key remains `jpy_usd_basis` for continuity with the existing regime and propagation logic, but the public card is intentionally labeled more precisely. The live card is a funding-stress construct built from:
+
+- live USD/JPY spot
+- official NY Fed SOFR inputs
+- Japan short-rate support inputs
+
+This is a live constructed funding signal, not a direct exchange-quoted cross-currency basis print.
+
 ## VIX And Tax-Receipts Market Stress
 
 The app now treats VIX as a propagation feature rather than a primary regime anchor.
@@ -426,7 +438,7 @@ The executive source note counts headline indicators that are not yet `live`.
 
 ## Current Caveats
 
-1. One or more headline cards may still use proxy sources depending on public-source availability.
+1. Some secondary non-headline panels may still use proxy sources depending on public-source availability, but the headline card set is intended to resolve to live inputs or live constructed support signals.
 2. Public sources can time out or revise history.
 3. Documentary overlays are useful, but inherently less clean than market data.
 4. The latent-state panel is intentionally conservative in its claims. It is descriptive and configured, not statistically calibrated for public probabilistic use.

@@ -399,7 +399,7 @@ class PublicDataCollector:
                 )
                 status_parts.append('synthetic USD funding pressure')
 
-        if not collected.get('jpy_usd_basis') and usdjpy and sofr:
+        if usdjpy and sofr:
             jpy_local_rate_history = jpy.history if jpy else _build_constant_history(start, end, 0.5)
             history = _build_basis_proxy_series(
                 start=start,
@@ -415,10 +415,10 @@ class PublicDataCollector:
             if history:
                 support['jpy_usd_basis'] = CollectedSeries(
                     key='jpy_usd_basis',
-                    source='proxy/live-usdjpy-nyfed-sofr',
+                    source='support/jpy-usd-funding-stress',
                     history=history,
                 )
-                status_parts.append('JPY basis proxy')
+                status_parts.append('JPY funding-stress support')
 
         if oil and usdjpy:
             history = _build_local_currency_oil_stress_history(oil.history, usdjpy.history, start, end, mode='multiply')
