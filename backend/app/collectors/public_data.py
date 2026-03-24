@@ -16,6 +16,10 @@ FRED_BASE_URL = 'https://fred.stlouisfed.org/graph/fredgraph.csv'
 TREASURY_AUCTIONS_URL = 'https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v1/accounting/od/auctions_query'
 TREASURY_DTS_URL = 'https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v1/accounting/dts/deposits_withdrawals_operating_cash'
 TREASURY_DEBT_TO_PENNY_URL = 'https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v2/accounting/od/debt_to_penny'
+TREASURY_YIELD_CSV_URL = 'https://home.treasury.gov/resource-center/data-chart-center/interest-rates/daily-treasury-rates.csv/{year}/all'
+NYFED_SOFR_URL = 'https://markets.newyorkfed.org/api/rates/secured/sofr/search.json'
+NYFED_EFFR_URL = 'https://markets.newyorkfed.org/api/rates/unsecured/effr/search.json'
+FED_H41_URL = 'https://www.federalreserve.gov/releases/h41/{stamp}/h41.htm'
 YAHOO_CHART_URL = 'https://query1.finance.yahoo.com/v8/finance/chart/{symbol}'
 TRADINGVIEW_SYMBOL_URL = 'https://www.tradingview.com/symbols/{symbol}/'
 FYICENTER_MOVE_URL = 'https://finance.fyicenter.com/1000140_NYSE_%5EMOVE-ICE_BofAML_MOVE_Index.html'
@@ -38,17 +42,12 @@ MONTH_CODES = {
 }
 
 FRED_DIRECT_SERIES: dict[str, tuple[str, Callable[[float], float]]] = {
-    'ten_year_yield': ('DGS10', lambda value: value),
-    'thirty_year_yield': ('DGS30', lambda value: value),
     'tips_vs_nominals': ('T10YIE', lambda value: value * 100.0),
     'oil_price': ('DCOILBRENTEU', lambda value: value),
     'credit_spreads': ('BAMLH0A0HYM2', lambda value: value * 100.0),
     'usd_index_proxy': ('DTWEXBGS', lambda value: value),
     'consumer_credit_stress': ('DRCCLACBS', lambda value: value * 20.0),
-    'sofr_rate': ('SOFR', lambda value: value),
     'japan_short_rate': ('IRSTCI01JPM156N', lambda value: value),
-    'fima_repo_usage': ('SWPT', lambda value: value),
-    'fed_swap_line_usage': ('WLCFLL', lambda value: value / 1000.0),
     'unemployment_rate': ('UNRATE', lambda value: value),
     'tanker_freight_proxy': ('TSIFRGHT', lambda value: max(10.0, min(100.0, (value - 80.0) * 1.3))),
     'lng_proxy': ('PNGASJPUSDM', lambda value: max(10.0, min(100.0, value * 6.0))),
@@ -113,12 +112,30 @@ class PublicDataCollector:
 
             try:
                 if status_callback:
+                    status_callback('market_data: nyfed')
+                nyfed_series, nyfed_status = self._collect_nyfed_series(client, start, end)
+            except Exception as exc:
+                nyfed_series, nyfed_status = {}, f'NY Fed collector failed: {exc.__class__.__name__}.'
+            collected.update(nyfed_series)
+            statuses['nyfed'] = nyfed_status
+
+            try:
+                if status_callback:
                     status_callback('market_data: ecb')
                 ecb_series, ecb_status = self._collect_ecb_series(client, start, end)
             except Exception as exc:
                 ecb_series, ecb_status = {}, f'ECB collector failed: {exc.__class__.__name__}.'
             collected.update(ecb_series)
             statuses['ecb'] = ecb_status
+
+            try:
+                if status_callback:
+                    status_callback('market_data: fed_h41')
+                fed_h41_series, fed_h41_status = self._collect_fed_h41_series(client, start, end)
+            except Exception as exc:
+                fed_h41_series, fed_h41_status = {}, f'Fed H.4.1 collector failed: {exc.__class__.__name__}.'
+            collected.update(fed_h41_series)
+            statuses['fed_h41'] = fed_h41_status
 
             try:
                 if status_callback:
@@ -261,6 +278,86 @@ class PublicDataCollector:
         except Exception:
             return {}, 'ECB official euro-rate feed unavailable; support layer will fall back to other public sources.'
 
+    def _collect_nyfed_series(
+        self,
+        client: httpx.Client,
+        start: date,
+        end: date,
+    ) -> tuple[dict[str, CollectedSeries], str]:
+        collected: dict[str, CollectedSeries] = {}
+        failures: list[str] = []
+        try:
+            sofr = self._fetch_nyfed_rate_history(client, NYFED_SOFR_URL, start, end, 'SOFR')
+            sofr_dense = _densify_daily(sofr, start, end)
+            if sofr_dense:
+                collected['sofr_rate'] = CollectedSeries(
+                    key='sofr_rate',
+                    source='nyfed/sofr',
+                    history=sofr_dense,
+                )
+            effr_midpoint = self._fetch_nyfed_effr_midpoint_history(client, start, end)
+            sofr_spread = _build_pointwise_series(
+                start,
+                end,
+                {'SOFR': sofr, 'EFFR_MID': effr_midpoint},
+                lambda values: round((values['SOFR'] - values['EFFR_MID']) * 100.0, 6),
+            )
+            if sofr_spread:
+                collected['sofr_spread'] = CollectedSeries(
+                    key='sofr_spread',
+                    source='nyfed/sofr-target-midpoint',
+                    history=sofr_spread,
+                )
+        except Exception:
+            failures.append('SOFR_EFFR')
+
+        live_count = len(collected)
+        if live_count == 0:
+            return {}, 'NY Fed SOFR/EFFR feeds unavailable; SOFR spread will fall back to demo values.'
+        if failures:
+            return collected, f'NY Fed rates live for {live_count} indicators; fallback remains for unavailable NY Fed series.'
+        return collected, f'NY Fed rates live for {live_count} indicators.'
+
+    def _collect_fed_h41_series(
+        self,
+        client: httpx.Client,
+        start: date,
+        end: date,
+    ) -> tuple[dict[str, CollectedSeries], str]:
+        collected: dict[str, CollectedSeries] = {}
+        failures: list[str] = []
+
+        try:
+            fima = self._fetch_h41_weekly_series(client, start, end, 'Foreign official and international accounts')
+            fima_dense = _densify_daily(fima, start, end)
+            if fima_dense:
+                collected['fima_repo_usage'] = CollectedSeries(
+                    key='fima_repo_usage',
+                    source='fed/h41-foreign-official-accounts',
+                    history=fima_dense,
+                )
+        except Exception:
+            failures.append('FIMA')
+
+        try:
+            swap_lines = self._fetch_h41_weekly_series(client, start, end, 'Central bank liquidity swaps')
+            swap_dense = _densify_daily(swap_lines, start, end)
+            if swap_dense:
+                collected['fed_swap_line_usage'] = CollectedSeries(
+                    key='fed_swap_line_usage',
+                    source='fed/h41-central-bank-liquidity-swaps',
+                    history=swap_dense,
+                )
+        except Exception:
+            failures.append('SWAP_LINES')
+
+        live_count = len(collected)
+        if live_count == 0:
+            return {}, 'Federal Reserve H.4.1 feeds unavailable; FIMA and swap-line metrics will fall back if needed.'
+        if failures:
+            return collected, f'Federal Reserve H.4.1 feeds live for {live_count} indicators; fallback remains for unavailable H.4.1 series.'
+        return collected, f'Federal Reserve H.4.1 feeds live for {live_count} indicators.'
+
     def _collect_support_series(
         self,
         start: date,
@@ -301,6 +398,27 @@ class PublicDataCollector:
                     history=history,
                 )
                 status_parts.append('synthetic USD funding pressure')
+
+        if not collected.get('jpy_usd_basis') and usdjpy and sofr:
+            jpy_local_rate_history = jpy.history if jpy else _build_constant_history(start, end, 0.5)
+            history = _build_basis_proxy_series(
+                start=start,
+                end=end,
+                fx_observations=_history_to_dated_observations(usdjpy.history),
+                usd_rate_observations=_history_to_dated_observations(sofr.history),
+                local_rate_observations=_history_to_dated_observations(jpy_local_rate_history),
+                rate_multiplier=7.5,
+                vol_multiplier=2.2,
+                floor_value=8.0,
+                ceiling_value=90.0,
+            )
+            if history:
+                support['jpy_usd_basis'] = CollectedSeries(
+                    key='jpy_usd_basis',
+                    source='proxy/live-usdjpy-nyfed-sofr',
+                    history=history,
+                )
+                status_parts.append('JPY basis proxy')
 
         if oil and usdjpy:
             history = _build_local_currency_oil_stress_history(oil.history, usdjpy.history, start, end, mode='multiply')
@@ -454,6 +572,25 @@ class PublicDataCollector:
                 )
         except Exception:
             failures.append('DEBT')
+
+        try:
+            ten_year, thirty_year = self._fetch_treasury_yield_curve_history(client, start, end)
+            ten_dense = _densify_daily(ten_year, start, end)
+            thirty_dense = _densify_daily(thirty_year, start, end)
+            if ten_dense:
+                collected['ten_year_yield'] = CollectedSeries(
+                    key='ten_year_yield',
+                    source='treasury/daily-yield-curve-10y',
+                    history=ten_dense,
+                )
+            if thirty_dense:
+                collected['thirty_year_yield'] = CollectedSeries(
+                    key='thirty_year_yield',
+                    source='treasury/daily-yield-curve-30y',
+                    history=thirty_dense,
+                )
+        except Exception:
+            failures.append('YIELD_CURVE')
 
         live_count = len(collected)
         if live_count == 0:
@@ -973,6 +1110,126 @@ class PublicDataCollector:
             raise ValueError('No debt-to-penny observations returned')
         return observations
 
+    def _fetch_treasury_yield_curve_history(
+        self,
+        client: httpx.Client,
+        start: date,
+        end: date,
+    ) -> tuple[list[tuple[date, float]], list[tuple[date, float]]]:
+        ten_year: list[tuple[date, float]] = []
+        thirty_year: list[tuple[date, float]] = []
+        for year in range(start.year, end.year + 1):
+            response = client.get(
+                TREASURY_YIELD_CSV_URL.format(year=year),
+                params={'type': 'daily_treasury_yield_curve'},
+            )
+            response.raise_for_status()
+            reader = csv.DictReader(io.StringIO(response.text))
+            for row in reader:
+                observed_at = row.get('Date')
+                if not observed_at:
+                    continue
+                day = datetime.strptime(observed_at, '%m/%d/%Y').date()
+                if day < start or day > end:
+                    continue
+                ten = _safe_float(row.get('10 Yr'))
+                thirty = _safe_float(row.get('30 Yr'))
+                if ten is not None:
+                    ten_year.append((day, ten))
+                if thirty is not None:
+                    thirty_year.append((day, thirty))
+        if not ten_year and not thirty_year:
+            raise ValueError('No Treasury yield-curve observations returned')
+        return ten_year, thirty_year
+
+    def _fetch_nyfed_rate_history(
+        self,
+        client: httpx.Client,
+        url: str,
+        start: date,
+        end: date,
+        expected_type: str,
+    ) -> list[tuple[date, float]]:
+        response = client.get(
+            url,
+            params={
+                'startDate': start.isoformat(),
+                'endDate': end.isoformat(),
+                'type': 'rate',
+            },
+            timeout=min(self.timeout_seconds, 8.0),
+        )
+        response.raise_for_status()
+        payload = response.json()
+        observations: list[tuple[date, float]] = []
+        for row in payload.get('refRates', []):
+            if row.get('type') != expected_type:
+                continue
+            observed_at = row.get('effectiveDate')
+            value = _safe_float(row.get('percentRate'))
+            if observed_at and value is not None:
+                observations.append((date.fromisoformat(observed_at), value))
+        if not observations:
+            raise ValueError(f'No NY Fed observations returned for {expected_type}')
+        return observations
+
+    def _fetch_nyfed_effr_midpoint_history(
+        self,
+        client: httpx.Client,
+        start: date,
+        end: date,
+    ) -> list[tuple[date, float]]:
+        response = client.get(
+            NYFED_EFFR_URL,
+            params={
+                'startDate': start.isoformat(),
+                'endDate': end.isoformat(),
+                'type': 'rate',
+            },
+            timeout=min(self.timeout_seconds, 8.0),
+        )
+        response.raise_for_status()
+        payload = response.json()
+        observations: list[tuple[date, float]] = []
+        for row in payload.get('refRates', []):
+            observed_at = row.get('effectiveDate')
+            floor = _safe_float(row.get('targetRateFrom'))
+            cap = _safe_float(row.get('targetRateTo'))
+            if observed_at and floor is not None and cap is not None:
+                observations.append((date.fromisoformat(observed_at), (floor + cap) / 2.0))
+        if not observations:
+            raise ValueError('No NY Fed EFFR midpoint observations returned')
+        return observations
+
+    def _fetch_h41_weekly_series(
+        self,
+        client: httpx.Client,
+        start: date,
+        end: date,
+        label: str,
+    ) -> list[tuple[date, float]]:
+        observations: list[tuple[date, float]] = []
+        current = end
+        while current.weekday() != 3:
+            current -= timedelta(days=1)
+        while current >= start:
+            response = client.get(
+                FED_H41_URL.format(stamp=current.strftime('%Y%m%d')),
+                timeout=min(self.timeout_seconds, 8.0),
+            )
+            if response.status_code == 404:
+                current -= timedelta(days=7)
+                continue
+            response.raise_for_status()
+            value = _parse_h41_label_value(response.text, label)
+            if value is not None:
+                observations.append((current, value))
+            current -= timedelta(days=7)
+        if not observations:
+            raise ValueError(f'No H.4.1 observations returned for {label}')
+        observations.sort(key=lambda item: item[0])
+        return observations
+
     def _fetch_contract_bar_map(
         self,
         client: httpx.Client,
@@ -992,6 +1249,19 @@ class PublicDataCollector:
 
 def _timestamp_for_day(day: date) -> datetime:
     return datetime.combine(day, time(hour=12), tzinfo=timezone.utc)
+
+
+def _history_to_dated_observations(history: list[tuple[datetime, float]]) -> list[tuple[date, float]]:
+    return [(timestamp.date(), float(value)) for timestamp, value in history]
+
+
+def _build_constant_history(start: date, end: date, value: float) -> list[tuple[datetime, float]]:
+    history: list[tuple[datetime, float]] = []
+    current = start
+    while current <= end:
+        history.append((_timestamp_for_day(current), round(float(value), 6)))
+        current += timedelta(days=1)
+    return history
 
 
 def _densify_daily(observations: list[tuple[date, float]], start: date, end: date) -> list[tuple[datetime, float]]:
@@ -1329,6 +1599,17 @@ def _build_period_change_history(
             value = (current_value - prior_value) / divisor
         derived.append((current_day, round(value, 6)))
     return _densify_daily(derived, start, end)
+
+
+def _parse_h41_label_value(text: str, label: str) -> float | None:
+    index = text.lower().find(label.lower())
+    if index == -1:
+        return None
+    snippet = text[index:index + 1200]
+    match = re.search(r"font-weight:bold\">(?:&#xa0;|\s)*([0-9,]+)</span>", snippet, flags=re.IGNORECASE)
+    if not match:
+        return None
+    return round(float(match.group(1).replace(',', '')) / 1000.0, 6)
 
 
 def _build_payroll_tax_base_history(
