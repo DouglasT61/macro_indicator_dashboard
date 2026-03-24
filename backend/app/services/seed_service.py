@@ -359,7 +359,7 @@ def _build_series_payloads(
             provider_messages[f'{key}_status'] = message
     try:
         if status_callback:
-            status_callback('Refreshing provider series: shipping_data')
+            status_callback('shipping_data: portwatch_hormuz')
         hormuz = collect_hormuz_transit_assessment(timeout_seconds=8.0)
         baseline['hormuz_tanker_transit_stress'] = hormuz.history
         source_map['hormuz_tanker_transit_stress'] = hormuz.source
@@ -465,28 +465,36 @@ def bootstrap_demo_only(db: Session) -> None:
 def refresh_market_data(db: Session, config: dict) -> None:
     series_lookup = ensure_series_registry(db)
     seed_manual_inputs(db)
-    history_map, source_map, provider_messages, data_mode = _build_series_payloads(
-        status_callback=lambda message: save_source_status(
+    def _set_refresh_phase(message: str) -> None:
+        save_source_status(
             db,
             get_source_status(db).get('data_mode', 'mixed'),
             {**dict(get_source_status(db).get('providers', {})), 'refresh_status': message},
-        ),
+        )
+
+    history_map, source_map, provider_messages, data_mode = _build_series_payloads(
+        status_callback=_set_refresh_phase,
     )
+
+    _set_refresh_phase('Applying refreshed series to database')
 
     for definition in SERIES_DEFINITIONS:
         history = history_map[definition.key]
         records = compute_series_metrics(history, config['thresholds'].get(definition.key))
         _replace_series_values(db, series_lookup[definition.key], records, source_override=source_map.get(definition.key))
 
+    _set_refresh_phase('Refreshing manual overlays')
     provider_messages['manual_overlays'] = _refresh_public_overlays(
         db,
-        status_callback=lambda message: save_source_status(
-            db,
-            get_source_status(db).get('data_mode', 'mixed'),
-            {**dict(get_source_status(db).get('providers', {})), 'refresh_status': message},
-        ),
+        status_callback=_set_refresh_phase,
     )
+
+    _set_refresh_phase('Saving source status')
     save_source_status(db, data_mode, provider_messages)
+
+    _set_refresh_phase('Recomputing regime scores')
     _recompute_regime_scores(db, config)
+
+    _set_refresh_phase('Recomputing alerts')
     _recompute_alerts(db, config)
 
