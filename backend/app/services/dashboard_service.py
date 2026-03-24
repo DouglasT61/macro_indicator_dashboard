@@ -489,6 +489,14 @@ def _raw_indicator_score(snapshot: dict[str, Any]) -> float:
     return round(float(normalized), 2)
 
 
+def _stage_input_confidence(snapshot: dict[str, Any]) -> float:
+    source_class = snapshot.get('source_class') or 'demo'
+    source = snapshot.get('source') or ''
+    if source_class == 'live' and source.startswith('support/'):
+        return 0.8
+    return SOURCE_CONFIDENCE.get(source_class, 0.0)
+
+
 def _stage_confidence_label(confidence: float) -> str:
     if confidence >= 0.9:
         return 'high confidence'
@@ -515,7 +523,7 @@ def _build_stage_scores(snapshots: dict[str, dict[str, Any]]) -> dict[str, float
 def _build_ordering_framework(snapshots: dict[str, dict[str, Any]]) -> dict[str, Any]:
     stages = [
         ('Shock', ['brent_prompt_spread', 'marine_insurance_stress', 'hormuz_tanker_transit_stress']),
-        ('Income Squeeze', ['household_real_income_squeeze', 'oil_in_yen_stress', 'oil_in_eur_stress', 'oil_in_cny_stress']),
+        ('Income Squeeze', ['external_importer_stress', 'household_real_income_squeeze', 'employment_tax_base_proxy']),
         ('Labor / Receipts', ['payroll_momentum', 'employment_tax_base_proxy', 'tax_receipts_market_stress']),
         ('Financial Tightening', ['jpy_usd_basis', 'synthetic_usd_funding_pressure', 'auction_stress', 'fima_repo_usage']),
     ]
@@ -524,7 +532,7 @@ def _build_ordering_framework(snapshots: dict[str, dict[str, Any]]) -> dict[str,
         relevant = [snapshots[key] for key in keys if key in snapshots]
         raw_values = [_raw_indicator_score(snapshot) for snapshot in relevant]
         raw_score = round(sum(raw_values) / len(raw_values), 2) if raw_values else 0.0
-        confidence_values = [SOURCE_CONFIDENCE.get(snapshot.get('source_class') or 'demo', 0.0) for snapshot in relevant]
+        confidence_values = [_stage_input_confidence(snapshot) for snapshot in relevant]
         confidence_score = round(sum(confidence_values) / len(confidence_values), 2) if confidence_values else 0.0
         items.append(
             {
