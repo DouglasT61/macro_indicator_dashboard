@@ -13,7 +13,7 @@ from app.regime_engine.config_loader import load_effective_config, load_file_con
 settings = get_settings()
 
 
-def _upsert_setting(db: Session, key: str, value_json: dict[str, Any]) -> AppSetting:
+def _upsert_setting(db: Session, key: str, value_json: dict[str, Any], *, commit: bool = True, refresh: bool = True) -> AppSetting:
     setting = db.query(AppSetting).filter(AppSetting.key == key).one_or_none()
     if setting is None:
         setting = AppSetting(key=key, value_json=value_json, updated_at=datetime.now(timezone.utc))
@@ -21,8 +21,12 @@ def _upsert_setting(db: Session, key: str, value_json: dict[str, Any]) -> AppSet
     else:
         setting.value_json = value_json
         setting.updated_at = datetime.now(timezone.utc)
-    db.commit()
-    db.refresh(setting)
+    if commit:
+        db.commit()
+    else:
+        db.flush()
+    if refresh:
+        db.refresh(setting)
     return setting
 
 
@@ -60,9 +64,22 @@ def get_source_status(db: Session) -> dict[str, Any]:
     return status.value_json
 
 
-def save_source_status(db: Session, data_mode: str, providers: dict[str, str]) -> AppSetting:
+def save_source_status(db: Session, data_mode: str, providers: dict[str, str], *, commit: bool = True) -> AppSetting:
     payload = {'data_mode': data_mode, 'providers': providers}
-    return _upsert_setting(db, 'source_status', payload)
+    return _upsert_setting(db, 'source_status', payload, commit=commit)
+
+
+def get_imported_series_keys(db: Session) -> set[str]:
+    setting = db.query(AppSetting).filter(AppSetting.key == 'imported_series_keys').one_or_none()
+    if setting is None:
+        return set()
+    keys = setting.value_json.get('keys', [])
+    return {str(key) for key in keys}
+
+
+def save_imported_series_keys(db: Session, keys: set[str], *, commit: bool = True) -> AppSetting:
+    payload = {'keys': sorted(keys)}
+    return _upsert_setting(db, 'imported_series_keys', payload, commit=commit)
 
 
 def reset_config(db: Session) -> AppSetting:

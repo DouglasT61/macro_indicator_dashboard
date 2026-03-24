@@ -14,7 +14,9 @@ settings = get_settings()
 
 
 def load_file_config() -> dict[str, Any]:
-    config_path = Path(settings.regime_config_path)
+    config_path = Path(settings.regime_config_path).expanduser()
+    if not config_path.is_absolute():
+        config_path = (Path(__file__).resolve().parents[3] / config_path).resolve()
     return json.loads(config_path.read_text(encoding="utf-8"))
 
 

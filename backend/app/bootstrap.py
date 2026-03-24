@@ -1,14 +1,19 @@
 from __future__ import annotations
 
+from app.core.config import get_settings
 from app.core.database import Base, SessionLocal, engine
-from app.services.seed_service import bootstrap_demo_only
+from app.services.seed_service import bootstrap_demo_only, ensure_bootstrap_state
 
 
 def main() -> None:
     Base.metadata.create_all(bind=engine)
+    settings = get_settings()
     db = SessionLocal()
     try:
-        bootstrap_demo_only(db)
+        if settings.demo_mode:
+            bootstrap_demo_only(db)
+        else:
+            ensure_bootstrap_state(db)
     finally:
         db.close()
 

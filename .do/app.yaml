@@ -32,7 +32,7 @@ services:
         value: ${macro-db.DATABASE_URL}
       - key: DEMO_MODE
         scope: RUN_TIME
-        value: "true"
+        value: "false"
       - key: SCHEDULER_ENABLED
         scope: RUN_TIME
         value: "true"

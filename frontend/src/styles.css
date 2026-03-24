@@ -108,6 +108,7 @@ textarea { resize: vertical; }
 .indicator-tile__source-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
 .source-pill { display: inline-flex; align-items: center; border-radius: 999px; padding: 0.18rem 0.5rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; border: 1px solid rgba(148, 163, 184, 0.18); }
 .source-pill--live { color: #7dd3fc; border-color: rgba(56, 189, 248, 0.28); background: rgba(3, 105, 161, 0.12); }
+.source-pill--support { color: #c4b5fd; border-color: rgba(99, 102, 241, 0.28); background: rgba(49, 46, 129, 0.16); }
 .source-pill--proxy { color: #fdba74; border-color: rgba(249, 115, 22, 0.28); background: rgba(124, 45, 18, 0.16); }
 .source-pill--demo { color: #fecaca; border-color: rgba(239, 68, 68, 0.28); background: rgba(127, 29, 29, 0.16); }
 .source-pill--manual { color: #c4b5fd; border-color: rgba(168, 85, 247, 0.28); background: rgba(88, 28, 135, 0.16); }
@@ -262,7 +263,21 @@ textarea { resize: vertical; }
 .about-app-modal__panel { width: min(1100px, 100%); max-height: min(86vh, 980px); border-radius: 24px; border: 1px solid var(--border); background: linear-gradient(180deg, rgba(8, 17, 29, 0.98), rgba(10, 21, 34, 0.98)); box-shadow: 0 24px 60px rgba(2, 6, 23, 0.5); padding: 1.25rem 1.4rem; display: grid; gap: 1rem; }
 .about-app-modal__header { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
 .about-app-modal__header h2, .about-app-modal__header p { margin: 0; }
-.about-app-modal__content { margin: 0; padding: 1rem; overflow: auto; max-height: 68vh; border-radius: 18px; border: 1px solid rgba(148, 163, 184, 0.14); background: rgba(4, 12, 21, 0.84); color: var(--text); font-family: "Cascadia Code", "Consolas", monospace; font-size: 0.92rem; line-height: 1.55; white-space: pre-wrap; }
+.about-app-modal__content { margin: 0; padding: 1rem; overflow: auto; max-height: 68vh; border-radius: 18px; border: 1px solid rgba(148, 163, 184, 0.14); background: rgba(4, 12, 21, 0.84); color: var(--text); font-size: 0.95rem; line-height: 1.6; }
+.about-app-modal__markdown h1,
+.about-app-modal__markdown h2,
+.about-app-modal__markdown h3 { margin: 1rem 0 0.5rem; color: #f8fafc; }
+.about-app-modal__markdown h1:first-child,
+.about-app-modal__markdown h2:first-child,
+.about-app-modal__markdown h3:first-child { margin-top: 0; }
+.about-app-modal__markdown p,
+.about-app-modal__markdown ul,
+.about-app-modal__markdown ol { margin: 0 0 0.85rem; }
+.about-app-modal__markdown ul,
+.about-app-modal__markdown ol { padding-left: 1.35rem; }
+.about-app-modal__markdown code { font-family: "Cascadia Code", "Consolas", monospace; font-size: 0.9em; background: rgba(15, 23, 42, 0.8); padding: 0.1rem 0.3rem; border-radius: 6px; }
+.about-app-modal__markdown pre { overflow: auto; padding: 0.85rem; border-radius: 12px; background: rgba(2, 6, 23, 0.92); border: 1px solid rgba(148, 163, 184, 0.12); }
+.about-app-modal__markdown pre code { background: transparent; padding: 0; }
 @media (max-width: 1100px) {
   .dashboard-frame { grid-template-columns: 1fr; }
   .dashboard-sidebar { position: static; }

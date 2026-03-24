@@ -11,7 +11,7 @@ from app.schemas.common import ApiMessage
 from app.schemas.dashboard import DashboardOverview
 from app.services.dashboard_service import get_dashboard_overview
 from app.services.export_service import build_daily_summary_markdown
-from app.services.refresh_service import run_refresh_in_new_session
+from app.services.refresh_service import mark_refresh_queued, run_refresh_in_new_session
 
 router = APIRouter()
 
@@ -23,6 +23,8 @@ def dashboard_overview(db: Session = Depends(get_db)) -> DashboardOverview:
 
 @router.post("/refresh", response_model=ApiMessage)
 def refresh_dashboard(background_tasks: BackgroundTasks) -> ApiMessage:
+    if not mark_refresh_queued():
+        return ApiMessage(message="Dashboard refresh already running.", timestamp=datetime.now(timezone.utc))
     background_tasks.add_task(run_refresh_in_new_session)
     return ApiMessage(message="Dashboard refresh queued.", timestamp=datetime.now(timezone.utc))
 

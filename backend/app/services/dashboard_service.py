@@ -11,7 +11,6 @@ from app.models import Alert, EventAnnotation, IndicatorSeries, IndicatorValue, 
 from app.regime_engine.config_loader import load_effective_config
 from app.services.analytics import determine_status, normalize_value, rolling_change
 from app.services.backtest_service import build_backtest_overview
-from app.services.seed_service import seed_demo_data
 from app.services.settings_service import get_alerts_enabled, get_source_status
 from app.services.state_space_service import evaluate_state_space
 
@@ -149,6 +148,7 @@ CAUSAL_LABELS = {
 
 SOURCE_CONFIDENCE = {
     'live': 1.0,
+    'support': 0.8,
     'proxy': 0.85,
     'auto': 0.75,
     'manual': 0.65,
@@ -179,7 +179,7 @@ def _serialize_alert(alert: Any) -> dict[str, Any]:
 
 
 def _classify_source(source: str) -> str:
-    if source == 'manual':
+    if source == 'manual' or source.startswith('manual/'):
         return 'manual'
     if source.startswith('auto/'):
         return 'auto'
@@ -187,6 +187,8 @@ def _classify_source(source: str) -> str:
         return 'demo'
     if source.startswith('proxy/'):
         return 'proxy'
+    if source.startswith('support/') or source.startswith('synthetic/'):
+        return 'support'
     return 'live'
 
 
@@ -259,18 +261,18 @@ def _build_indicator_snapshot(
         status = determine_status(float(latest.value), thresholds)
         display_name = series.name
         display_unit = series.unit
-        if key == 'jpy_usd_basis' and series.source.startswith('support/'):
+        if key == 'jpy_usd_basis' and source_class == 'support':
             display_name = 'JPY/USD Funding Stress'
         narrative = f"{display_name} is {status} at {float(latest.value):.2f} {display_unit}."
         if source_class == 'demo':
             narrative = f'{display_name} live feed is unavailable. Demo fallback values are suppressed in the UI.'
-        elif source_class == 'proxy':
-            narrative = f'{display_name} is a proxy-derived signal at {float(latest.value):.2f} {display_unit}.'
-        elif key == 'jpy_usd_basis' and series.source.startswith('support/'):
+        elif source_class == 'support':
             narrative = (
                 f'{display_name} is {status} at {float(latest.value):.2f} {display_unit}. '
-                'This is a live funding-stress construct built from direct spot FX and official short-rate inputs.'
+                'This is a live support construct built from direct market and official-source inputs.'
             )
+        elif source_class == 'proxy':
+            narrative = f'{display_name} is a proxy-derived signal at {float(latest.value):.2f} {display_unit}.'
         elif is_auction_series:
             narrative = (
                 f'{display_name} is {status} at {float(latest.value):.2f} {display_unit}. '
@@ -491,9 +493,6 @@ def _raw_indicator_score(snapshot: dict[str, Any]) -> float:
 
 def _stage_input_confidence(snapshot: dict[str, Any]) -> float:
     source_class = snapshot.get('source_class') or 'demo'
-    source = snapshot.get('source') or ''
-    if source_class == 'live' and source.startswith('support/'):
-        return 0.8
     return SOURCE_CONFIDENCE.get(source_class, 0.0)
 
 
@@ -635,8 +634,8 @@ def _build_narratives(
     )
     top_alerts = ', '.join(_alert_field(alert, 'title') for alert in alerts[:3]) if alerts else 'no active alerts'
     escalation = (
-        f"Escalation watch: {top_alerts}. Econometric regime is {state_space['current_regime'].replace('_', ' ')} "
-        f"at {state_space['current_probability']:.1f}% probability."
+        f"Escalation watch: {top_alerts}. Latent-state regime is {state_space['current_regime'].replace('_', ' ')} "
+        f"at {state_space['current_probability']:.1f}% relative confidence."
     )
     return {'daily': daily, 'weekly': weekly, 'escalation': escalation}
 
@@ -729,7 +728,6 @@ def _build_interpretation_chart(snapshots: dict[str, dict[str, Any]]) -> dict[st
 
 
 def get_dashboard_overview(db: Session) -> dict[str, Any]:
-    seed_demo_data(db)
     config = load_effective_config(db)
     series_map = _build_series_map(db)
     manual_map = _latest_manual_inputs(db)

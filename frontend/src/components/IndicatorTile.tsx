@@ -8,6 +8,7 @@ interface IndicatorTileProps {
 
 const SOURCE_LABELS: Record<IndicatorSnapshot['source_class'], string> = {
   live: 'live',
+  support: 'support',
   proxy: 'proxy',
   demo: 'unavailable',
   manual: 'manual',
@@ -76,6 +77,7 @@ function formatAuctionCount(value: number | undefined): string {
 
 export function IndicatorTile({ indicator, events }: IndicatorTileProps) {
   const isUnavailable = indicator.source_class === 'demo';
+  const isSupport = indicator.source_class === 'support';
   const isProxy = indicator.source_class === 'proxy';
   const isAuto = indicator.source_class === 'auto';
   const isAuctionSeries = indicator.key.startsWith('auction_');
@@ -152,6 +154,7 @@ export function IndicatorTile({ indicator, events }: IndicatorTileProps) {
       ) : isAuctionSeries ? null : (
         <SparklineChart indicator={indicator} events={events} />
       )}
+      {isSupport ? <p className="indicator-tile__warning">This is a support-derived live construct, not a direct quoted market print.</p> : null}
       {isProxy ? <p className="indicator-tile__warning">This is a proxy-derived signal, not a direct market print.</p> : null}
       {isAuto ? <p className="indicator-tile__warning indicator-tile__warning--auto">This value is auto-refreshed from public-source overlays. Use manual input only if you need an override.</p> : null}
       {isUnavailable ? <p className="indicator-tile__warning indicator-tile__warning--critical">Demo fallback is suppressed for market interpretation.</p> : null}

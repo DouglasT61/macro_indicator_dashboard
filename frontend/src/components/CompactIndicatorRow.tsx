@@ -8,6 +8,7 @@ interface CompactIndicatorRowProps {
 
 const SOURCE_LABELS: Record<IndicatorSnapshot['source_class'], string> = {
   live: 'live',
+  support: 'support',
   proxy: 'proxy',
   demo: 'unavailable',
   manual: 'manual',

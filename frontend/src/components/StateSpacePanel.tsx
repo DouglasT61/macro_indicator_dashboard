@@ -51,17 +51,17 @@ export function StateSpacePanel({ stateSpace }: StateSpacePanelProps) {
 
   const confidenceSeries = [
     {
-      name: 'Sticky Confidence',
+      name: 'Sticky Share',
       color: '#f59e0b',
       values: stateSpace.probability_history.map((row) => ({ timestamp: row.timestamp, value: row.sticky })),
     },
     {
-      name: 'Convex Confidence',
+      name: 'Convex Share',
       color: '#38bdf8',
       values: stateSpace.probability_history.map((row) => ({ timestamp: row.timestamp, value: row.convex })),
     },
     {
-      name: 'Break Confidence',
+      name: 'Break Share',
       color: '#ef4444',
       values: stateSpace.probability_history.map((row) => ({ timestamp: row.timestamp, value: row.break })),
     },
@@ -69,7 +69,7 @@ export function StateSpacePanel({ stateSpace }: StateSpacePanelProps) {
 
   const disagreementSeries = [
     {
-      name: 'Confidence Gap',
+      name: 'Share Gap',
       color: '#7dd3fc',
       values: stateSpace.disagreement_history.map((row) => ({ timestamp: row.timestamp, value: row.probability_gap })),
     },
@@ -101,7 +101,7 @@ export function StateSpacePanel({ stateSpace }: StateSpacePanelProps) {
           <p>{stateSpace.agreement_summary}</p>
         </div>
         <div className={`status-pill status-pill--${tone}`}>
-          {stateSpace.current_regime.replace('_', ' ')} {stateSpace.current_probability.toFixed(1)}%
+          {stateSpace.current_regime.replace('_', ' ')} {stateSpace.current_probability.toFixed(1)}% share
         </div>
       </div>
 
@@ -119,7 +119,7 @@ export function StateSpacePanel({ stateSpace }: StateSpacePanelProps) {
           <strong>{stateSpace.innovation_stress.toFixed(2)}</strong>
         </article>
         <article className="state-space-metric-card">
-          <span className="state-space-metric-card__label">Confidence Band</span>
+          <span className="state-space-metric-card__label">Dispersion Band</span>
           <strong>{stateSpace.diagnostics.confidence_band}</strong>
         </article>
         <article className="state-space-metric-card">
@@ -153,19 +153,19 @@ export function StateSpacePanel({ stateSpace }: StateSpacePanelProps) {
       <div className="state-space-chart-grid">
         <LineChart title="Latent State History" series={latentSeries} height={220} />
         <LineChart
-          title="Regime Confidence"
+          title="Regime Share"
           series={confidenceSeries}
           height={220}
           thresholdLines={[
-            { label: 'Watch', value: 40, color: '#facc15' },
-            { label: 'Dominant', value: 55, color: '#ef4444' },
+            { label: 'Building', value: 40, color: '#facc15' },
+            { label: 'Leading', value: 55, color: '#ef4444' },
           ]}
         />
       </div>
 
       <div className="state-space-chart-grid state-space-chart-grid--compact">
         <LineChart
-          title="Rule vs Latent-State Gap"
+          title="Rule vs Latent-State Share Gap"
           series={disagreementSeries}
           height={180}
           thresholdLines={[
@@ -180,9 +180,9 @@ export function StateSpacePanel({ stateSpace }: StateSpacePanelProps) {
           </div>
           <div className="state-space-diagnostics-list">
             <div><span>Recent disagreement streak</span><strong>{stateSpace.diagnostics.recent_disagreement_streak}</strong></div>
-            <div><span>Max confidence gap</span><strong>{stateSpace.diagnostics.max_probability_gap.toFixed(1)}</strong></div>
-            <div><span>Latest confidence gap</span><strong>{stateSpace.diagnostics.latest_probability_gap.toFixed(1)}</strong></div>
-            <div><span>Current relative confidence</span><strong>{stateSpace.current_probability.toFixed(1)}%</strong></div>
+            <div><span>Max share gap</span><strong>{stateSpace.diagnostics.max_probability_gap.toFixed(1)}</strong></div>
+            <div><span>Latest share gap</span><strong>{stateSpace.diagnostics.latest_probability_gap.toFixed(1)}</strong></div>
+            <div><span>Current regime share</span><strong>{stateSpace.current_probability.toFixed(1)}%</strong></div>
           </div>
         </article>
       </div>
@@ -201,7 +201,7 @@ export function StateSpacePanel({ stateSpace }: StateSpacePanelProps) {
             <span>{stateSpace.calibration.configured_regime.replace('_', ' ')}</span>
           </div>
           <div className="state-space-card__value">{stateSpace.calibration.configured_probability.toFixed(1)}%</div>
-          <div className="state-space-card__change">Relative confidence from the configured latent-state filter</div>
+          <div className="state-space-card__change">Relative regime share from the configured latent-state filter</div>
         </article>
         <article className="state-space-card state-space-card--diagnostics">
           <div className="state-space-card__header">
@@ -210,7 +210,7 @@ export function StateSpacePanel({ stateSpace }: StateSpacePanelProps) {
           </div>
           <p className="state-space-card__summary">{stateSpace.calibration.cluster_focus.summary}</p>
           <div className="state-space-card__metrics-inline">
-            <span>Confidence {(stateSpace.calibration.cluster_focus.confidence * 100).toFixed(0)}%</span>
+            <span>Weight {(stateSpace.calibration.cluster_focus.confidence * 100).toFixed(0)}%</span>
             <span>Support {stateSpace.calibration.cluster_focus.supporting_episodes.length}</span>
           </div>
         </article>
@@ -229,7 +229,7 @@ export function StateSpacePanel({ stateSpace }: StateSpacePanelProps) {
 
       <div className="state-space-forecast-header">
         <div>
-          <h3>Forward Confidence</h3>
+          <h3>Forward Regime Balance</h3>
           <p>{stateSpace.forecast.summary}</p>
         </div>
       </div>
@@ -253,7 +253,7 @@ export function StateSpacePanel({ stateSpace }: StateSpacePanelProps) {
               <span>{horizon.dominant_regime.replace('_', ' ')}</span>
             </div>
             <div className="state-space-card__value">{horizon.dominant_probability.toFixed(1)}%</div>
-            <div className="state-space-card__change">Relative confidence</div>
+            <div className="state-space-card__change">Relative regime share</div>
             <div className="state-space-card__metrics-inline">
               <span>Sticky {horizon.sticky.toFixed(1)}</span>
               <span>Convex {horizon.convex.toFixed(1)}</span>
@@ -264,7 +264,7 @@ export function StateSpacePanel({ stateSpace }: StateSpacePanelProps) {
       </div>
 
       <div className="state-space-chart-grid state-space-chart-grid--compact">
-        <LineChart title="Forward Regime Confidence" series={forecastSeries} height={180} />
+        <LineChart title="Forward Regime Share" series={forecastSeries} height={180} />
         <div className="state-space-scenario-grid">
           {stateSpace.forecast.scenarios.map((scenario) => (
             <article key={scenario.key} className={`state-space-card state-space-card--scenario state-space-card--${regimeTone(scenario.dominant_regime)}`}>
@@ -274,7 +274,7 @@ export function StateSpacePanel({ stateSpace }: StateSpacePanelProps) {
               </div>
               <p className="state-space-card__summary">{scenario.description}</p>
               <div className="state-space-card__value">{scenario.dominant_probability.toFixed(1)}%</div>
-              <div className="state-space-card__change">Break confidence {scenario.break.toFixed(1)}%</div>
+              <div className="state-space-card__change">Break share {scenario.break.toFixed(1)}%</div>
               <div className="state-space-card__metrics-inline">
                 <span>Sticky {scenario.sticky.toFixed(1)}</span>
                 <span>Convex {scenario.convex.toFixed(1)}</span>

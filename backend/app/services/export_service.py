@@ -22,7 +22,7 @@ def build_daily_summary_markdown(db: Session) -> str:
         '',
         f"Generated: {overview['generated_at'].isoformat()}",
         f"Current rule regime: **{regime['current_regime']}**",
-        f"Current latent-state regime: **{state_space['current_regime'].replace('_', ' ').title()}** ({state_space['current_probability']:.1f}% relative confidence)",
+        f"Current latent-state regime: **{state_space['current_regime'].replace('_', ' ').title()}** ({state_space['current_probability']:.1f}% regime share)",
         '',
         '## Executive Interpretation',
         f"- Ordering discipline: {ordering['summary']}",
@@ -39,14 +39,14 @@ def build_daily_summary_markdown(db: Session) -> str:
         f"- Agreement with rule engine: {'yes' if state_space['rule_agreement'] else 'no'}",
         f"- Observation coverage: {state_space['observation_coverage']:.1f}%",
         f"- Innovation stress: {state_space['innovation_stress']:.2f}",
-        f"- Confidence band: {diagnostics['confidence_band']}",
+        f"- Dispersion band: {diagnostics['confidence_band']}",
         f"- Tracking quality: {diagnostics['tracking_quality']}",
         f"- Regime flips in sample: {diagnostics['dominant_regime_flips']}",
         '',
         '## Model Notes',
         f"- {calibration['summary']}",
-        f"- Configured regime: {calibration['configured_regime'].replace('_', ' ').title()} {calibration['configured_probability']:.1f}% relative confidence",
-        f"- Comparison regime: {calibration['calibrated_regime'].replace('_', ' ').title()} {calibration['calibrated_probability']:.1f}% relative confidence",
+        f"- Configured regime: {calibration['configured_regime'].replace('_', ' ').title()} {calibration['configured_probability']:.1f}% regime share",
+        f"- Comparison regime: {calibration['calibrated_regime'].replace('_', ' ').title()} {calibration['calibrated_probability']:.1f}% regime share",
         f"- Episode subfamily focus: {calibration['cluster_focus']['summary']}",
         f"- Validation trust gate: {calibration['trust_gate']['summary']}",
         f"- Transition fit: {calibration['transition']['summary']}",
@@ -57,13 +57,13 @@ def build_daily_summary_markdown(db: Session) -> str:
         f"- Iterative estimation: {calibration['iteration']['summary']}",
         f"- Validation: {calibration['validation']['summary']}",
         '',
-        '## Forward Confidence',
+        '## Forward Regime Balance',
         f"- {forecast['summary']}",
         f"- Forecast conditioning: {forecast['conditioning_summary']}",
     ]
     for horizon in forecast['horizons']:
         lines.append(
-            f"- {horizon['days']}d: {horizon['dominant_regime'].replace('_', ' ').title()} {horizon['dominant_probability']:.1f}% relative confidence "
+            f"- {horizon['days']}d: {horizon['dominant_regime'].replace('_', ' ').title()} {horizon['dominant_probability']:.1f}% regime share "
             f"(Sticky {horizon['sticky']:.1f} / Convex {horizon['convex']:.1f} / Break {horizon['break']:.1f})"
         )
 

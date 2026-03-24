@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class ThresholdConfig(BaseModel):
@@ -24,6 +24,8 @@ class RegimeConfigModel(BaseModel):
     regimes: dict[str, list[SignalWeight]]
     alert_rules: dict[str, dict[str, Any]]
     causal_groups: dict[str, list[str]]
+
+    model_config = ConfigDict(extra="allow")
 
 
 class SettingsResponse(BaseModel):

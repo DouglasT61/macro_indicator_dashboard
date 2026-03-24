@@ -2026,20 +2026,34 @@ def _compute_auction_stress_histories(rows: list[dict[str, str]], start: date, e
     if not long_end_auctions:
         return {}
 
-    btc_values = [float(item['bid_to_cover']) for item in long_end_auctions if item['bid_to_cover'] is not None]
-    yield_values = [float(item['high_yield']) for item in long_end_auctions]
-    indirect_values = [float(item['indirect_share']) for item in long_end_auctions if float(item['indirect_share']) > 0]
-    dealer_values = [float(item['dealer_share']) for item in long_end_auctions if float(item['dealer_share']) > 0]
+    long_end_auctions = sorted(long_end_auctions, key=lambda item: item['auction_date'])  # type: ignore[arg-type]
 
     clearing_points: list[tuple[date, float]] = []
     sponsorship_points: list[tuple[date, float]] = []
+    btc_values: list[float] = []
+    yield_values: list[float] = []
+    indirect_values: list[float] = []
+    dealer_values: list[float] = []
     for item in long_end_auctions:
-        btc_stress = _percentile_rank(btc_values, float(item['bid_to_cover']), inverse=True)
-        yield_stress = _percentile_rank(yield_values, float(item['high_yield']))
+        bid_to_cover = float(item['bid_to_cover'])
+        high_yield = float(item['high_yield'])
+        btc_values.append(bid_to_cover)
+        yield_values.append(high_yield)
+
+        btc_stress = _percentile_rank(btc_values, bid_to_cover, inverse=True)
+        yield_stress = _percentile_rank(yield_values, high_yield)
         indirect_share = float(item['indirect_share'])
-        indirect_stress = _percentile_rank(indirect_values, indirect_share, inverse=True) if indirect_share > 0 else 50.0
         dealer_share = float(item['dealer_share'])
-        dealer_stress = _percentile_rank(dealer_values, dealer_share) if dealer_share > 0 else 50.0
+        if indirect_share > 0:
+            indirect_values.append(indirect_share)
+            indirect_stress = _percentile_rank(indirect_values, indirect_share, inverse=True)
+        else:
+            indirect_stress = 50.0
+        if dealer_share > 0:
+            dealer_values.append(dealer_share)
+            dealer_stress = _percentile_rank(dealer_values, dealer_share)
+        else:
+            dealer_stress = 50.0
 
         clearing_score = round(0.45 * btc_stress + 0.30 * yield_stress + 0.25 * dealer_stress, 4)
         sponsorship_score = round(0.65 * indirect_stress + 0.35 * dealer_stress, 4)

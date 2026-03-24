@@ -12,6 +12,7 @@ from app.collectors.public_data import (
     _build_pointwise_series,
     _build_treasury_basis_history,
     _build_treasury_depth_history,
+    _compute_auction_stress_histories,
     _compute_auction_stress_history,
     _densify_daily,
     _generate_contract_specs,
@@ -69,6 +70,52 @@ def test_compute_auction_stress_history_generates_daily_step_series() -> None:
     assert len(history) == 4
     assert history[0][1] < history[-1][1]
     assert history[2][1] == history[3][1]
+
+
+def test_auction_stress_history_uses_trailing_distribution_without_future_lookahead() -> None:
+    rows = [
+        {
+            'auction_date': '2026-01-10',
+            'security_type': 'Note',
+            'security_term': '10-Year',
+            'bid_to_cover_ratio': '2.70',
+            'high_yield': '4.20',
+            'offering_amt': '39000000000',
+            'indirect_bidder_accepted': '25000000000',
+            'primary_dealer_accepted': '9000000000',
+        },
+        {
+            'auction_date': '2026-02-10',
+            'security_type': 'Note',
+            'security_term': '10-Year',
+            'bid_to_cover_ratio': '2.60',
+            'high_yield': '4.25',
+            'offering_amt': '40000000000',
+            'indirect_bidder_accepted': '24000000000',
+            'primary_dealer_accepted': '10000000000',
+        },
+        {
+            'auction_date': '2026-03-10',
+            'security_type': 'Bond',
+            'security_term': '30-Year',
+            'bid_to_cover_ratio': '1.80',
+            'high_yield': '5.10',
+            'offering_amt': '22000000000',
+            'indirect_bidder_accepted': '8000000000',
+            'primary_dealer_accepted': '11000000000',
+        },
+    ]
+
+    histories = _compute_auction_stress_histories(rows, start=date(2026, 1, 10), end=date(2026, 3, 12))
+    clearing_history = histories['auction_clearing_stress']
+
+    jan10 = next(value for timestamp, value in clearing_history if timestamp.date() == date(2026, 1, 10))
+    feb10 = next(value for timestamp, value in clearing_history if timestamp.date() == date(2026, 2, 10))
+    mar10 = next(value for timestamp, value in clearing_history if timestamp.date() == date(2026, 3, 10))
+
+    assert jan10 == 50.0
+    assert feb10 > jan10
+    assert mar10 > feb10
 
 
 def test_basis_proxy_series_becomes_more_negative_with_wider_rate_gap_and_fx_vol() -> None:

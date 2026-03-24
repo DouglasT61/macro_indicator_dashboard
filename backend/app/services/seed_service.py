@@ -26,7 +26,7 @@ from app.regime_engine.config_loader import load_file_config
 from app.regime_engine.engine import build_regime_history
 from app.seed.catalog import MANUAL_INPUT_DEFAULTS, SERIES_DEFINITIONS
 from app.services.analytics import compute_series_metrics, determine_status
-from app.services.settings_service import get_source_status, save_source_status
+from app.services.settings_service import get_imported_series_keys, get_source_status, save_imported_series_keys, save_source_status
 
 
 LIVE_HISTORY_DAYS = 180
@@ -111,7 +111,14 @@ def seed_events(db: Session) -> None:
     db.commit()
 
 
-def _replace_series_values(db: Session, series: IndicatorSeries, records: list[dict], source_override: str | None = None) -> None:
+def _replace_series_values(
+    db: Session,
+    series: IndicatorSeries,
+    records: list[dict],
+    source_override: str | None = None,
+    *,
+    commit: bool = True,
+) -> None:
     db.query(IndicatorValue).filter(IndicatorValue.series_id == series.id).delete()
     db.flush()
     for record in records:
@@ -132,10 +139,13 @@ def _replace_series_values(db: Session, series: IndicatorSeries, records: list[d
     if source_override is not None:
         series.source = source_override
     series.last_updated = records[-1]['timestamp'] if records else None
-    db.commit()
+    if commit:
+        db.commit()
+    else:
+        db.flush()
 
 
-def _recompute_regime_scores(db: Session, config: dict) -> None:
+def _recompute_regime_scores(db: Session, config: dict, *, commit: bool = True) -> None:
     series_lookup = {series.key: series for series in db.query(IndicatorSeries).all()}
     timelines: dict[str, list[tuple[datetime, float]]] = {}
     for key, series in series_lookup.items():
@@ -160,10 +170,13 @@ def _recompute_regime_scores(db: Session, config: dict) -> None:
                 explanation_json=row['explanation'],
             )
         )
-    db.commit()
+    if commit:
+        db.commit()
+    else:
+        db.flush()
 
 
-def _recompute_alerts(db: Session, config: dict) -> None:
+def _recompute_alerts(db: Session, config: dict, *, commit: bool = True) -> None:
     latest_values: dict[str, float] = {}
     recent_history: dict[str, list[float]] = {}
     for series in db.query(IndicatorSeries).all():
@@ -195,10 +208,13 @@ def _recompute_alerts(db: Session, config: dict) -> None:
     db.flush()
     for alert in alerts:
         db.add(Alert(**alert))
-    db.commit()
+    if commit:
+        db.commit()
+    else:
+        db.flush()
 
 
-def _upsert_manual_overlay(db: Session, key: str, value: float, notes: str) -> None:
+def _upsert_manual_overlay(db: Session, key: str, value: float, notes: str, *, commit: bool = True) -> None:
     latest = (
         db.query(ManualInput)
         .filter(ManualInput.key == key)
@@ -216,17 +232,25 @@ def _upsert_manual_overlay(db: Session, key: str, value: float, notes: str) -> N
             notes=notes,
         )
     )
-    db.commit()
+    if commit:
+        db.commit()
+    else:
+        db.flush()
 
 
-def _refresh_public_overlays(db: Session, status_callback: Callable[[str], None] | None = None) -> str:
+def _refresh_public_overlays(
+    db: Session,
+    status_callback: Callable[[str], None] | None = None,
+    *,
+    commit: bool = True,
+) -> str:
     messages: list[str] = []
 
     try:
         if status_callback:
             status_callback('Refreshing overlay: marine_insurance_stress')
         marine = collect_marine_insurance_assessment(timeout_seconds=8.0)
-        _upsert_manual_overlay(db, 'marine_insurance_stress', marine.score, marine.notes)
+        _upsert_manual_overlay(db, 'marine_insurance_stress', marine.score, marine.notes, commit=commit)
         messages.append('Marine insurance overlay refreshed from Beinsure site scan.')
     except Exception:
         messages.append('Marine insurance overlay remains manual/demo; site scan unavailable on this refresh.')
@@ -235,7 +259,7 @@ def _refresh_public_overlays(db: Session, status_callback: Callable[[str], None]
         if status_callback:
             status_callback('Refreshing overlay: tanker_disruption_score')
         tanker = collect_tanker_disruption_assessment(settings.aishub_username, timeout_seconds=8.0)
-        _upsert_manual_overlay(db, 'tanker_disruption_score', tanker.score, tanker.notes)
+        _upsert_manual_overlay(db, 'tanker_disruption_score', tanker.score, tanker.notes, commit=commit)
         messages.append('Tanker disruption overlay refreshed from public shipping sources.')
     except Exception:
         messages.append('Tanker disruption overlay remains manual/demo; public shipping sources unavailable on this refresh.')
@@ -244,7 +268,7 @@ def _refresh_public_overlays(db: Session, status_callback: Callable[[str], None]
         if status_callback:
             status_callback('Refreshing overlay: private_credit_stress')
         private_credit = collect_private_credit_stress(timeout_seconds=8.0)
-        _upsert_manual_overlay(db, private_credit.key, private_credit.value, private_credit.notes)
+        _upsert_manual_overlay(db, private_credit.key, private_credit.value, private_credit.notes, commit=commit)
         messages.append('Private credit overlay refreshed from public market proxies.')
     except Exception:
         messages.append('Private credit overlay remains manual/demo; public market proxies unavailable on this refresh.')
@@ -253,7 +277,7 @@ def _refresh_public_overlays(db: Session, status_callback: Callable[[str], None]
         if status_callback:
             status_callback('Refreshing overlay: geopolitical_escalation_toggle')
         geopolitical = collect_geopolitical_escalation_signal(timeout_seconds=8.0)
-        _upsert_manual_overlay(db, geopolitical.key, geopolitical.value, geopolitical.notes)
+        _upsert_manual_overlay(db, geopolitical.key, geopolitical.value, geopolitical.notes, commit=commit)
         messages.append('Geopolitical escalation toggle refreshed from public news scan.')
     except Exception:
         messages.append('Geopolitical escalation toggle remains manual/demo; public news scan unavailable on this refresh.')
@@ -262,7 +286,7 @@ def _refresh_public_overlays(db: Session, status_callback: Callable[[str], None]
         if status_callback:
             status_callback('Refreshing overlay: central_bank_intervention_toggle')
         intervention = collect_central_bank_intervention_signal(timeout_seconds=8.0)
-        _upsert_manual_overlay(db, intervention.key, intervention.value, intervention.notes)
+        _upsert_manual_overlay(db, intervention.key, intervention.value, intervention.notes, commit=commit)
         messages.append('Central bank intervention toggle refreshed from official Fed feeds.')
     except Exception:
         messages.append('Central bank intervention toggle remains manual/demo; official Fed feeds unavailable on this refresh.')
@@ -271,7 +295,7 @@ def _refresh_public_overlays(db: Session, status_callback: Callable[[str], None]
         if status_callback:
             status_callback('Refreshing overlay: p_and_i_circular_stress')
         pni = collect_p_and_i_circular_stress(timeout_seconds=8.0)
-        _upsert_manual_overlay(db, pni.key, pni.value, pni.notes)
+        _upsert_manual_overlay(db, pni.key, pni.value, pni.notes, commit=commit)
         messages.append('P&I circular stress refreshed from official club notices.')
     except Exception:
         messages.append('P&I circular stress remains manual/demo; official club notices unavailable on this refresh.')
@@ -280,7 +304,7 @@ def _refresh_public_overlays(db: Session, status_callback: Callable[[str], None]
         if status_callback:
             status_callback('Refreshing overlay: iaea_nuclear_ambiguity')
         iaea = collect_iaea_nuclear_ambiguity(timeout_seconds=8.0)
-        _upsert_manual_overlay(db, iaea.key, iaea.value, iaea.notes)
+        _upsert_manual_overlay(db, iaea.key, iaea.value, iaea.notes, commit=commit)
         messages.append('IAEA nuclear ambiguity refreshed from official verification statements.')
     except Exception:
         messages.append('IAEA nuclear ambiguity remains manual/demo; official verification statements unavailable on this refresh.')
@@ -289,7 +313,7 @@ def _refresh_public_overlays(db: Session, status_callback: Callable[[str], None]
         if status_callback:
             status_callback('Refreshing overlay: interceptor_depletion')
         interceptor = collect_interceptor_depletion_signal(timeout_seconds=8.0)
-        _upsert_manual_overlay(db, interceptor.key, interceptor.value, interceptor.notes)
+        _upsert_manual_overlay(db, interceptor.key, interceptor.value, interceptor.notes, commit=commit)
         messages.append('Interceptor depletion refreshed from operational reporting.')
     except Exception:
         messages.append('Interceptor depletion remains manual/demo; operational reporting unavailable on this refresh.')
@@ -298,7 +322,7 @@ def _refresh_public_overlays(db: Session, status_callback: Callable[[str], None]
         if status_callback:
             status_callback('Refreshing overlay: governance_fragmentation')
         fragmentation = collect_governance_fragmentation_signal(timeout_seconds=8.0)
-        _upsert_manual_overlay(db, fragmentation.key, fragmentation.value, fragmentation.notes)
+        _upsert_manual_overlay(db, fragmentation.key, fragmentation.value, fragmentation.notes, commit=commit)
         messages.append('Governance fragmentation refreshed from conflict and statement scans.')
     except Exception:
         messages.append('Governance fragmentation remains manual/demo; conflict and statement scans unavailable on this refresh.')
@@ -443,7 +467,8 @@ def bootstrap_demo_only(db: Session) -> None:
     for definition in SERIES_DEFINITIONS:
         history = history_map[definition.key]
         records = compute_series_metrics(history, config['thresholds'].get(definition.key))
-        _replace_series_values(db, series_lookup[definition.key], records, source_override=f'demo/{definition.source}')
+        source_override = definition.source if definition.source.startswith('demo/') else f'demo/{definition.source}'
+        _replace_series_values(db, series_lookup[definition.key], records, source_override=source_override)
 
     seed_manual_inputs(db)
     seed_events(db)
@@ -462,14 +487,36 @@ def bootstrap_demo_only(db: Session) -> None:
     _recompute_alerts(db, config)
 
 
+def ensure_bootstrap_state(db: Session) -> None:
+    ensure_series_registry(db)
+    seed_manual_inputs(db)
+    seed_events(db)
+    existing_status = db.query(IndicatorValue.id).first()
+    if existing_status is None:
+        save_source_status(
+            db,
+            'initializing',
+            {
+                'market_data': 'Awaiting first live refresh.',
+                'treasury': 'Awaiting first live refresh.',
+                'manual_overlays': 'Manual defaults seeded; overlay refresh pending.',
+                'futures_market': 'Awaiting first live refresh.',
+                'shipping_data': 'Awaiting first live refresh.',
+                'refresh_status': 'Awaiting first live refresh.',
+            },
+        )
+
+
 def refresh_market_data(db: Session, config: dict) -> None:
     series_lookup = ensure_series_registry(db)
     seed_manual_inputs(db)
+    imported_series_keys = get_imported_series_keys(db)
     def _set_refresh_phase(message: str) -> None:
         save_source_status(
             db,
             get_source_status(db).get('data_mode', 'mixed'),
             {**dict(get_source_status(db).get('providers', {})), 'refresh_status': message},
+            commit=False,
         )
 
     history_map, source_map, provider_messages, data_mode = _build_series_payloads(
@@ -479,22 +526,36 @@ def refresh_market_data(db: Session, config: dict) -> None:
     _set_refresh_phase('Applying refreshed series to database')
 
     for definition in SERIES_DEFINITIONS:
+        if definition.key in imported_series_keys:
+            continue
         history = history_map[definition.key]
         records = compute_series_metrics(history, config['thresholds'].get(definition.key))
-        _replace_series_values(db, series_lookup[definition.key], records, source_override=source_map.get(definition.key))
+        _replace_series_values(
+            db,
+            series_lookup[definition.key],
+            records,
+            source_override=source_map.get(definition.key),
+            commit=False,
+        )
 
     _set_refresh_phase('Refreshing manual overlays')
     provider_messages['manual_overlays'] = _refresh_public_overlays(
         db,
         status_callback=_set_refresh_phase,
+        commit=False,
     )
+    if imported_series_keys:
+        provider_messages['manual_overlays'] = (
+            f"{provider_messages['manual_overlays']} Imported series preserved: {', '.join(sorted(imported_series_keys))}."
+        ).strip()
 
     _set_refresh_phase('Saving source status')
-    save_source_status(db, data_mode, provider_messages)
+    save_source_status(db, data_mode, provider_messages, commit=False)
 
     _set_refresh_phase('Recomputing regime scores')
-    _recompute_regime_scores(db, config)
+    _recompute_regime_scores(db, config, commit=False)
 
     _set_refresh_phase('Recomputing alerts')
-    _recompute_alerts(db, config)
+    _recompute_alerts(db, config, commit=False)
+    db.commit()
 

@@ -7,6 +7,9 @@ from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+BACKEND_ROOT = Path(__file__).resolve().parents[2]
+
+
 class Settings(BaseSettings):
     app_name: str = "Macro Stress Dashboard"
     app_env: str = "development"
@@ -20,7 +23,7 @@ class Settings(BaseSettings):
     refresh_hour: int = 6
     refresh_minute: int = 0
     enable_alerts: bool = True
-    regime_config_path: Path = Field(default=Path("backend/config/regime_config.json"))
+    regime_config_path: Path = Field(default=BACKEND_ROOT / "config" / "regime_config.json")
     fred_api_key: str | None = None
     eia_api_key: str | None = None
     market_data_api_key: str | None = None

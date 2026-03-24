@@ -12,6 +12,12 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
+}
+
 export function useDashboardData() {
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
   const [settings, setSettings] = useState<SettingsResponse | null>(null);
@@ -19,22 +25,50 @@ export function useDashboardData() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchDashboardState = useCallback(async () => {
+    const [overviewData, settingsData] = await Promise.all([
+      fetchJson<DashboardOverview>(`${API_BASE}/dashboard/overview`),
+      fetchJson<SettingsResponse>(`${API_BASE}/settings/config`),
+    ]);
+    setOverview(overviewData);
+    setSettings(settingsData);
+    return { overviewData, settingsData };
+  }, []);
+
   const load = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const [overviewData, settingsData] = await Promise.all([
-        fetchJson<DashboardOverview>(`${API_BASE}/dashboard/overview`),
-        fetchJson<SettingsResponse>(`${API_BASE}/settings/config`),
-      ]);
-      setOverview(overviewData);
-      setSettings(settingsData);
+      await fetchDashboardState();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load dashboard data.');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchDashboardState]);
+
+  const waitForRefreshSettlement = useCallback(
+    async (baselineStatus?: string | null) => {
+      let sawProgress = false;
+      for (let attempt = 0; attempt < 20; attempt += 1) {
+        await sleep(attempt === 0 ? 800 : 1500);
+        const { overviewData } = await fetchDashboardState();
+        const status = overviewData.source_status?.refresh_status ?? '';
+        const terminal =
+          status.startsWith('Refresh completed') ||
+          status.startsWith('Refresh failed') ||
+          status.includes('already running') ||
+          status.startsWith('Awaiting first live refresh');
+        if (!baselineStatus || status !== baselineStatus) {
+          sawProgress = true;
+        }
+        if ((sawProgress && terminal) || attempt === 19) {
+          return;
+        }
+      }
+    },
+    [fetchDashboardState],
+  );
 
   useEffect(() => {
     void load();
@@ -43,29 +77,31 @@ export function useDashboardData() {
   const refresh = useCallback(async () => {
     setSaving(true);
     try {
+      const baselineStatus = overview?.source_status?.refresh_status ?? null;
       await fetchJson(`${API_BASE}/dashboard/refresh`, { method: 'POST' });
-      await load();
+      await waitForRefreshSettlement(baselineStatus);
     } finally {
       setSaving(false);
     }
-  }, [load]);
+  }, [overview?.source_status?.refresh_status, waitForRefreshSettlement]);
 
   const saveConfig = useCallback(
     async (config: Record<string, unknown>) => {
       setSaving(true);
       try {
+        const baselineStatus = overview?.source_status?.refresh_status ?? null;
         const response = await fetchJson<SettingsResponse>(`${API_BASE}/settings/config`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(config),
         });
         setSettings(response);
-        await load();
+        await waitForRefreshSettlement(baselineStatus);
       } finally {
         setSaving(false);
       }
     },
-    [load],
+    [overview?.source_status?.refresh_status, waitForRefreshSettlement],
   );
 
   const toggleAlerts = useCallback(async (enabled: boolean) => {
@@ -84,17 +120,18 @@ export function useDashboardData() {
     async (payload: { key: string; value: number; notes: string }) => {
       setSaving(true);
       try {
+        const baselineStatus = overview?.source_status?.refresh_status ?? null;
         await fetchJson(`${API_BASE}/settings/manual-inputs`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
-        await load();
+        await waitForRefreshSettlement(baselineStatus);
       } finally {
         setSaving(false);
       }
     },
-    [load],
+    [overview?.source_status?.refresh_status, waitForRefreshSettlement],
   );
 
   const saveEvent = useCallback(
@@ -106,12 +143,12 @@ export function useDashboardData() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
-        await load();
+        await fetchDashboardState();
       } finally {
         setSaving(false);
       }
     },
-    [load],
+    [fetchDashboardState],
   );
 
   const importCsv = useCallback(
@@ -127,12 +164,12 @@ export function useDashboardData() {
         if (!response.ok) {
           throw new Error(`Failed to import CSV for ${seriesKey}`);
         }
-        await load();
+        await fetchDashboardState();
       } finally {
         setSaving(false);
       }
     },
-    [load],
+    [fetchDashboardState],
   );
 
   const exportSummary = useCallback(async () => {

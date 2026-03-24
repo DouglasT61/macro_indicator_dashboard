@@ -159,6 +159,19 @@ export function DashboardPage() {
 
   const interpretationChart = overview.interpretation_chart ?? { series: [], thresholds: [] };
   const sourceIssues = overview.headline_indicators.filter((indicator) => indicator.source_class !== 'live');
+  const sourceIssueLabels = Array.from(
+    new Set(
+      sourceIssues.map((indicator) => {
+        if (indicator.source_class === 'demo') {
+          return 'unavailable/demo';
+        }
+        if (indicator.source_class === 'support') {
+          return 'support-derived';
+        }
+        return indicator.source_class;
+      }),
+    ),
+  );
   const navItems = buildNavItems(activeTab, overview);
   const tabCounts = {
     executive: countStressedIndicators(overview.headline_indicators) + overview.alerts.filter((alert) => alert.severity !== 'info').length,
@@ -212,7 +225,7 @@ export function DashboardPage() {
         <section className="data-warning-banner">
           <strong>Source note.</strong>
           <span>
-            {sourceIssues.length} headline indicator{sourceIssues.length === 1 ? '' : 's'} currently use {sourceIssues.some((indicator) => indicator.source_class === 'demo') ? 'unavailable/demo' : 'proxy'} sources. The dashboard remains usable, but those cards should be read as fallback or proxy inputs until they resolve to direct live feeds.
+            {sourceIssues.length} headline indicator{sourceIssues.length === 1 ? '' : 's'} currently use {sourceIssueLabels.join(', ')} inputs. The dashboard remains usable, but those cards should be read according to their source badge rather than as direct market prints.
           </span>
         </section>
       ) : null}

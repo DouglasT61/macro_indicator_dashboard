@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 
 interface AboutAppModalProps {
   content: string;
@@ -47,7 +48,9 @@ export function AboutAppModal({ content, open, onClose }: AboutAppModalProps) {
             Close
           </button>
         </div>
-        <pre className="about-app-modal__content">{content}</pre>
+        <div className="about-app-modal__content about-app-modal__markdown">
+          <ReactMarkdown>{content}</ReactMarkdown>
+        </div>
       </section>
     </div>
   );

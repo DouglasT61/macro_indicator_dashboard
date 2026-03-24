@@ -46,5 +46,6 @@ def import_indicator_csv(db: Session, series_key: str, upload: UploadFile, thres
             )
         )
     series.last_updated = records[-1]["timestamp"]
+    series.source = "manual/csv-import"
     db.commit()
     return len(records)

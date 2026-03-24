@@ -281,7 +281,8 @@ The current shared runtime is intentionally:
 
 - Some public feeds remain intermittent and may fall back or become unavailable on a given refresh
 - The container starts on a deterministic bootstrap dataset and then performs live refresh asynchronously after startup
-- `EUR/USD basis` and `JPY/USD basis` still require proxy support until a clean direct public source is integrated
+- `EUR/USD basis` still relies on proxy support until a clean direct public source is integrated
+- `JPY/USD Funding Stress` is a live support-derived construct rather than a direct licensed basis quote
 - SQLite is appropriate for single-user local sharing, not multi-instance deployment
 - The app is designed for one-user desktop/container use, not clustered production hosting
 

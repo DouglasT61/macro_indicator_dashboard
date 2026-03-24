@@ -6,8 +6,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 
 from app.core.config import get_settings
-from app.core.database import SessionLocal
-from app.services.refresh_service import run_refresh
+from app.services.refresh_service import mark_refresh_queued, run_refresh_in_new_session
 
 
 settings = get_settings()
@@ -38,11 +37,9 @@ class SchedulerManager:
 
     @staticmethod
     def _job_wrapper() -> None:
-        db = SessionLocal()
-        try:
-            run_refresh(db)
-        finally:
-            db.close()
+        if not mark_refresh_queued():
+            return
+        run_refresh_in_new_session()
 
 
 scheduler_manager = SchedulerManager()

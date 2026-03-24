@@ -11,7 +11,7 @@ export interface IndicatorSnapshot {
   category: string;
   unit: string;
   source: string;
-  source_class: 'live' | 'proxy' | 'demo' | 'manual' | 'auto';
+  source_class: 'live' | 'support' | 'proxy' | 'demo' | 'manual' | 'auto';
   latest_value: number;
   normalized_value: number | null;
   zscore: number | null;

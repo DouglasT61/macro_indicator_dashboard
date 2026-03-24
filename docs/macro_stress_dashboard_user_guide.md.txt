@@ -160,9 +160,9 @@ The cost of chartering a dirty tanker (one that carries crude oil). When freight
 
 This is a text-derived overlay built from marine and war-risk insurance news sources. Marine insurance is typically where geopolitical shipping stress first becomes explicitly visible in pricing and capacity language. Underwriters withdraw coverage, reimpose exclusion zones, or demand war-risk premiums that make certain routes economically unviable long before that shows up in freight rates or oil prices.
 
-### JPY/USD Cross-Currency Basis
+### JPY/USD Funding Stress
 
-This measures how expensive it is to borrow U.S. dollars using Japanese yen as collateral in the currency swap market. When this spread turns deeply negative, it means dollar funding is tightening globally. Japan is one of the world's largest holders of U.S. Treasuries and one of the most dollar-dependent funding systems. JPY basis stress is often one of the earliest public signals that the funding chain is under real pressure.  When the JPY falls against USD, concurrently with rising energy prices (nearly 90% of oil trades globally are priced in USD)it means Japan is forced into selling assets (largely UST holdings) to pay for rising costs.  This forced selling of UST�s recursively enters the US fiscal stress and the need to issue more UST�s.
+This is a live support-derived funding-stress construct rather than a direct licensed quoted basis feed. It combines live USD/JPY, official short-rate inputs, and the app's funding-stress logic to estimate when Japanese balance-sheet pressure is transmitting into the dollar system. Japan is one of the world's largest holders of U.S. Treasuries and one of the most dollar-dependent funding systems. When the JPY weakens against USD while energy prices remain elevated, Japan's local-currency import bill worsens and the pressure on marginal U.S. Treasury demand rises with it.
 
 ### EUR/USD Cross-Currency Basis
 
@@ -245,9 +245,9 @@ Below those are official supporting inputs: SOFR and the federal funds rate from
 
 The Synthetic USD Funding Pressure score is a composite built from those direct inputs. It gives you a live, non-proxy read on overall dollar funding pressure even in the absence of a clean public direct cross-currency basis feed.
 
-The EUR/USD basis and JPY/USD basis cards are explicit proxies constructed from public data. They are directionally useful but should be read alongside the direct support inputs. If the basis proxies and the support panel are pointing in the same direction, confidence in the funding read rises. If they diverge, treat the basis signals more cautiously until they realign.
+The EUR/USD basis card is still an explicit proxy constructed from public data. The JPY funding headline now uses a live support-derived construct rather than a direct licensed basis quote. Both should still be read alongside the direct support inputs. If the proxy/support layer and the direct spot/rate inputs are pointing in the same direction, confidence in the funding read rises. If they diverge, treat the funding read more cautiously until they realign.
 
-The practical check: look at the FX Funding Support panel, verify that EUR/USD spot, USD/JPY spot, SOFR, the ECB deposit rate, and the Japan short rate are consistent with the story the basis proxies are telling. If the dollar is strengthening, short-rate differentials are widening, and the Synthetic Funding Pressure score is elevated, then a wide JPY and EUR basis signal has real credibility. If those support inputs are calm and the proxies are elevated, treat the proxy read with skepticism.
+The practical check: look at the FX Funding Support panel, verify that EUR/USD spot, USD/JPY spot, SOFR, the ECB deposit rate, and the Japan short rate are consistent with the story the EUR proxy and the JPY funding-support card are telling. If the dollar is strengthening, short-rate differentials are widening, and the Synthetic Funding Pressure score is elevated, then a stressed JPY funding read and a wide EUR basis signal have real credibility. If those support inputs are calm and the proxy/support layer is elevated, treat the funding read with skepticism.
 
 ---
 
@@ -337,7 +337,7 @@ Only after those five steps does it make sense to drill into the detailed panels
 
 No model is a perfect market oracle, and this one is no exception.
 
-The EUR/USD and JPY/USD basis cards are proxies, not direct licensed market feeds. Use them directionally, not as precise measurements.
+The EUR/USD basis card remains a proxy, not a direct licensed market feed. The JPY/USD funding card is a live support-derived construct rather than a direct licensed basis quote. Use both directionally, not as precise market measurements.
 
 Official series including FIMA, swap-line data, and monthly labor prints are publication-lagged. They confirm events that have already occurred.
 
