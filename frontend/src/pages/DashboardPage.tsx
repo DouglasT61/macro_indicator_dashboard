@@ -210,9 +210,9 @@ export function DashboardPage() {
 
       {sourceIssues.length > 0 ? (
         <section className="data-warning-banner">
-          <strong>Critical data quality warning.</strong>
+          <strong>Source note.</strong>
           <span>
-            {sourceIssues.length} headline indicator{sourceIssues.length === 1 ? '' : 's'} currently use {sourceIssues.some((indicator) => indicator.source_class === 'demo') ? 'unavailable/demo' : 'proxy'} sources. Do not treat this dashboard as a fully live market read until those cards resolve to live feeds.
+            {sourceIssues.length} headline indicator{sourceIssues.length === 1 ? '' : 's'} currently use {sourceIssues.some((indicator) => indicator.source_class === 'demo') ? 'unavailable/demo' : 'proxy'} sources. The dashboard remains usable, but those cards should be read as fallback or proxy inputs until they resolve to direct live feeds.
           </span>
         </section>
       ) : null}
