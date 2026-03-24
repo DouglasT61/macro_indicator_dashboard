@@ -293,22 +293,27 @@ export function DashboardPage() {
               <section className="dashboard-anchor" id="executive-ordering">
                 <CollapsibleSection title="Ordering Discipline" description="Sequence the shock correctly before comparing late-stage financial variables." defaultOpen>
                   <section className="executive-insight-grid">
-                    <article className="executive-insight-card">
-                      <h3>Framework</h3>
-                      <p>{overview.ordering_framework.summary}</p>
-                      <div className="executive-insight-card__metric">Lead stage: {overview.ordering_framework.lead_stage} ({overview.ordering_framework.lead_score.toFixed(1)})</div>
-                    </article>
-                    <article className="executive-insight-card">
-                      <h3>Stage Scores</h3>
-                      <div className="executive-stage-list">
-                        {overview.ordering_framework.items.map((item) => (
-                          <div key={item.label} className="executive-stage-row">
-                            <span>{item.label}</span>
-                            <div className="executive-stage-row__bar">
-                              <div className={`executive-stage-row__fill executive-stage-row__fill--${item.status}`} style={{ width: `${Math.min(100, item.score)}%` }} />
+                      <article className="executive-insight-card">
+                        <h3>Framework</h3>
+                        <p>{overview.ordering_framework.summary}</p>
+                        <div className="executive-insight-card__metric">
+                          Lead stage: {overview.ordering_framework.lead_stage} ({overview.ordering_framework.lead_score.toFixed(1)}, {overview.ordering_framework.lead_confidence_label})
+                        </div>
+                      </article>
+                      <article className="executive-insight-card">
+                        <h3>Stage Scores</h3>
+                        <div className="executive-stage-list">
+                          {overview.ordering_framework.items.map((item) => (
+                            <div key={item.label} className="executive-stage-row">
+                              <div className="executive-stage-row__label-group">
+                                <span>{item.label}</span>
+                                <span className="executive-stage-row__confidence">{item.confidence_label}</span>
+                              </div>
+                              <div className="executive-stage-row__bar">
+                                <div className={`executive-stage-row__fill executive-stage-row__fill--${item.status}`} style={{ width: `${Math.min(100, item.score)}%` }} />
+                              </div>
+                              <strong>{item.score.toFixed(1)}</strong>
                             </div>
-                            <strong>{item.score.toFixed(1)}</strong>
-                          </div>
                         ))}
                       </div>
                     </article>

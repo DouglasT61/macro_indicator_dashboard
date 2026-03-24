@@ -397,12 +397,15 @@ class OrderingStage(BaseModel):
     label: str
     score: float
     status: str
+    confidence_score: float
+    confidence_label: str
 
 
 class OrderingFrameworkOverview(BaseModel):
     summary: str
     lead_stage: str
     lead_score: float
+    lead_confidence_label: str
     items: list[OrderingStage] = Field(default_factory=list)
 
 

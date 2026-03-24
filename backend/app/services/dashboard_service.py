@@ -473,6 +473,32 @@ def _indicator_score(snapshot: dict[str, Any]) -> float:
     return round(float(normalized) * confidence, 2)
 
 
+def _raw_indicator_score(snapshot: dict[str, Any]) -> float:
+    normalized = snapshot.get('normalized_value')
+    if normalized is None:
+        warning = snapshot.get('warning_threshold')
+        critical = snapshot.get('critical_threshold')
+        direction = snapshot.get('direction', 'high')
+        if warning is not None and critical is not None:
+            normalized = normalize_value(
+                float(snapshot['latest_value']),
+                {'warning': warning, 'critical': critical, 'direction': direction},
+            )
+    if normalized is None:
+        return 0.0
+    return round(float(normalized), 2)
+
+
+def _stage_confidence_label(confidence: float) -> str:
+    if confidence >= 0.9:
+        return 'high confidence'
+    if confidence >= 0.7:
+        return 'medium confidence'
+    if confidence > 0.0:
+        return 'low confidence'
+    return 'demo-only'
+
+
 def _build_stage_scores(snapshots: dict[str, dict[str, Any]]) -> dict[str, float]:
     stage_inputs = {
         'physical': ['brent_prompt_spread', 'tanker_freight_proxy', 'marine_insurance_stress', 'hormuz_tanker_transit_stress', 'gulf_crude_dislocation'],
@@ -495,15 +521,38 @@ def _build_ordering_framework(snapshots: dict[str, dict[str, Any]]) -> dict[str,
     ]
     items = []
     for label, keys in stages:
-        values = [_indicator_score(snapshots[key]) for key in keys if key in snapshots]
-        score = round(sum(values) / len(values), 2) if values else 0.0
-        items.append({'label': label, 'score': score, 'status': _format_stage_label(score)})
-    lead = max(items, key=lambda item: item['score']) if items else {'label': 'Shock', 'score': 0.0, 'status': 'background'}
+        relevant = [snapshots[key] for key in keys if key in snapshots]
+        raw_values = [_raw_indicator_score(snapshot) for snapshot in relevant]
+        raw_score = round(sum(raw_values) / len(raw_values), 2) if raw_values else 0.0
+        confidence_values = [SOURCE_CONFIDENCE.get(snapshot.get('source_class') or 'demo', 0.0) for snapshot in relevant]
+        confidence_score = round(sum(confidence_values) / len(confidence_values), 2) if confidence_values else 0.0
+        items.append(
+            {
+                'label': label,
+                'score': raw_score,
+                'status': _format_stage_label(raw_score),
+                'confidence_score': confidence_score,
+                'confidence_label': _stage_confidence_label(confidence_score),
+            }
+        )
+    lead = max(items, key=lambda item: item['score']) if items else {
+        'label': 'Shock',
+        'score': 0.0,
+        'status': 'background',
+        'confidence_score': 0.0,
+        'confidence_label': 'demo-only',
+    }
     summary = (
         'Ordering discipline: physical shock first, household real-income squeeze next, then labor / receipts damage, '
         'and finally broader financial tightening and Fed plumbing stress.'
     )
-    return {'summary': summary, 'lead_stage': lead['label'], 'lead_score': lead['score'], 'items': items}
+    return {
+        'summary': summary,
+        'lead_stage': lead['label'],
+        'lead_score': lead['score'],
+        'lead_confidence_label': lead['confidence_label'],
+        'items': items,
+    }
 
 
 def _build_stagflation_overview(snapshots: dict[str, dict[str, Any]]) -> dict[str, Any]:

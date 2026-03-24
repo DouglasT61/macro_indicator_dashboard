@@ -407,12 +407,15 @@ export interface OrderingStage {
   label: string;
   score: number;
   status: string;
+  confidence_score: number;
+  confidence_label: string;
 }
 
 export interface OrderingFrameworkOverview {
   summary: string;
   lead_stage: string;
   lead_score: number;
+  lead_confidence_label: string;
   items: OrderingStage[];
 }
 
