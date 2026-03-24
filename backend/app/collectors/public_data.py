@@ -425,7 +425,7 @@ class PublicDataCollector:
             if history:
                 support['oil_in_yen_stress'] = CollectedSeries(
                     key='oil_in_yen_stress',
-                    source='synthetic/brent-usdjpy-local-cost',
+                    source='support/brent-usdjpy-local-cost',
                     history=history,
                 )
                 status_parts.append('oil-in-yen stress')
@@ -435,7 +435,7 @@ class PublicDataCollector:
             if history:
                 support['oil_in_eur_stress'] = CollectedSeries(
                     key='oil_in_eur_stress',
-                    source='synthetic/brent-eurusd-local-cost',
+                    source='support/brent-eurusd-local-cost',
                     history=history,
                 )
                 status_parts.append('oil-in-euro stress')
@@ -445,7 +445,7 @@ class PublicDataCollector:
             if history:
                 support['oil_in_cny_stress'] = CollectedSeries(
                     key='oil_in_cny_stress',
-                    source='synthetic/brent-usdcny-local-cost',
+                    source='support/brent-usdcny-local-cost',
                     history=history,
                 )
                 status_parts.append('oil-in-yuan stress')
@@ -462,20 +462,29 @@ class PublicDataCollector:
         if importer_history:
             support['external_importer_stress'] = CollectedSeries(
                 key='external_importer_stress',
-                source='synthetic/japan-europe-china-importer-stress',
+                source='support/japan-europe-china-importer-stress',
                 history=importer_history,
             )
             status_parts.append('external importer stress')
 
-        if expectations and tax_base and payroll:
+        if importer_history and tax_base:
             tax_base_stress = _build_threshold_stress_history(tax_base.history, warning=3.0, critical=0.0, direction='low', start=start, end=end)
-            payroll_stress = _build_threshold_stress_history(payroll.history, warning=100.0, critical=0.0, direction='low', start=start, end=end)
+            payroll_stress = (
+                _build_threshold_stress_history(payroll.history, warning=100.0, critical=0.0, direction='low', start=start, end=end)
+                if payroll
+                else []
+            )
+            receipts_stress = (
+                _build_threshold_stress_history(receipts.history, warning=45.0, critical=35.0, direction='low', start=start, end=end)
+                if receipts
+                else []
+            )
             household_history = _build_weighted_composite_history(
                 [
-                    (support.get('external_importer_stress').history if support.get('external_importer_stress') else [], 0.35),
-                    (expectations.history, 0.25),
-                    (tax_base_stress, 0.20),
-                    (payroll_stress, 0.20),
+                    (support.get('external_importer_stress').history if support.get('external_importer_stress') else [], 0.55),
+                    (tax_base_stress, 0.25),
+                    (receipts_stress, 0.10),
+                    (payroll_stress, 0.10),
                 ],
                 start,
                 end,
@@ -483,7 +492,7 @@ class PublicDataCollector:
             if household_history:
                 support['household_real_income_squeeze'] = CollectedSeries(
                     key='household_real_income_squeeze',
-                    source='synthetic/income-energy-squeeze',
+                    source='support/income-energy-squeeze',
                     history=household_history,
                 )
                 status_parts.append('household real-income squeeze')
@@ -628,6 +637,7 @@ class PublicDataCollector:
         try:
             wti_front_history = _build_direct_yahoo_history(client, 'CL=F', start, end)
             if wti_front_history:
+                collected['oil_price'] = CollectedSeries('oil_price', 'market/yahoo-wti-front-fallback', wti_front_history)
                 try:
                     murban_history = _build_tradingview_single_value_history(client, 'ICEAD-ADM1!', end, end)
                     murban_spread = _build_latest_relative_spread_history(murban_history, wti_front_history)
@@ -652,6 +662,13 @@ class PublicDataCollector:
                 failures.extend(['MURBAN_WTI', 'OMAN_WTI', 'GULF_CRUDE_DISLOCATION'])
         except Exception:
             failures.extend(['WTI_FRONT_DIRECT', 'MURBAN_WTI', 'OMAN_WTI', 'GULF_CRUDE_DISLOCATION'])
+
+        try:
+            brent_front_history = _build_direct_yahoo_history(client, 'BZ=F', start, end)
+            if brent_front_history:
+                collected['oil_price'] = CollectedSeries('oil_price', 'market/yahoo-brent-front', brent_front_history)
+        except Exception:
+            failures.append('BRENT_FRONT_DIRECT')
 
         try:
             move_bars = _fetch_yahoo_bars(client, '^MOVE', start, end)
