@@ -4,9 +4,9 @@
 
 ## Why This Exists
 
-I built this dashboard out of necessity driven by personal failure.  The dashboard should not be interpreted as a tool that tells you what will happen.  There are no guarantees for successful outcomes – there never are.  Instead, I built this tool to help me be better prepared for the direction global events are taking and thereby giving me a better chance for being prepared for what does happen over the next few months, quarters and years.
+I built this dashboard out of necessity driven by personal failure.  The dashboard should not be interpreted as a tool that tells you what will happen.  There are no guarantees for successful outcomes ï¿½ there never are.  Instead, I built this tool to help me be better prepared for the direction global events are taking and thereby giving me a better chance for being prepared for what does happen over the next few months, quarters and years.
 
-I have been investing in commercial real estate and related capital markets for forty years. In that time I’ve been caught badly positioned twice by macro forces I did not see coming, and did not understand.  Both times the lesson was the same: significant shocks to the monetary system made standard economic frameworks obsolete.  Recent Western sovereign debt bubbles and their corresponding debt to GDP and deficits to GDP largely explain why.
+I have been investing in commercial real estate and related capital markets for forty years. In that time Iï¿½ve been caught badly positioned twice by macro forces I did not see coming, and did not understand.  Both times the lesson was the same: significant shocks to the monetary system made standard economic frameworks obsolete.  Recent Western sovereign debt bubbles and their corresponding debt to GDP and deficits to GDP largely explain why.
 
 The models that most economists and strategists use today were built for a world of stable globalization, predictable energy flows, and well-functioning Treasury markets. That world is under serious stress, not only from current shocks but also from shocks occurring over the past 25 years never fully resolved. The transmission channels that connect geopolitical disruption to energy markets to dollar funding to Treasury auctions to the cost of capital for every asset class are not optional reading anymore. They are the real operating environment we are all required to operate within.
 
@@ -38,25 +38,25 @@ Here is the full progression:
 
 **The Fed is drawn in** as the market structure begins to fail. FIMA repo usage rises. Swap lines activate. The central bank becomes the buyer of last resort.
 
-**Inflation and repression risk** close the loop. If all of this happens while wages remain sticky, inflation expectations remain elevated, and the fiscal deficit is large, the policy options narrow, and the tools available to the Fed don’t match up. A clean disinflationary resolution requires the Fed to hold rates high and let the economy adjust. But if markets are dysfunctional and the debt load is too large, the incentive shifts toward holding rates below inflation, issuing more debt, and letting real returns erode over time. Refer back to the historical analog of the post-World War II era in the US.
+**Inflation and repression risk** close the loop. If all of this happens while wages remain sticky, inflation expectations remain elevated, and the fiscal deficit is large, the policy options narrow, and the tools available to the Fed donï¿½t match up. A clean disinflationary resolution requires the Fed to hold rates high and let the economy adjust. But if markets are dysfunctional and the debt load is too large, the incentive shifts toward holding rates below inflation, issuing more debt, and letting real returns erode over time. Refer back to the historical analog of the post-World War II era in the US.
 
 That is the scenario this dashboard is designed to detect early. Here's how to read and use the app:
 
 ---
 
-Monitor the dashboard daily to get a sense of daily movements – events are moving rapidly right now.  You will intuitively begin to see movements and the direction the global system is going in.  Your goal is not to make predictions – that’s a fools errand.  By understanding the direction the system is moving you then have the opportunity to positioning your own financial portfolio in a way that you have the opportunity for asymmetric returns – you have a greater expected value (“EV”) for upside than downside returns.  The most effective (no guarantee) way to accomplish this is to read the dashboard in the following sequence:
+Monitor the dashboard daily to get a sense of daily movements ï¿½ events are moving rapidly right now.  You will intuitively begin to see movements and the direction the global system is going in.  Your goal is not to make predictions ï¿½ thatï¿½s a fools errand.  By understanding the direction the system is moving you then have the opportunity to positioning your own financial portfolio in a way that you have the opportunity for asymmetric returns ï¿½ you have a greater expected value (ï¿½EVï¿½) for upside than downside returns.  The most effective (no guarantee) way to accomplish this is to read the dashboard in the following sequence:
 
-Start with the three regime cards and the fast-moving stress panel. Get the current altitude reading – overall sense of things. What regime is active, and how strong is it?
+Start with the three regime cards and the fast-moving stress panel. Get the current altitude reading ï¿½ overall sense of things. What regime is active, and how strong is it?
 
 Move to the causal chain panel. Observe where the base stress highest? Where is loop pressure building above the base stress? Is the chain advancing through the nodes or stalling early?
 
 Then check the econometric layer. What are the latent state estimates saying? What cluster family is the system in? Are any latent states accelerating?  What hidden forces are building and likely to drive the system in one direction or another?
 
-Next, look at the historical analog panel. What past episode does this most resemble? Knowing the subfamily helps you anticipate how the stress is likely to propagate from here – up or down.
+Next, look at the historical analog panel. What past episode does this most resemble? Knowing the subfamily helps you anticipate how the stress is likely to propagate from here ï¿½ up or down.
 
 Check the employment and domestic transmission panel. Is labor market weakness starting to show up? Are tax base and household credit indicators moving? If so, the stress chain is broadening beyond financial markets.
 
-Only after those five steps does it make sense to drill into the detailed panels. By then you have a thesis – not a prediction but an intuition. The detailed panels either confirm or complicate that intuition.
+Only after those five steps does it make sense to drill into the detailed panels. By then you have a thesis ï¿½ not a prediction but an intuition. The detailed panels either confirm or complicate that intuition.
 
 ## The Four Summary Cards at the Top
 
@@ -82,7 +82,7 @@ The contributors here shift away from oil and toward cross-currency basis spread
 
 ### Break / Repression
 
-This card measures whether the system is moving from stress into outright dysfunction. Think of it as the instrument that tells you whether the problem has entered official-sector territory: the Fed is having to intervene, Treasury auctions are failing to clear normally, and the domestic economy is starting to crack. The economy is entering a stagflationary regime – the Fed’s worst nightmare.  The reason is the simultaneity of rising funding costs (inflation driven rise in bond yields), and falling tax receipts, widening deficits and driving higher new Treasury issuance.  A condition often referred to as a debt death spiral, until policymakers intervene with artificial funding cost controls and massive liquidity injections.
+This card measures whether the system is moving from stress into outright dysfunction. Think of it as the instrument that tells you whether the problem has entered official-sector territory: the Fed is having to intervene, Treasury auctions are failing to clear normally, and the domestic economy is starting to crack. The economy is entering a stagflationary regime ï¿½ the Fedï¿½s worst nightmare.  The reason is the simultaneity of rising funding costs (inflation driven rise in bond yields), and falling tax receipts, widening deficits and driving higher new Treasury issuance.  A condition often referred to as a debt death spiral, until policymakers intervene with artificial funding cost controls and massive liquidity injections.
 
 Below 45 means low risk. Between 45 and 59, dysfunction risk is building. Between 60 and 74, you are in an active break-risk regime. Above 75, it is dominant.
 
@@ -122,11 +122,13 @@ That distinction matters. If a node's propagated score is much higher than its b
 
 A few design choices worth understanding:
 
-The inflation and repression node deliberately includes labor market and domestic credit metrics. When payrolls weaken and temp-help employment rolls over, federal withholding tax revenues fall (nearly 50% of federal tax receipts come from employment) and household credit stress rises at the same time. That combination feeds directly into the fiscal and repression risk story, which is why labor data belongs in this chain rather than in a separate macroeconomic sidebar. This is especially important today given the trend of AI-related job losses for white-collar workers – likely in its early stages.  Job losses propagate into consumer credit stress. What happens when banks' balance sheets when a significant portion of consumer credits go bad?
+The inflation and repression node deliberately includes labor market and domestic credit metrics. When payrolls weaken and temp-help employment rolls over, federal withholding tax revenues fall (nearly 50% of federal tax receipts come from employment) and household credit stress rises at the same time. That combination feeds directly into the fiscal and repression risk story, which is why labor data belongs in this chain rather than in a separate macroeconomic sidebar. This is especially important today given the trend of AI-related job losses for white-collar workers ï¿½ likely in its early stages.  Job losses propagate into consumer credit stress. What happens when banks' balance sheets when a significant portion of consumer credits go bad?
 
 On the shipping side, the oil node uses direct Hormuz tanker transit data from the IMF's PortWatch system rather than relying only on oil prices or news overlays. This gives the dashboard an actual physical flow signal at one of the world's most critical chokepoints.
 
 The oil block also includes direct Gulf crude dislocation spreads. Murban versus WTI and Oman versus WTI tell you whether Middle East export barrels are pricing at a premium to U.S. crude. When those spreads widen alongside Hormuz transit deterioration, freight stress, and marine insurance stress, the evidence points to a regional shock of physical supply that cannot be absorbed through normal market arbitrage. That is a much more serious development than a generalized oil rally.
+
+The dashboard also now treats **local-currency oil stress** as a live support layer. Oil in Yen, Oil in EUR, and Oil in CNY are constructed from live crude and live FX inputs, then rolled into a broader external-importer-stress block. That matters because the path from higher oil to dollar funding stress often runs through the balance sheets of import-dependent countries before it shows up cleanly in U.S. market plumbing.
 
 ---
 
@@ -160,7 +162,7 @@ This is a text-derived overlay built from marine and war-risk insurance news sou
 
 ### JPY/USD Cross-Currency Basis
 
-This measures how expensive it is to borrow U.S. dollars using Japanese yen as collateral in the currency swap market. When this spread turns deeply negative, it means dollar funding is tightening globally. Japan is one of the world's largest holders of U.S. Treasuries and one of the most dollar-dependent funding systems. JPY basis stress is often one of the earliest public signals that the funding chain is under real pressure.  When the JPY falls against USD, concurrently with rising energy prices (nearly 90% of oil trades globally are priced in USD)it means Japan is forced into selling assets (largely UST holdings) to pay for rising costs.  This forced selling of UST’s recursively enters the US fiscal stress and the need to issue more UST’s.
+This measures how expensive it is to borrow U.S. dollars using Japanese yen as collateral in the currency swap market. When this spread turns deeply negative, it means dollar funding is tightening globally. Japan is one of the world's largest holders of U.S. Treasuries and one of the most dollar-dependent funding systems. JPY basis stress is often one of the earliest public signals that the funding chain is under real pressure.  When the JPY falls against USD, concurrently with rising energy prices (nearly 90% of oil trades globally are priced in USD)it means Japan is forced into selling assets (largely UST holdings) to pay for rising costs.  This forced selling of USTï¿½s recursively enters the US fiscal stress and the need to issue more USTï¿½s.
 
 ### EUR/USD Cross-Currency Basis
 
@@ -217,6 +219,13 @@ These indicators move more slowly than market data. They are not crisis triggers
 **Unemployment Rate** is the clearest signal that macro stress is leaking into households and consumer credit. Rising unemployment raises default risk across the credit system.
 
 **Wage Stickiness** measures year-over-year average hourly earnings growth. Persistent wage growth keeps inflation alive even when financial conditions are tightening, which is precisely the toxic combination that raises repression risk. The Fed cannot ease aggressively if wages are still rising.
+
+**Household Real Income Squeeze** is now a live support composite rather than a pure demo placeholder. It is built from:
+- local-currency imported-energy stress
+- employment tax-base deterioration
+- receipts pressure
+- payroll pressure where available
+This should be read as a transmission measure. It is not a direct survey of household pain. It is a live/public approximation of how energy stress and labor-income pressure combine to squeeze real purchasing power.
 
 **Hours Worked Momentum** is worth watching before payrolls turn. Employers typically cut hours before they eliminate jobs. A deterioration here is an early warning that labor demand is weakening.
 
@@ -364,7 +373,7 @@ The UST Auction Stress card has been restructured into three weighted subcompone
 
 # Technical Reference Appendix
 
-The sections below document the mathematical and statistical architecture underlying the dashboard. They are intended for users who want to understand exactly how the scoring, propagation, and state estimation are constructed. Non-technical readers do not need this section to use the dashboard effectively, but it is included here for full transparency.  The parameters and weightings are purely theoretical and are mine.  For users statistically and geopolitically inclined, your opinion for the choices I’ve made are important and valuable to me.  Give me your feedback for what I’ve done wrong, and right.  Let’s discuss what you think should be done differently.
+The sections below document the mathematical and statistical architecture underlying the dashboard. They are intended for users who want to understand exactly how the scoring, propagation, and state estimation are constructed. Non-technical readers do not need this section to use the dashboard effectively, but it is included here for full transparency.  The parameters and weightings are purely theoretical and are mine.  For users statistically and geopolitically inclined, your opinion for the choices Iï¿½ve made are important and valuable to me.  Give me your feedback for what Iï¿½ve done wrong, and right.  Letï¿½s discuss what you think should be done differently.
 
 ## How Indicators Are Normalized
 
