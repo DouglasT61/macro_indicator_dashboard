@@ -472,6 +472,9 @@ def _format_stage_label(score: float) -> str:
 def _indicator_score(snapshot: dict[str, Any]) -> float:
     source_class = snapshot.get('source_class') or 'demo'
     confidence = SOURCE_CONFIDENCE.get(source_class, 0.0)
+    latest_value = snapshot.get('latest_value')
+    if latest_value is None:
+        return 0.0
     normalized = snapshot.get('normalized_value')
     if normalized is None:
         warning = snapshot.get('warning_threshold')
@@ -479,7 +482,7 @@ def _indicator_score(snapshot: dict[str, Any]) -> float:
         direction = snapshot.get('direction', 'high')
         if warning is not None and critical is not None:
             normalized = normalize_value(
-                float(snapshot['latest_value']),
+                float(latest_value),
                 {'warning': warning, 'critical': critical, 'direction': direction},
             )
     if normalized is None:
@@ -488,6 +491,9 @@ def _indicator_score(snapshot: dict[str, Any]) -> float:
 
 
 def _raw_indicator_score(snapshot: dict[str, Any]) -> float:
+    latest_value = snapshot.get('latest_value')
+    if latest_value is None:
+        return 0.0
     normalized = snapshot.get('normalized_value')
     if normalized is None:
         warning = snapshot.get('warning_threshold')
@@ -495,7 +501,7 @@ def _raw_indicator_score(snapshot: dict[str, Any]) -> float:
         direction = snapshot.get('direction', 'high')
         if warning is not None and critical is not None:
             normalized = normalize_value(
-                float(snapshot['latest_value']),
+                float(latest_value),
                 {'warning': warning, 'critical': critical, 'direction': direction},
             )
     if normalized is None:
