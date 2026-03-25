@@ -12,7 +12,7 @@ export interface IndicatorSnapshot {
   unit: string;
   source: string;
   source_class: 'live' | 'support' | 'proxy' | 'demo' | 'manual' | 'auto';
-  latest_value: number;
+  latest_value: number | null;
   normalized_value: number | null;
   zscore: number | null;
   rate_of_change: number | null;

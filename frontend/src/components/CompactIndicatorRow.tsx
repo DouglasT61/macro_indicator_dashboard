@@ -17,7 +17,7 @@ const SOURCE_LABELS: Record<IndicatorSnapshot['source_class'], string> = {
 
 export function CompactIndicatorRow({ indicator, events }: CompactIndicatorRowProps) {
   const isUnavailable = indicator.source_class === 'demo';
-  const valueText = isUnavailable ? 'n/a' : indicator.latest_value.toFixed(2);
+  const valueText = isUnavailable || indicator.latest_value === null ? 'n/a' : indicator.latest_value.toFixed(2);
   return (
     <article className={`compact-indicator compact-indicator--${indicator.status} ${isUnavailable ? 'compact-indicator--unavailable' : ''}`}>
       <div className="compact-indicator__main">

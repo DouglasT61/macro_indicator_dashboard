@@ -29,7 +29,7 @@ class IndicatorSnapshot(BaseModel):
     unit: str
     source: str
     source_class: str | None = None
-    latest_value: float
+    latest_value: float | None = None
     normalized_value: float | None = None
     zscore: float | None = None
     rate_of_change: float | None = None

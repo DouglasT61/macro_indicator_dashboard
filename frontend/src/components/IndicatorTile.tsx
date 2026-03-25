@@ -96,7 +96,7 @@ export function IndicatorTile({ indicator, events }: IndicatorTileProps) {
         <span className={`status-pill status-pill--${indicator.status}`}>{indicator.status}</span>
       </div>
       <div className="indicator-tile__value-row">
-        <div className="indicator-tile__value">{isUnavailable ? 'n/a' : indicator.latest_value.toFixed(2)}</div>
+        <div className="indicator-tile__value">{isUnavailable || indicator.latest_value === null ? 'n/a' : indicator.latest_value.toFixed(2)}</div>
         <div className="indicator-tile__unit">{isUnavailable ? 'unavailable' : indicator.unit}</div>
       </div>
       {isAuctionSeries ? (

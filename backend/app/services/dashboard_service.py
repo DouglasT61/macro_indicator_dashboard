@@ -264,8 +264,23 @@ def _build_indicator_snapshot(
         if key == 'jpy_usd_basis' and source_class == 'support':
             display_name = 'JPY/USD Funding Stress'
         narrative = f"{display_name} is {status} at {float(latest.value):.2f} {display_unit}."
+        latest_value: float | None = round(float(latest.value), 2)
+        normalized_value: float | None = latest.normalized_value
+        zscore: float | None = latest.zscore
+        rate_of_change: float | None = latest.rate_of_change
+        acceleration: float | None = latest.acceleration
+        history_payload: list[dict[str, Any]] = [
+            {'timestamp': item.timestamp, 'value': round(float(item.value), 2)}
+            for item in history_values
+        ]
         if source_class == 'demo':
             narrative = f'{display_name} live feed is unavailable. Demo fallback values are suppressed in the UI.'
+            latest_value = None
+            normalized_value = None
+            zscore = None
+            rate_of_change = None
+            acceleration = None
+            history_payload = []
         elif source_class == 'support':
             narrative = (
                 f'{display_name} is {status} at {float(latest.value):.2f} {display_unit}. '
@@ -286,11 +301,11 @@ def _build_indicator_snapshot(
             'unit': display_unit,
             'source': series.source,
             'source_class': source_class,
-            'latest_value': round(float(latest.value), 2),
-            'normalized_value': latest.normalized_value,
-            'zscore': latest.zscore,
-            'rate_of_change': latest.rate_of_change,
-            'acceleration': latest.acceleration,
+            'latest_value': latest_value,
+            'normalized_value': normalized_value,
+            'zscore': zscore,
+            'rate_of_change': rate_of_change,
+            'acceleration': acceleration,
             'status': status,
             'warning_threshold': thresholds['warning'] if thresholds else None,
             'critical_threshold': thresholds['critical'] if thresholds else None,
@@ -298,10 +313,7 @@ def _build_indicator_snapshot(
             'chart_style': chart_style,
             'chart_window_label': chart_window_label,
             'narrative': narrative,
-            'history': [
-                {'timestamp': item.timestamp, 'value': round(float(item.value), 2)}
-                for item in history_values
-            ],
+            'history': history_payload,
         }
 
     manual = _latest_manual_inputs(db).get(key)
