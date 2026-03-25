@@ -65,6 +65,11 @@
       "critical": 75.0,
       "direction": "high"
     },
+    "auction_belly_clearing_stress": {
+      "warning": 58.0,
+      "critical": 75.0,
+      "direction": "high"
+    },
     "auction_foreign_sponsorship_stress": {
       "warning": 58.0,
       "critical": 75.0,
@@ -73,6 +78,11 @@
     "auction_issuance_mix_stress": {
       "warning": 58.0,
       "critical": 75.0,
+      "direction": "high"
+    },
+    "auction_coupon_cluster_stress": {
+      "warning": 55.0,
+      "critical": 72.0,
       "direction": "high"
     },
     "fima_repo_usage": {
@@ -381,6 +391,12 @@
         "description": "Treasury demand is softer but not yet broken."
       },
       {
+        "indicator": "auction_belly_clearing_stress",
+        "weight": 0.04,
+        "mode": "stress",
+        "description": "Weak 5Y/7Y coupon clearing suggests Treasury stress is migrating inward before the long end fully breaks."
+      },
+      {
         "indicator": "move_index",
         "weight": 0.07,
         "mode": "stress",
@@ -528,9 +544,21 @@
       },
       {
         "indicator": "auction_stress",
-        "weight": 0.11,
+        "weight": 0.13,
         "mode": "stress",
         "description": "Long-end auction demand is slipping."
+      },
+      {
+        "indicator": "auction_belly_clearing_stress",
+        "weight": 0.07,
+        "mode": "stress",
+        "description": "Repeated weak 5Y/7Y coupon auctions show the belly is under strain."
+      },
+      {
+        "indicator": "auction_coupon_cluster_stress",
+        "weight": 0.05,
+        "mode": "stress",
+        "description": "Weak coupon auctions are clustering across recent cycles."
       },
       {
         "indicator": "treasury_basis_proxy",
@@ -641,6 +669,18 @@
         "weight": 0.17,
         "mode": "stress",
         "description": "Repeated weak auctions are impairing duration clearing."
+      },
+      {
+        "indicator": "auction_belly_clearing_stress",
+        "weight": 0.05,
+        "mode": "stress",
+        "description": "Persistent belly weakness shows duration stress is broadening across core coupon issuance."
+      },
+      {
+        "indicator": "auction_coupon_cluster_stress",
+        "weight": 0.05,
+        "mode": "stress",
+        "description": "A cluster of weak coupon auctions raises the probability that clearing stress becomes systemic."
       },
       {
         "indicator": "sofr_spread",

@@ -178,13 +178,17 @@ The MOVE Index is the bond market's equivalent of the VIX: it measures implied v
 
 ### UST Auction Stress
 
-This is one of the most structurally important cards in the dashboard, and it is worth understanding exactly what it measures. The score is a weighted composite of three distinct subcomponents, each probing a different dimension of how the Treasury market is functioning.
+This card now treats Treasury auction stress as a **multi-part coupon-clearing problem**, not just a single long-end signal. The composite is designed to catch both outright duration-clearing trouble and earlier migration of stress into the belly of the curve.
 
-**Long-End Clearing Stress** carries 50% of the weight. This captures what most investors think of as classic auction deterioration: weak bid-to-cover ratios on 7-year and longer maturities, elevated stop-out yield stress, and heavier dealer absorption. When dealers are forced to take down a larger share of an auction at a concession, it means natural buyers are stepping back.
+**Long-End Clearing Stress** carries 40% of the weight. This is the classic duration-clearing component: weaker bid-to-cover, worse stop-out behavior, and heavier dealer absorption in the 10-year, 20-year, and 30-year sector.
 
-**Foreign Sponsorship Stress** carries 30% of the weight. This measures whether the indirect bidder category, the channel through which foreign central banks and reserve managers participate, is weakening relative to recent norms. A sustained decline in indirect takedown at long-end auctions is one of the clearest publicly observable signals that foreign official demand for U.S. duration is eroding.
+**Belly Clearing Stress** carries 25% of the weight. This covers the 5-year and 7-year coupon auctions. The purpose is to detect when stress is migrating inward before the far long end fully breaks. A weak 5-year is not the same as a failed 30-year, but repeated poor 5-year and 7-year clearing is an important precursor signal.
 
-**Issuance Mix Stress** carries the remaining 20%. This tracks the rolling 90-day share of Treasury issuance shifting toward bills and shorter-dated paper relative to long-end coupons. When the Treasury Department appears to be leaning more heavily on the front end of the curve, it is often a debt-management stress signal: longer-term buyers are either unavailable or too expensive to attract.  They are actively avoiding duration.
+**Foreign Sponsorship Stress** carries 20% of the weight. This measures whether indirect participation is deteriorating relative to each tenor bucket's own history. It is the public proxy for weakening foreign and reserve-manager sponsorship of Treasury coupons.
+
+**Issuance Mix Stress** carries 10% of the weight. This tracks whether Treasury issuance is leaning more heavily on the front end relative to longer-duration coupons. It is treated as a secondary structural stress signal rather than the main clearing signal.
+
+**Coupon Cluster Stress** carries 5% of the weight. This is the streak-and-clustering term. One weak coupon auction matters; repeated weak 5-year, 7-year, 10-year, or long-bond auctions in a short window matter more because they suggest the problem is broadening rather than idiosyncratic.
 
 Because Treasury auctions are events rather than continuous market data, the auction card behaves differently from other cards in the dashboard. It is event-native. Rather than a sparkline, it shows the window used to calculate the score, the date of the last score change, the number of stressed auction events in the prior three months and six months, and the most recent step changes with full dates.
 

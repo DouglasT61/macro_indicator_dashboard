@@ -73,7 +73,7 @@ PANEL_LAYOUT = {
             'id': 'ust-funding',
             'title': 'UST / Funding View',
             'description': 'Duration clearing, yields, term premium, auctions, and FIMA use.',
-            'series': ['ten_year_yield', 'thirty_year_yield', 'term_premium_proxy', 'auction_stress', 'auction_clearing_stress', 'auction_foreign_sponsorship_stress', 'auction_issuance_mix_stress', 'fima_repo_usage', 'fed_swap_line_usage'],
+            'series': ['ten_year_yield', 'thirty_year_yield', 'term_premium_proxy', 'auction_stress', 'auction_clearing_stress', 'auction_belly_clearing_stress', 'auction_foreign_sponsorship_stress', 'auction_issuance_mix_stress', 'auction_coupon_cluster_stress', 'fima_repo_usage', 'fed_swap_line_usage'],
         },
         {
             'id': 'inflation-expectations',

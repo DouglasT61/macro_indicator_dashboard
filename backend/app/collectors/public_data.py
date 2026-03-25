@@ -2113,49 +2113,131 @@ def _compute_auction_stress_histories(rows: list[dict[str, str]], start: date, e
     if not auctions:
         return {}
 
-    long_end_auctions = [
+    coupon_auctions = [
         item
         for item in auctions
         if str(item['security_type']) in {'Note', 'Bond'}
-        and float(item['term_years']) >= 7.0
+        and float(item['term_years']) >= 5.0
         and item['bid_to_cover'] is not None
     ]
-    if not long_end_auctions:
+    if not coupon_auctions:
         return {}
 
-    long_end_auctions = sorted(long_end_auctions, key=lambda item: item['auction_date'])  # type: ignore[arg-type]
+    coupon_auctions = sorted(coupon_auctions, key=lambda item: item['auction_date'])  # type: ignore[arg-type]
 
+    belly_points: list[tuple[date, float]] = []
     clearing_points: list[tuple[date, float]] = []
     sponsorship_points: list[tuple[date, float]] = []
-    btc_values: list[float] = []
-    yield_values: list[float] = []
-    indirect_values: list[float] = []
-    dealer_values: list[float] = []
-    for item in long_end_auctions:
+    cluster_points: list[tuple[date, float]] = []
+    bucket_history: dict[str, dict[str, list[float]]] = {}
+    recent_coupon_events: list[dict[str, date | float | str]] = []
+
+    def _tenor_bucket(term_years: float) -> str:
+        if term_years < 6.0:
+            return '5y'
+        if term_years < 8.5:
+            return '7y'
+        if term_years < 15.0:
+            return '10y'
+        return '20yplus'
+
+    def _bucket_weight(bucket: str) -> float:
+        return {
+            '5y': 1.0,
+            '7y': 1.1,
+            '10y': 1.2,
+            '20yplus': 1.35,
+        }.get(bucket, 1.0)
+
+    for item in coupon_auctions:
+        term_years = float(item['term_years'])
+        bucket = _tenor_bucket(term_years)
+        bucket_values = bucket_history.setdefault(
+            bucket,
+            {
+                'btc': [],
+                'yield': [],
+                'indirect': [],
+                'dealer': [],
+            },
+        )
         bid_to_cover = float(item['bid_to_cover'])
         high_yield = float(item['high_yield'])
-        btc_values.append(bid_to_cover)
-        yield_values.append(high_yield)
+        btc_sample = [*bucket_values['btc'], bid_to_cover]
+        yield_sample = [*bucket_values['yield'], high_yield]
 
-        btc_stress = _percentile_rank(btc_values, bid_to_cover, inverse=True)
-        yield_stress = _percentile_rank(yield_values, high_yield)
+        btc_stress = _percentile_rank(btc_sample, bid_to_cover, inverse=True)
+        yield_stress = _percentile_rank(yield_sample, high_yield)
         indirect_share = float(item['indirect_share'])
         dealer_share = float(item['dealer_share'])
         if indirect_share > 0:
-            indirect_values.append(indirect_share)
-            indirect_stress = _percentile_rank(indirect_values, indirect_share, inverse=True)
+            indirect_sample = [*bucket_values['indirect'], indirect_share]
+            indirect_stress = _percentile_rank(indirect_sample, indirect_share, inverse=True)
         else:
             indirect_stress = 50.0
         if dealer_share > 0:
-            dealer_values.append(dealer_share)
-            dealer_stress = _percentile_rank(dealer_values, dealer_share)
+            dealer_sample = [*bucket_values['dealer'], dealer_share]
+            dealer_stress = _percentile_rank(dealer_sample, dealer_share)
         else:
             dealer_stress = 50.0
 
         clearing_score = round(0.45 * btc_stress + 0.30 * yield_stress + 0.25 * dealer_stress, 4)
         sponsorship_score = round(0.65 * indirect_stress + 0.35 * dealer_stress, 4)
-        clearing_points.append((item['auction_date'], clearing_score))
+        if term_years >= 10.0:
+            clearing_points.append((item['auction_date'], clearing_score))
+        if 5.0 <= term_years < 8.5:
+            belly_points.append((item['auction_date'], clearing_score))
         sponsorship_points.append((item['auction_date'], sponsorship_score))
+
+        severity = 0.0
+        if clearing_score >= 75.0:
+            severity = 1.0
+        elif clearing_score >= 58.0:
+            severity = 0.6
+
+        recent_coupon_events.append(
+            {
+                'auction_date': item['auction_date'],
+                'bucket': bucket,
+                'severity': severity,
+                'weight': _bucket_weight(bucket),
+            }
+        )
+        auction_day = item['auction_date']
+        if isinstance(auction_day, date):
+            window_start = auction_day - timedelta(days=60)
+            recent_window = [
+                event
+                for event in recent_coupon_events
+                if isinstance(event['auction_date'], date)
+                and window_start <= event['auction_date'] <= auction_day
+            ]
+            weighted_cluster = sum(float(event['severity']) * float(event['weight']) for event in recent_window)
+            recent_belly = [
+                event
+                for event in recent_coupon_events
+                if event['bucket'] in {'5y', '7y'} and float(event['severity']) > 0
+            ]
+            streak_bonus = 0.0
+            if len(recent_belly) >= 2:
+                last_two = recent_belly[-2:]
+                first_day = last_two[0]['auction_date']
+                second_day = last_two[1]['auction_date']
+                if (
+                    isinstance(first_day, date)
+                    and isinstance(second_day, date)
+                    and (second_day - first_day).days <= 45
+                ):
+                    streak_bonus = 0.8
+            cluster_score = min(100.0, ((weighted_cluster + streak_bonus) / 3.5) * 100.0)
+            cluster_points.append((auction_day, round(cluster_score, 4)))
+
+        bucket_values['btc'].append(bid_to_cover)
+        bucket_values['yield'].append(high_yield)
+        if indirect_share > 0:
+            bucket_values['indirect'].append(indirect_share)
+        if dealer_share > 0:
+            bucket_values['dealer'].append(dealer_share)
 
     issuance_points: list[tuple[date, float]] = []
     issuance_gaps: list[float] = []
@@ -2192,13 +2274,17 @@ def _compute_auction_stress_histories(rows: list[dict[str, str]], start: date, e
         issuance_points.append((auction_day, round(issuance_stress, 4)))
 
     clearing_history = _densify_daily(clearing_points, start, end)
+    belly_history = _densify_daily(belly_points, start, end)
     sponsorship_history = _densify_daily(sponsorship_points, start, end)
+    cluster_history = _densify_daily(cluster_points, start, end)
     issuance_history = _densify_daily(issuance_points, start, end)
     composite_history = _build_weighted_composite_history(
         [
-            (clearing_history, 0.50),
-            (sponsorship_history, 0.30),
-            (issuance_history, 0.20),
+            (clearing_history, 0.40),
+            (belly_history, 0.25),
+            (sponsorship_history, 0.20),
+            (issuance_history, 0.10),
+            (cluster_history, 0.05),
         ],
         start,
         end,
@@ -2207,8 +2293,10 @@ def _compute_auction_stress_histories(rows: list[dict[str, str]], start: date, e
     return {
         'auction_stress': composite_history,
         'auction_clearing_stress': clearing_history,
+        'auction_belly_clearing_stress': belly_history,
         'auction_foreign_sponsorship_stress': sponsorship_history,
         'auction_issuance_mix_stress': issuance_history,
+        'auction_coupon_cluster_stress': cluster_history,
     }
 
 

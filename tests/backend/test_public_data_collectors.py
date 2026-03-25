@@ -63,13 +63,23 @@ def test_compute_auction_stress_history_generates_daily_step_series() -> None:
             'offering_amt': '22000000000',
             'indirect_bidder_accepted': '12000000000',
         },
+        {
+            'auction_date': '2026-03-25',
+            'security_type': 'Note',
+            'security_term': '5-Year',
+            'bid_to_cover_ratio': '2.20',
+            'high_yield': '4.45',
+            'offering_amt': '70000000000',
+            'indirect_bidder_accepted': '39000000000',
+            'primary_dealer_accepted': '15000000000',
+        },
     ]
 
-    history = _compute_auction_stress_history(rows, start=date(2026, 3, 10), end=date(2026, 3, 13))
+    history = _compute_auction_stress_history(rows, start=date(2026, 3, 10), end=date(2026, 3, 26))
 
-    assert len(history) == 4
+    assert len(history) == 17
     assert history[0][1] < history[-1][1]
-    assert history[2][1] == history[3][1]
+    assert history[-2][1] == history[-1][1]
 
 
 def test_auction_stress_history_uses_trailing_distribution_without_future_lookahead() -> None:
@@ -96,13 +106,13 @@ def test_auction_stress_history_uses_trailing_distribution_without_future_lookah
         },
         {
             'auction_date': '2026-03-10',
-            'security_type': 'Bond',
-            'security_term': '30-Year',
-            'bid_to_cover_ratio': '1.80',
-            'high_yield': '5.10',
-            'offering_amt': '22000000000',
-            'indirect_bidder_accepted': '8000000000',
-            'primary_dealer_accepted': '11000000000',
+            'security_type': 'Note',
+            'security_term': '10-Year',
+            'bid_to_cover_ratio': '2.10',
+            'high_yield': '4.60',
+            'offering_amt': '39000000000',
+            'indirect_bidder_accepted': '18000000000',
+            'primary_dealer_accepted': '14000000000',
         },
     ]
 
@@ -116,6 +126,68 @@ def test_auction_stress_history_uses_trailing_distribution_without_future_lookah
     assert jan10 == 50.0
     assert feb10 > jan10
     assert mar10 > feb10
+
+
+def test_auction_histories_capture_belly_and_cluster_stress_from_repeated_5y_weakness() -> None:
+    rows = [
+        {
+            'auction_date': '2026-01-27',
+            'security_type': 'Note',
+            'security_term': '5-Year',
+            'bid_to_cover_ratio': '2.55',
+            'high_yield': '4.18',
+            'offering_amt': '70000000000',
+            'indirect_bidder_accepted': '43000000000',
+            'primary_dealer_accepted': '12000000000',
+        },
+        {
+            'auction_date': '2026-02-25',
+            'security_type': 'Note',
+            'security_term': '5-Year',
+            'bid_to_cover_ratio': '2.32',
+            'high_yield': '4.31',
+            'offering_amt': '70000000000',
+            'indirect_bidder_accepted': '43600000000',
+            'primary_dealer_accepted': '8950000000',
+        },
+        {
+            'auction_date': '2026-03-26',
+            'security_type': 'Note',
+            'security_term': '5-Year',
+            'bid_to_cover_ratio': '2.15',
+            'high_yield': '4.44',
+            'offering_amt': '70000000000',
+            'indirect_bidder_accepted': '39800000000',
+            'primary_dealer_accepted': '16500000000',
+        },
+        {
+            'auction_date': '2026-03-10',
+            'security_type': 'Note',
+            'security_term': '10-Year',
+            'bid_to_cover_ratio': '2.52',
+            'high_yield': '4.35',
+            'offering_amt': '39000000000',
+            'indirect_bidder_accepted': '24000000000',
+            'primary_dealer_accepted': '10500000000',
+        },
+    ]
+
+    histories = _compute_auction_stress_histories(rows, start=date(2026, 1, 27), end=date(2026, 3, 27))
+
+    belly = histories['auction_belly_clearing_stress']
+    cluster = histories['auction_coupon_cluster_stress']
+    composite = histories['auction_stress']
+
+    jan = next(value for timestamp, value in belly if timestamp.date() == date(2026, 1, 27))
+    feb = next(value for timestamp, value in belly if timestamp.date() == date(2026, 2, 25))
+    mar = next(value for timestamp, value in belly if timestamp.date() == date(2026, 3, 26))
+    cluster_mar = next(value for timestamp, value in cluster if timestamp.date() == date(2026, 3, 26))
+    composite_mar = next(value for timestamp, value in composite if timestamp.date() == date(2026, 3, 26))
+
+    assert feb > jan
+    assert mar > feb
+    assert cluster_mar > 0
+    assert composite_mar >= mar * 0.5
 
 
 def test_basis_proxy_series_becomes_more_negative_with_wider_rate_gap_and_fx_vol() -> None:
