@@ -348,7 +348,7 @@ class CausalNode(BaseModel):
 class CrisisSignal(BaseModel):
     key: str
     label: str
-    value: float
+    value: float | None = None
     status: str
     explanation: str
 

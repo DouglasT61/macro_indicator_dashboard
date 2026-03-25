@@ -30,7 +30,7 @@ export function CrisisMonitor({ signals, active }: CrisisMonitorProps) {
               <div className="crisis-signal__label">{signal.label}</div>
               <span className={`status-pill status-pill--${signal.status}`}>{signal.status}</span>
             </div>
-            <div className="crisis-signal__value">{signal.value.toFixed(2)}</div>
+              <div className="crisis-signal__value">{signal.value === null ? 'n/a' : signal.value.toFixed(2)}</div>
             <p>{signal.explanation}</p>
           </article>
         ))}

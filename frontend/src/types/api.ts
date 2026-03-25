@@ -352,7 +352,7 @@ export interface CausalNode {
 export interface CrisisSignal {
   key: string;
   label: string;
-  value: number;
+  value: number | null;
   status: StatusColor;
   explanation: string;
 }
