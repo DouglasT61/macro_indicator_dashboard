@@ -28,7 +28,7 @@ HEADLINE_KEYS = [
 CRISIS_KEYS = [
     ('treasury_liquidity_proxy', 'Treasury liquidity / depth proxy'),
     ('sofr_spread', 'SOFR versus target'),
-    ('treasury_basis_proxy', 'Cash-futures Treasury basis proxy'),
+    ('treasury_basis_proxy', 'Synthetic CTD Treasury basis stress'),
     ('jpy_usd_basis', 'JPY cross-currency basis'),
     ('brent_prompt_spread', 'Brent M1-M6 spread'),
 ]
@@ -263,6 +263,8 @@ def _build_indicator_snapshot(
         display_unit = series.unit
         if key == 'jpy_usd_basis' and source_class == 'support':
             display_name = 'JPY/USD Funding Stress'
+        if key == 'treasury_basis_proxy':
+            display_name = 'Synthetic CTD Treasury Basis Stress'
         narrative = f"{display_name} is {status} at {float(latest.value):.2f} {display_unit}."
         latest_value: float | None = round(float(latest.value), 2)
         normalized_value: float | None = latest.normalized_value

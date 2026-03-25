@@ -194,9 +194,9 @@ One nuance worth understanding: the card can show a current critical score along
 
 A market-derived measure of depth in the Treasury futures market. Thin markets mean small trades move prices disproportionately, which is a hallmark of stress. Poor liquidity in Treasuries is a precondition for the kind of disorderly moves that force official intervention.
 
-### Treasury Basis Stress Proxy
+### Synthetic CTD Treasury Basis Stress
 
-Measures the divergence between Treasury cash prices and futures prices. Normally these are tightly linked by arbitrage. When they diverge, it signals that the leveraged basis trade, a core strategy of hedge funds that provide enormous amounts of Treasury market liquidity, is breaking down. A basis unwind can become a self-reinforcing feedback loop. This was one of the central dynamics in the March 2020 Treasury market dislocation.
+Measures a CTD-style approximation of Treasury cash-versus-futures stress. The app uses front-month 10-year Treasury note futures (`ZN`) and compares them against a synthetic 8-year, 6% coupon Treasury priced off the official U.S. Treasury 7-year and 10-year cash-yield curve. It is not the exact hedge-fund cash-futures basis trade, because the public stack does not include the full deliverable basket, cheapest-to-deliver identity, conversion factors, or repo specialness. It is a support-derived live construct designed to estimate when the cash-futures relationship is diverging enough that basis-trade stress is becoming a meaningful part of the Treasury-plumbing story.
 
 ### FIMA Repo Usage
 

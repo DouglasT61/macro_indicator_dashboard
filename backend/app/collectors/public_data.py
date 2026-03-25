@@ -583,7 +583,9 @@ class PublicDataCollector:
             failures.append('DEBT')
 
         try:
-            ten_year, thirty_year = self._fetch_treasury_yield_curve_history(client, start, end)
+            curve_terms = self._fetch_treasury_yield_curve_terms(client, start, end)
+            ten_year = curve_terms.get('10 Yr', [])
+            thirty_year = curve_terms.get('30 Yr', [])
             ten_dense = _densify_daily(ten_year, start, end)
             thirty_dense = _densify_daily(thirty_year, start, end)
             if ten_dense:
@@ -722,12 +724,14 @@ class PublicDataCollector:
             zn_specs = _generate_contract_specs('ZN', '.CBT', start, end, monthly=False, roll_lead_days=20)
             zn_bars = self._fetch_contract_bar_map(client, zn_specs, start, end)
             front_history = _build_front_contract_history(zn_specs, zn_bars, start, end)
-            dgs10 = self._fetch_fred_csv(client, 'DGS10', start, end)
-            basis_history = _build_treasury_basis_history(front_history, _densify_daily(dgs10, start, end))
+            curve_terms = self._fetch_treasury_yield_curve_terms(client, start, end)
+            seven_dense = _densify_daily(curve_terms.get('7 Yr', []), start, end)
+            ten_dense = _densify_daily(curve_terms.get('10 Yr', []), start, end)
+            basis_history = _build_synthetic_ctd_basis_history(front_history, seven_dense, ten_dense)
             if basis_history:
                 collected['treasury_basis_proxy'] = CollectedSeries(
                     'treasury_basis_proxy',
-                    'market/yahoo-zn-basis',
+                    'support/zn-synthetic-ctd-basis',
                     basis_history,
                 )
         except Exception:
@@ -1127,14 +1131,17 @@ class PublicDataCollector:
             raise ValueError('No debt-to-penny observations returned')
         return observations
 
-    def _fetch_treasury_yield_curve_history(
+    def _fetch_treasury_yield_curve_terms(
         self,
         client: httpx.Client,
         start: date,
         end: date,
-    ) -> tuple[list[tuple[date, float]], list[tuple[date, float]]]:
-        ten_year: list[tuple[date, float]] = []
-        thirty_year: list[tuple[date, float]] = []
+    ) -> dict[str, list[tuple[date, float]]]:
+        terms: dict[str, list[tuple[date, float]]] = {
+            '7 Yr': [],
+            '10 Yr': [],
+            '30 Yr': [],
+        }
         for year in range(start.year, end.year + 1):
             response = client.get(
                 TREASURY_YIELD_CSV_URL.format(year=year),
@@ -1149,15 +1156,22 @@ class PublicDataCollector:
                 day = datetime.strptime(observed_at, '%m/%d/%Y').date()
                 if day < start or day > end:
                     continue
-                ten = _safe_float(row.get('10 Yr'))
-                thirty = _safe_float(row.get('30 Yr'))
-                if ten is not None:
-                    ten_year.append((day, ten))
-                if thirty is not None:
-                    thirty_year.append((day, thirty))
-        if not ten_year and not thirty_year:
+                for term in terms:
+                    value = _safe_float(row.get(term))
+                    if value is not None:
+                        terms[term].append((day, value))
+        if not any(terms.values()):
             raise ValueError('No Treasury yield-curve observations returned')
-        return ten_year, thirty_year
+        return terms
+
+    def _fetch_treasury_yield_curve_history(
+        self,
+        client: httpx.Client,
+        start: date,
+        end: date,
+    ) -> tuple[list[tuple[date, float]], list[tuple[date, float]]]:
+        terms = self._fetch_treasury_yield_curve_terms(client, start, end)
+        return terms.get('10 Yr', []), terms.get('30 Yr', [])
 
     def _fetch_nyfed_rate_history(
         self,
@@ -1554,23 +1568,106 @@ def _build_treasury_depth_history(front_history: list[YahooBar], window: int = 2
     return [(bar.timestamp, round(value, 6)) for bar, value in zip(front_history, stress_values)]
 
 
-def _build_treasury_basis_history(
+def _semiannual_bond_price(
+    yield_percent: float,
+    *,
+    coupon_percent: float,
+    maturity_years: float,
+    face_value: float = 100.0,
+) -> float:
+    periods = max(1, int(round(maturity_years * 2.0)))
+    yield_per_period = (yield_percent / 100.0) / 2.0
+    coupon_cashflow = face_value * (coupon_percent / 100.0) / 2.0
+    present_value = 0.0
+    for period in range(1, periods + 1):
+        discount = (1.0 + yield_per_period) ** period
+        present_value += coupon_cashflow / discount
+    present_value += face_value / ((1.0 + yield_per_period) ** periods)
+    return present_value
+
+
+def _yield_from_bond_price(
+    price: float,
+    *,
+    coupon_percent: float,
+    maturity_years: float,
+    lower_bound: float = 0.01,
+    upper_bound: float = 12.0,
+    iterations: int = 40,
+) -> float:
+    if price <= 0:
+        return upper_bound
+    low = lower_bound
+    high = upper_bound
+    for _ in range(iterations):
+        midpoint = (low + high) / 2.0
+        model_price = _semiannual_bond_price(
+            midpoint,
+            coupon_percent=coupon_percent,
+            maturity_years=maturity_years,
+        )
+        if model_price > price:
+            low = midpoint
+        else:
+            high = midpoint
+    return (low + high) / 2.0
+
+
+def _build_synthetic_ctd_basis_history(
     front_history: list[YahooBar],
+    seven_year_yield_history: list[tuple[datetime, float]],
     ten_year_yield_history: list[tuple[datetime, float]],
+    *,
+    synthetic_maturity_years: float = 8.0,
+    synthetic_coupon_percent: float = 6.0,
     window: int = 20,
 ) -> list[tuple[datetime, float]]:
-    cash_price_proxy = [100.0 - 8.0 * item[1] for item in ten_year_yield_history]
-    futures_prices = [bar.close for bar in front_history]
-    divergence: list[float] = []
-    for index in range(len(front_history)):
-        start_index = max(0, index - window + 1)
-        future_slice = futures_prices[start_index:index + 1]
-        cash_slice = cash_price_proxy[start_index:index + 1]
-        future_z = _trailing_zscore(future_slice)
-        cash_z = _trailing_zscore(cash_slice)
-        divergence.append(abs(future_z - cash_z) * 25.0)
-    stress_values = _rolling_percentile_series(divergence, window=window)
-    return [(front_history[index].timestamp, round(stress_values[index], 6)) for index in range(len(front_history))]
+    if not front_history or not seven_year_yield_history or not ten_year_yield_history:
+        return []
+
+    seven_map = {timestamp.date(): float(value) for timestamp, value in seven_year_yield_history}
+    ten_map = {timestamp.date(): float(value) for timestamp, value in ten_year_yield_history}
+
+    gaps_bps: list[float] = []
+    history: list[tuple[datetime, float]] = []
+    interpolation_weight = max(0.0, min(1.0, synthetic_maturity_years - 7.0))
+
+    for bar in front_history:
+        day = bar.timestamp.date()
+        seven_year = seven_map.get(day)
+        ten_year = ten_map.get(day)
+        if seven_year is None or ten_year is None:
+            continue
+
+        synthetic_cash_yield = seven_year + interpolation_weight * (ten_year - seven_year)
+        futures_implied_yield = _yield_from_bond_price(
+            bar.close,
+            coupon_percent=synthetic_coupon_percent,
+            maturity_years=synthetic_maturity_years,
+        )
+        synthetic_cash_price = _semiannual_bond_price(
+            synthetic_cash_yield,
+            coupon_percent=synthetic_coupon_percent,
+            maturity_years=synthetic_maturity_years,
+        )
+        basis_gap_bps = abs(synthetic_cash_yield - futures_implied_yield) * 100.0
+        price_gap_points = abs(synthetic_cash_price - bar.close)
+        normalized_price_gap = min(100.0, price_gap_points * 18.0)
+        normalized_yield_gap = min(100.0, basis_gap_bps * 2.0)
+        raw_stress = 0.75 * normalized_yield_gap + 0.25 * normalized_price_gap
+        gaps_bps.append(basis_gap_bps)
+        start_index = max(0, len(gaps_bps) - window)
+        local_sample = gaps_bps[start_index:]
+        local_mean = sum(local_sample) / len(local_sample)
+        local_std = _sample_stddev(local_sample)
+        if local_std == 0:
+            dispersion_boost = 0.0
+        else:
+            dispersion_boost = max(0.0, min(25.0, ((basis_gap_bps - local_mean) / local_std) * 8.0))
+        stress_value = max(0.0, min(100.0, raw_stress + dispersion_boost))
+        history.append((bar.timestamp, round(stress_value, 6)))
+
+    return history
 
 
 def _forward_fill_history(

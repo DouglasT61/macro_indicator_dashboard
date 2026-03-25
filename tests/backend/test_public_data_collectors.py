@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime, timezone
 
 from app.collectors.public_data import (
     YahooBar,
@@ -10,7 +10,7 @@ from app.collectors.public_data import (
     _build_period_change_history,
     _build_payroll_tax_base_history,
     _build_pointwise_series,
-    _build_treasury_basis_history,
+    _build_synthetic_ctd_basis_history,
     _build_treasury_depth_history,
     _compute_auction_stress_histories,
     _compute_auction_stress_history,
@@ -174,13 +174,40 @@ def test_front_contract_history_and_treasury_metrics_build() -> None:
     }
     front_history = _build_front_contract_history(specs, bar_map, start=date(2026, 3, 1), end=date(2026, 3, 5))
     depth = _build_treasury_depth_history(front_history, window=3)
-    basis = _build_treasury_basis_history(front_history, [(bar.timestamp, 4.2 + index * 0.02) for index, bar in enumerate(front_history)], window=3)
+    seven_year = [(bar.timestamp, 4.05 + index * 0.02) for index, bar in enumerate(front_history)]
+    ten_year = [(bar.timestamp, 4.20 + index * 0.02) for index, bar in enumerate(front_history)]
+    basis = _build_synthetic_ctd_basis_history(front_history, seven_year, ten_year, window=3)
 
     assert len(front_history) == 5
     assert len(depth) == 5
     assert len(basis) == 5
     assert all(value >= 0 for _, value in depth)
     assert all(value >= 0 for _, value in basis)
+
+
+def test_synthetic_ctd_basis_history_rises_with_larger_futures_cash_yield_gap() -> None:
+    front_history = [
+        YahooBar(timestamp=datetime(2026, 3, day, tzinfo=timezone.utc), close=110.9 + offset, high=111.0, low=110.5, volume=90000.0)
+        for offset, day in enumerate(range(1, 6))
+    ]
+    seven_year = [
+        (datetime(2026, 3, day, tzinfo=timezone.utc), 4.00 + 0.01 * index)
+        for index, day in enumerate(range(1, 6))
+    ]
+    ten_year = [
+        (datetime(2026, 3, day, tzinfo=timezone.utc), 4.20 + 0.01 * index)
+        for index, day in enumerate(range(1, 6))
+    ]
+
+    calm = _build_synthetic_ctd_basis_history(front_history, seven_year, ten_year, window=3)
+    stressed_front_history = [
+        YahooBar(timestamp=bar.timestamp, close=bar.close + 2.5, high=bar.high + 2.5, low=bar.low + 2.5, volume=bar.volume)
+        for bar in front_history
+    ]
+    stressed = _build_synthetic_ctd_basis_history(stressed_front_history, seven_year, ten_year, window=3)
+
+    assert len(calm) == len(stressed) == 5
+    assert stressed[-1][1] > calm[-1][1]
 
 
 

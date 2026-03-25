@@ -46,7 +46,7 @@ SERIES_DEFINITIONS: list[SeriesDefinition] = [
     SeriesDefinition("sofr_spread", "SOFR Minus Target Midpoint", "funding", "demo/nyfed_stub", "daily", "bps", "Repo funding stress proxied by SOFR relative to target midpoint."),
     SeriesDefinition("move_index", "MOVE Index", "funding", "demo/vol_stub", "daily", "index", "Treasury volatility proxy."),
     SeriesDefinition("treasury_liquidity_proxy", "Treasury Liquidity Proxy", "funding", "demo/market_depth_stub", "daily", "index", "Treasury market depth/liquidity stress proxy."),
-    SeriesDefinition("treasury_basis_proxy", "Treasury Basis Stress Proxy", "funding", "demo/market_depth_stub", "daily", "index", "Cash-futures Treasury basis stress proxy."),
+    SeriesDefinition("treasury_basis_proxy", "Synthetic CTD Treasury Basis Stress", "funding", "demo/market_depth_stub", "daily", "index", "Synthetic CTD-style Treasury basis stress built from ZN futures versus an interpolated 7Y/10Y official cash-yield curve."),
     SeriesDefinition("auction_stress", "UST Auction Stress", "ust_funding", "demo/treasury_stub", "daily", "index", "Composite of long-end clearing stress, foreign sponsorship stress, and front-end issuance mix stress."),
     SeriesDefinition("auction_clearing_stress", "UST Long-End Clearing Stress", "ust_funding", "demo/treasury_stub", "daily", "index", "Long-end auction clearing stress built from bid-to-cover weakness, elevated stop-out yields, and dealer absorption."),
     SeriesDefinition("auction_foreign_sponsorship_stress", "UST Foreign Sponsorship Stress", "ust_funding", "demo/treasury_stub", "daily", "index", "Weak foreign and indirect participation in long-end auctions, with higher dealer warehousing stress."),
