@@ -1,6 +1,6 @@
 ﻿import { useState, type ReactNode } from 'react';
 
-import guideContent from '../../../docs/macro_stress_dashboard_user_guide.md.txt?raw';
+import guideContent from '../../../docs/macro_stress_dashboard_user_guide.md.tx?raw';
 import { AboutAppModal } from '../components/AboutAppModal';
 import { AdvancedAnalyticsModal } from '../components/AdvancedAnalyticsModal';
 import { AlertList } from '../components/AlertList';
