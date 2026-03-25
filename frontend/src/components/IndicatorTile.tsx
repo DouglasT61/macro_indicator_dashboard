@@ -82,6 +82,16 @@ export function IndicatorTile({ indicator, events }: IndicatorTileProps) {
   const isAuto = indicator.source_class === 'auto';
   const isAuctionSeries = indicator.key.startsWith('auction_');
   const auctionSummary = isAuctionSeries ? buildAuctionEventSummary(indicator) : null;
+  const contribution = indicator.model_contribution;
+  const dominantContribution = indicator.dominant_model_contribution ?? 0;
+  const dominantRegimeLabel =
+    indicator.dominant_model_regime === 'sticky'
+      ? 'Sticky'
+      : indicator.dominant_model_regime === 'convex'
+        ? 'Convex'
+        : indicator.dominant_model_regime === 'break'
+          ? 'Break'
+          : null;
 
   return (
     <article className={`indicator-tile indicator-tile--${indicator.status} ${isUnavailable ? 'indicator-tile--unavailable' : ''}`}>
@@ -96,8 +106,14 @@ export function IndicatorTile({ indicator, events }: IndicatorTileProps) {
         <span className={`status-pill status-pill--${indicator.status}`}>{indicator.status}</span>
       </div>
       <div className="indicator-tile__value-row">
-        <div className="indicator-tile__value">{isUnavailable || indicator.latest_value === null ? 'n/a' : indicator.latest_value.toFixed(2)}</div>
-        <div className="indicator-tile__unit">{isUnavailable ? 'unavailable' : indicator.unit}</div>
+        <div className="indicator-tile__value">
+          {isUnavailable
+            ? dominantContribution.toFixed(2)
+            : indicator.latest_value === null
+              ? 'n/a'
+              : indicator.latest_value.toFixed(2)}
+        </div>
+        <div className="indicator-tile__unit">{isUnavailable ? 'model score' : indicator.unit}</div>
       </div>
       {isAuctionSeries ? (
         <div className="indicator-tile__auction-summary">
@@ -150,14 +166,26 @@ export function IndicatorTile({ indicator, events }: IndicatorTileProps) {
         </>
       )}
       {isUnavailable ? (
-        <div className="chart-fallback">Live data unavailable for this indicator.</div>
+        <div className="chart-fallback">Live measurement unavailable. Showing model contribution instead.</div>
       ) : isAuctionSeries ? null : (
         <SparklineChart indicator={indicator} events={events} />
       )}
+      {isUnavailable && contribution ? (
+        <div className="indicator-tile__contribution">
+          <div className="indicator-tile__contribution-title">
+            Model contribution{dominantRegimeLabel ? ` (${dominantRegimeLabel} lead)` : ''}
+          </div>
+          <div className="indicator-tile__contribution-grid">
+            <span>Sticky {contribution.sticky.toFixed(2)}</span>
+            <span>Convex {contribution.convex.toFixed(2)}</span>
+            <span>Break {contribution.break.toFixed(2)}</span>
+          </div>
+        </div>
+      ) : null}
       {isSupport ? <p className="indicator-tile__warning">This is a support-derived live construct, not a direct quoted market print.</p> : null}
       {isProxy ? <p className="indicator-tile__warning">This is a proxy-derived signal, not a direct market print.</p> : null}
       {isAuto ? <p className="indicator-tile__warning indicator-tile__warning--auto">This value is auto-refreshed from public-source overlays. Use manual input only if you need an override.</p> : null}
-      {isUnavailable ? <p className="indicator-tile__warning indicator-tile__warning--critical">Demo fallback is suppressed for market interpretation.</p> : null}
+      {isUnavailable ? <p className="indicator-tile__warning indicator-tile__warning--critical">Underlying live feed is unavailable. This card is contributing through the model, not through a live market measurement.</p> : null}
       <p className="indicator-tile__narrative">{indicator.narrative}</p>
     </article>
   );

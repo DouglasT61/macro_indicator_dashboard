@@ -40,6 +40,9 @@ class IndicatorSnapshot(BaseModel):
     direction: str = 'high'
     chart_style: str | None = None
     chart_window_label: str | None = None
+    model_contribution: dict[str, float] | None = None
+    dominant_model_regime: str | None = None
+    dominant_model_contribution: float | None = None
     narrative: str
     history: list[TimePoint] = Field(default_factory=list)
 

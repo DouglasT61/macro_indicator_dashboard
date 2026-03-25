@@ -315,6 +315,9 @@ def _build_indicator_snapshot(
             'direction': thresholds.get('direction', 'high') if thresholds else 'high',
             'chart_style': chart_style,
             'chart_window_label': chart_window_label,
+            'model_contribution': None,
+            'dominant_model_regime': None,
+            'dominant_model_contribution': None,
             'narrative': narrative,
             'history': history_payload,
         }
@@ -343,9 +346,40 @@ def _build_indicator_snapshot(
         'direction': thresholds.get('direction', 'high') if thresholds else 'high',
         'chart_style': chart_style,
         'chart_window_label': chart_window_label,
+        'model_contribution': None,
+        'dominant_model_regime': None,
+        'dominant_model_contribution': None,
         'narrative': narrative,
         'history': [{'timestamp': manual.timestamp, 'value': round(float(manual.value), 2)}],
     }
+
+
+def _attach_model_contributions(snapshots: dict[str, dict[str, Any]], explanation: dict[str, Any]) -> None:
+    drivers_by_regime = explanation.get('drivers', {})
+    contribution_map: dict[str, dict[str, float]] = defaultdict(dict)
+    for regime_name, drivers in drivers_by_regime.items():
+        for driver in drivers:
+            indicator = driver.get('indicator')
+            if not indicator or indicator not in snapshots:
+                continue
+            contribution_map[indicator][regime_name] = round(float(driver.get('contribution', 0.0)), 2)
+
+    for key, snapshot in snapshots.items():
+        model_contribution = contribution_map.get(key, {})
+        if not model_contribution:
+            snapshot['model_contribution'] = {'sticky': 0.0, 'convex': 0.0, 'break': 0.0}
+            snapshot['dominant_model_regime'] = None
+            snapshot['dominant_model_contribution'] = 0.0
+            continue
+        normalized = {
+            'sticky': round(float(model_contribution.get('sticky', 0.0)), 2),
+            'convex': round(float(model_contribution.get('convex', 0.0)), 2),
+            'break': round(float(model_contribution.get('break', 0.0)), 2),
+        }
+        dominant_regime = max(normalized, key=normalized.get)
+        snapshot['model_contribution'] = normalized
+        snapshot['dominant_model_regime'] = dominant_regime
+        snapshot['dominant_model_contribution'] = normalized[dominant_regime]
 
 
 def _regime_propagation_boost(explanation: dict[str, Any], regime_name: str) -> float:
@@ -755,6 +789,7 @@ def get_dashboard_overview(db: Session) -> dict[str, Any]:
     snapshot_keys = set(series_map.keys()) | set(manual_map.keys())
     snapshots = {key: _build_indicator_snapshot(key, series_map, config, db) for key in snapshot_keys}
     regime = _build_regime_overview(db)
+    _attach_model_contributions(snapshots, regime['explanation'])
     state_space = evaluate_state_space(snapshots, config, regime['current_regime'])
     backtest = build_backtest_overview(snapshots, regime, state_space)
 

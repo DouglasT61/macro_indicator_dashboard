@@ -23,6 +23,13 @@ export interface IndicatorSnapshot {
   direction: 'high' | 'low';
   chart_style?: 'line' | 'step' | null;
   chart_window_label?: string | null;
+  model_contribution?: {
+    sticky: number;
+    convex: number;
+    break: number;
+  } | null;
+  dominant_model_regime?: 'sticky' | 'convex' | 'break' | null;
+  dominant_model_contribution?: number | null;
   narrative: string;
   history: TimePoint[];
 }
