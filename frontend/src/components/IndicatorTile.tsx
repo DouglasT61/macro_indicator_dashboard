@@ -82,6 +82,7 @@ export function IndicatorTile({ indicator, events }: IndicatorTileProps) {
   const isAuto = indicator.source_class === 'auto';
   const isAuctionSeries = indicator.key.startsWith('auction_');
   const auctionSummary = isAuctionSeries ? buildAuctionEventSummary(indicator) : null;
+  const auctionBreakdown = indicator.key === 'auction_stress' ? indicator.auction_breakdown ?? [] : [];
   const contribution = indicator.model_contribution;
   const dominantContribution = indicator.dominant_model_contribution ?? 0;
   const dominantRegimeLabel =
@@ -143,6 +144,20 @@ export function IndicatorTile({ indicator, events }: IndicatorTileProps) {
               ? 'Recent stressed auction events have occurred in the last 6 months.'
               : 'No new stressed auction step changes in the last 6 months.'}
           </div>
+          {auctionBreakdown.length ? (
+            <div className="indicator-tile__auction-breakdown">
+              <div className="indicator-tile__auction-events-title">Composite breakdown</div>
+              <div className="indicator-tile__auction-breakdown-grid">
+                {auctionBreakdown.map((item) => (
+                  <div key={item.key} className="indicator-tile__auction-breakdown-item">
+                    <span>{item.label}</span>
+                    <strong>{item.value.toFixed(1)}</strong>
+                    <em>{Math.round(item.weight * 100)}%</em>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
           {auctionSummary?.recentChanges?.length ? (
             <div className="indicator-tile__auction-events">
               <div className="indicator-tile__auction-events-title">Last recorded step changes</div>

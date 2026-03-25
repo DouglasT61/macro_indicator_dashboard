@@ -155,6 +155,14 @@ SOURCE_CONFIDENCE = {
     'demo': 0.0,
 }
 
+AUCTION_BREAKDOWN_CONFIG = [
+    ('auction_clearing_stress', 'Long-End', 0.40),
+    ('auction_belly_clearing_stress', 'Belly', 0.25),
+    ('auction_foreign_sponsorship_stress', 'Foreign', 0.20),
+    ('auction_issuance_mix_stress', 'Mix', 0.10),
+    ('auction_coupon_cluster_stress', 'Cluster', 0.05),
+]
+
 
 def _alert_field(alert: Any, field: str) -> Any:
     return getattr(alert, field) if hasattr(alert, field) else alert.get(field)
@@ -297,6 +305,25 @@ def _build_indicator_snapshot(
                 f'This is an event-driven stepped series and only changes when qualifying auctions occur. '
                 f'The card is showing a {chart_window_label} window.'
             )
+        auction_breakdown = None
+        if key == 'auction_stress' and source_class != 'demo':
+            auction_breakdown = []
+            for component_key, label, weight in AUCTION_BREAKDOWN_CONFIG:
+                component_series = series_map.get(component_key)
+                if component_series is None:
+                    continue
+                component_values = _series_values(db, component_series.id)
+                if not component_values:
+                    continue
+                component_latest = component_values[-1]
+                auction_breakdown.append(
+                    {
+                        'key': component_key,
+                        'label': label,
+                        'weight': round(weight, 2),
+                        'value': round(float(component_latest.value), 2),
+                    }
+                )
         return {
             'key': key,
             'name': display_name,
@@ -315,6 +342,7 @@ def _build_indicator_snapshot(
             'direction': thresholds.get('direction', 'high') if thresholds else 'high',
             'chart_style': chart_style,
             'chart_window_label': chart_window_label,
+            'auction_breakdown': auction_breakdown,
             'model_contribution': None,
             'dominant_model_regime': None,
             'dominant_model_contribution': None,
@@ -346,6 +374,7 @@ def _build_indicator_snapshot(
         'direction': thresholds.get('direction', 'high') if thresholds else 'high',
         'chart_style': chart_style,
         'chart_window_label': chart_window_label,
+        'auction_breakdown': None,
         'model_contribution': None,
         'dominant_model_regime': None,
         'dominant_model_contribution': None,

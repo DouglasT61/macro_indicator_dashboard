@@ -133,6 +133,12 @@ textarea { resize: vertical; }
 .indicator-tile__auction-label { display: block; font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.15rem; }
 .indicator-tile__auction-stat strong { font-size: 0.98rem; color: #f3f7fb; }
 .indicator-tile__auction-threshold { font-size: 0.84rem; color: #d4dde8; }
+.indicator-tile__auction-breakdown { display: grid; gap: 0.35rem; }
+.indicator-tile__auction-breakdown-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.45rem; }
+.indicator-tile__auction-breakdown-item { display: grid; grid-template-columns: 1fr auto auto; gap: 0.4rem; align-items: baseline; padding: 0.45rem 0.55rem; border: 1px solid rgba(120, 140, 170, 0.18); border-radius: 10px; background: rgba(10, 18, 32, 0.26); font-size: 0.82rem; }
+.indicator-tile__auction-breakdown-item span { color: var(--text-secondary); font-weight: 600; }
+.indicator-tile__auction-breakdown-item strong { color: #f3f7fb; font-size: 0.92rem; }
+.indicator-tile__auction-breakdown-item em { color: var(--accent-gold); font-style: normal; font-weight: 700; font-size: 0.74rem; }
 .indicator-tile__auction-events { display: grid; gap: 0.35rem; }
 .indicator-tile__auction-events-title { font-size: 0.76rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.1rem; }
 .indicator-tile__auction-event { display: flex; justify-content: space-between; gap: 0.75rem; padding: 0.35rem 0.1rem; border-bottom: 1px solid rgba(120, 140, 170, 0.12); font-size: 0.84rem; color: #d4dde8; }
