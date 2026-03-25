@@ -1,4 +1,4 @@
-export type StatusColor = 'green' | 'yellow' | 'orange' | 'red';
+export type StatusColor = 'green' | 'yellow' | 'orange' | 'red' | 'neutral';
 
 export interface TimePoint {
   timestamp: string;

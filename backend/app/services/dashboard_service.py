@@ -275,6 +275,7 @@ def _build_indicator_snapshot(
         ]
         if source_class == 'demo':
             narrative = f'{display_name} live feed is unavailable. Demo fallback values are suppressed in the UI.'
+            status = 'neutral'
             latest_value = None
             normalized_value = None
             zscore = None

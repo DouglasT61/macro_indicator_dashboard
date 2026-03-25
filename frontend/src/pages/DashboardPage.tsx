@@ -104,7 +104,7 @@ function buildNavItems(activeTab: TabKey, overview: NonNullable<ReturnType<typeo
       { id: 'executive-interpretation', label: 'Score History' },
       { id: 'executive-interpretation-rule', label: 'Interpretation Rule' },
       { id: 'executive-headline', label: 'Critical Indicators', count: countStressedIndicators(overview.headline_indicators) },
-      { id: 'executive-crisis', label: 'Fast Stress Panel', count: overview.crisis_monitor.filter((signal) => signal.status !== 'green').length },
+      { id: 'executive-crisis', label: 'Fast Stress Panel', count: overview.crisis_monitor.filter((signal) => signal.status === 'orange' || signal.status === 'red').length },
       { id: 'executive-chain', label: 'Causal Chain', count: overview.causal_chain.filter((node) => node.status !== 'green').length },
       { id: 'executive-narratives', label: 'Narratives' },
       { id: 'executive-alerts', label: 'Alerts', count: overview.alerts.filter((alert) => alert.severity !== 'info').length },
