@@ -350,7 +350,7 @@
       },
       {
         "indicator": "hormuz_tanker_transit_stress",
-        "weight": 0.08,
+        "weight": 0.12,
         "mode": "stress",
         "description": "PortWatch shows tanker transit deterioration through the Strait of Hormuz."
       },
@@ -386,7 +386,7 @@
       },
       {
         "indicator": "auction_stress",
-        "weight": 0.08,
+        "weight": 0.06,
         "mode": "stress",
         "description": "Treasury demand is softer but not yet broken."
       },
@@ -464,7 +464,7 @@
       },
       {
         "indicator": "external_importer_stress",
-        "weight": 0.05,
+        "weight": 0.07,
         "mode": "stress",
         "description": "Local-currency oil stress in major importer regions is feeding imported inflation and current-account strain."
       },
@@ -514,7 +514,7 @@
       },
       {
         "indicator": "hormuz_tanker_transit_stress",
-        "weight": 0.06,
+        "weight": 0.09,
         "mode": "stress",
         "description": "Hormuz tanker transit stress confirms the shipping shock is constraining flows."
       },
@@ -622,7 +622,7 @@
       },
       {
         "indicator": "expected_inflation_5y5y",
-        "weight": 0.05,
+        "weight": 0.06,
         "mode": "stress",
         "description": "Forward inflation expectations are climbing as the shock migrates into policy credibility."
       },
@@ -640,13 +640,13 @@
       },
       {
         "indicator": "expectations_entrenchment_score",
-        "weight": 0.05,
+        "weight": 0.06,
         "mode": "stress",
         "description": "The combined expectations block shows persistence broadening beyond spot oil."
       },
       {
         "indicator": "external_importer_stress",
-        "weight": 0.08,
+        "weight": 0.11,
         "mode": "stress",
         "description": "Japan, Europe, and China are absorbing a compounded local-currency energy shock."
       },
@@ -658,9 +658,21 @@
       },
       {
         "indicator": "household_real_income_squeeze",
-        "weight": 0.04,
+        "weight": 0.06,
         "mode": "stress",
         "description": "The real-income squeeze is increasing the chance that the oil shock migrates into broader demand and credit stress."
+      },
+      {
+        "indicator": "employment_tax_base_proxy",
+        "weight": 0.04,
+        "mode": "stress",
+        "description": "A weakening labor-income tax base shows the oil shock is starting to damage nominal growth capacity."
+      },
+      {
+        "indicator": "tax_receipts_market_stress",
+        "weight": 0.04,
+        "mode": "stress",
+        "description": "Receipts-sensitive market stress confirms the migration from inflation shock into fiscal strain."
       }
     ],
     "break": [
@@ -756,9 +768,15 @@
       },
       {
         "indicator": "employment_tax_base_proxy",
-        "weight": 0.08,
+        "weight": 0.09,
         "mode": "stress",
         "description": "The labor-income tax base is eroding, worsening fiscal strain."
+      },
+      {
+        "indicator": "federal_receipts_quality",
+        "weight": 0.06,
+        "mode": "stress",
+        "description": "Federal receipts quality is weakening, tightening the sovereign funding trap."
       },
       {
         "indicator": "temp_help_stress",
@@ -768,7 +786,7 @@
       },
       {
         "indicator": "synthetic_usd_funding_pressure",
-        "weight": 0.09,
+        "weight": 0.1,
         "mode": "stress",
         "description": "Synthetic funding pressure remains elevated alongside broader plumbing stress."
       },
@@ -822,7 +840,7 @@
       },
       {
         "indicator": "tax_receipts_market_stress",
-        "weight": 0.07,
+        "weight": 0.08,
         "mode": "stress",
         "description": "Volatility, weaker equities, and softer receipts quality are worsening capital-gains-sensitive fiscal pressure."
       },
@@ -849,6 +867,13 @@
     }
   },
   "causal_groups": {
+    "hormuz_flow_stress": [
+      "hormuz_tanker_transit_stress",
+      "marine_insurance_stress",
+      "tanker_freight_proxy",
+      "tanker_disruption_score",
+      "gulf_crude_dislocation"
+    ],
     "marine_insurance_stress": [
       "marine_insurance_stress",
       "tanker_disruption_score",
@@ -861,7 +886,6 @@
       "wti_prompt_spread",
       "oil_price",
       "lng_proxy",
-      "hormuz_tanker_transit_stress",
       "murban_wti_spread",
       "oman_wti_spread",
       "gulf_crude_dislocation",
@@ -948,6 +972,11 @@
     "edges": [
       {
         "from": "geopolitical_trigger_stress",
+        "to": "hormuz_flow_stress",
+        "weight": 0.4
+      },
+      {
+        "from": "geopolitical_trigger_stress",
         "to": "marine_insurance_stress",
         "weight": 0.46
       },
@@ -960,6 +989,26 @@
         "from": "geopolitical_trigger_stress",
         "to": "dollar_funding_stress",
         "weight": 0.18
+      },
+      {
+        "from": "hormuz_flow_stress",
+        "to": "oil_physical_stress",
+        "weight": 0.44
+      },
+      {
+        "from": "hormuz_flow_stress",
+        "to": "expectations_credibility_stress",
+        "weight": 0.26
+      },
+      {
+        "from": "hormuz_flow_stress",
+        "to": "external_importer_stress",
+        "weight": 0.42
+      },
+      {
+        "from": "hormuz_flow_stress",
+        "to": "household_tax_stress",
+        "weight": 0.2
       },
       {
         "from": "marine_insurance_stress",
@@ -1038,6 +1087,11 @@
       },
       {
         "from": "external_importer_stress",
+        "to": "expectations_credibility_stress",
+        "weight": 0.16
+      },
+      {
+        "from": "external_importer_stress",
         "to": "dollar_funding_stress",
         "weight": 0.24
       },
@@ -1069,39 +1123,47 @@
       {
         "from": "household_tax_stress",
         "to": "ust_demand_stress",
-        "weight": 0.18
+        "weight": 0.24
+      },
+      {
+        "from": "household_tax_stress",
+        "to": "fed_intervention_stress",
+        "weight": 0.12
       }
     ],
     "regime_sensitivity": {
       "sticky": {
+        "hormuz_flow_stress": 0.04,
         "marine_insurance_stress": 0.02,
         "oil_physical_stress": 0.04,
         "inflation_repression_stress": 0.03,
         "geopolitical_trigger_stress": 0.015,
-        "expectations_credibility_stress": 0.03,
-        "external_importer_stress": 0.025,
-        "household_tax_stress": 0.025
+        "expectations_credibility_stress": 0.04,
+        "external_importer_stress": 0.03,
+        "household_tax_stress": 0.03
       },
       "convex": {
+        "hormuz_flow_stress": 0.04,
         "oil_physical_stress": 0.04,
         "dollar_funding_stress": 0.06,
         "ust_demand_stress": 0.05,
         "repo_basis_stress": 0.06,
         "geopolitical_trigger_stress": 0.06,
-        "expectations_credibility_stress": 0.035,
-        "external_importer_stress": 0.05,
-        "household_tax_stress": 0.03
+        "expectations_credibility_stress": 0.05,
+        "external_importer_stress": 0.06,
+        "household_tax_stress": 0.04
       },
       "break": {
+        "hormuz_flow_stress": 0.015,
         "dollar_funding_stress": 0.04,
         "ust_demand_stress": 0.06,
         "repo_basis_stress": 0.08,
         "fed_intervention_stress": 0.07,
         "inflation_repression_stress": 0.05,
         "geopolitical_trigger_stress": 0.075,
-        "expectations_credibility_stress": 0.04,
-        "external_importer_stress": 0.05,
-        "household_tax_stress": 0.06
+        "expectations_credibility_stress": 0.05,
+        "external_importer_stress": 0.06,
+        "household_tax_stress": 0.08
       }
     }
   },

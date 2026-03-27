@@ -126,6 +126,8 @@ The inflation and repression node deliberately includes labor market and domesti
 
 On the shipping side, the oil node uses direct Hormuz tanker transit data from the IMF's PortWatch system rather than relying only on oil prices or news overlays. This gives the dashboard an actual physical flow signal at one of the world's most critical chokepoints.
 
+The model now treats Hormuz as the **highest-value upstream physical confirmation variable** rather than as just another oil-market input. That does not mean Hormuz replaces downstream confirmation. It means the system now assumes that when Hormuz tanker passage, freight, insurance, and Gulf dislocation align, the burden of proof shifts to the downstream blocks: inflation credibility, income squeeze, fiscal capacity, and Treasury/Fed trap. The dashboard therefore treats Hormuz as the best real-world trigger and the downstream stages as the confirmation chain.
+
 The oil block also includes direct Gulf crude dislocation spreads. Murban versus WTI and Oman versus WTI tell you whether Middle East export barrels are pricing at a premium to U.S. crude. When those spreads widen alongside Hormuz transit deterioration, freight stress, and marine insurance stress, the evidence points to a regional shock of physical supply that cannot be absorbed through normal market arbitrage. That is a much more serious development than a generalized oil rally.
 
 The dashboard also now treats **local-currency oil stress** as a live support layer. Oil in Yen, Oil in EUR, and Oil in CNY are constructed from live crude and live FX inputs, then rolled into a broader external-importer-stress block. That matters because the path from higher oil to dollar funding stress often runs through the balance sheets of import-dependent countries before it shows up cleanly in U.S. market plumbing.
@@ -363,9 +365,19 @@ Stagflation is now an explicit interpretation layer in the executive view, not j
 
 The sequencing of the stress chain is now shown directly: physical shock first, income squeeze next, labor and receipts next, financial tightening last. This ordering discipline is visible in the executive panel.
 
+The executive migration section has also been refactored into a dedicated five-stage ladder:
+
+- Hormuz Trigger
+- Inflation / Credibility
+- Income / Output
+- Fiscal Capacity
+- Treasury / Fed Trap
+
+This is now the preferred way to read the dashboard's shock transmission path. Hormuz is intentionally first because it is the cleanest physical confirmation variable. The later stages are where the model decides whether that physical shock is remaining local or becoming a stagflationary sovereign-financial problem.
+
 The household income, tax base, and federal receipts channel now carries more explicit weight, through the household real income squeeze, employment tax base proxy, and tax receipts market stress indicators.
 
-The physical-to-financial migration spread is now a visible calculation in the executive layer, separating where physical stress sits versus where financial market stress sits. When the financial score is running well above the physical score, it signals that markets are pricing risk that the underlying fundamentals may not yet fully justify, or vice versa.
+The older physical-versus-financial migration summary has been replaced by the staged migration ladder above. That is a more faithful representation of the model's logic: physical trigger first, then inflation persistence, then output and tax-base damage, then fiscal strain, then Treasury/Fed trap conditions.
 
 The app now models oil in local currency stress explicitly, through separate series for Japan, Europe, and China. The Japan channel is treated as the sharpest observable transmission path given the scale of Japanese dollar funding and Treasury holdings. Europe is treated as a strong imported-inflation and funding amplifier. China is treated as lower confidence but relevant to the marginal U.S. Treasury demand story.
 
@@ -434,7 +446,7 @@ score_j(t+1) = clamp(
 ```
 Ordering stage score = average of stage component normalized scores
 Stagflation composite = (inflation_score + growth_score + policy_constraint_score) / 3
-Migration spread = financial_score - physical_score
+  Shock migration stage score = average of stage component normalized scores
 ```
 
 ## State-Space Model

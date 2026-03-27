@@ -100,7 +100,7 @@ function buildNavItems(activeTab: TabKey, overview: NonNullable<ReturnType<typeo
       { id: 'executive-regime', label: 'Regime View' },
       { id: 'executive-ordering', label: 'Ordering Discipline' },
       { id: 'executive-stagflation', label: 'Stagflation' },
-      { id: 'executive-migration', label: 'Physical vs Financial' },
+      { id: 'executive-migration', label: 'Shock Migration' },
       { id: 'executive-interpretation', label: 'Score History' },
       { id: 'executive-interpretation-rule', label: 'Interpretation Rule' },
       { id: 'executive-headline', label: 'Critical Indicators', count: countStressedIndicators(overview.headline_indicators) },
@@ -355,19 +355,30 @@ export function DashboardPage() {
               </section>
 
               <section className="dashboard-anchor" id="executive-migration">
-                <CollapsibleSection title="Physical vs Financial Migration" description="Separates the physical oil shock from the financial-system response.">
+                <CollapsibleSection title="Shock Migration" description="Tracks the path from Hormuz confirmation into stagflation, fiscal strain, and Treasury/Fed trap conditions.">
                   <section className="executive-insight-grid">
                     <article className="executive-insight-card">
                       <h3>Migration Summary</h3>
                       <p>{overview.migration_overview.summary}</p>
-                      <div className="executive-insight-card__metric">Financial minus physical: {overview.migration_overview.financial_minus_physical.toFixed(1)}</div>
+                      <div className="executive-insight-card__metric">
+                        Lead stage: {overview.migration_overview.lead_stage} ({overview.migration_overview.lead_score.toFixed(1)}, {overview.migration_overview.lead_confidence_label})
+                      </div>
                     </article>
                     <article className="executive-insight-card">
-                      <h3>Node Scores</h3>
-                      <div className="executive-insight-card__metric-grid">
-                        <span>Physical</span><strong>{overview.migration_overview.physical_score.toFixed(1)}</strong>
-                        <span>Domestic</span><strong>{overview.migration_overview.domestic_score.toFixed(1)}</strong>
-                        <span>Financial</span><strong>{overview.migration_overview.financial_score.toFixed(1)}</strong>
+                      <h3>Migration Stages</h3>
+                      <div className="executive-stage-list">
+                        {overview.migration_overview.items.map((item) => (
+                          <div key={item.label} className="executive-stage-row">
+                            <div className="executive-stage-row__label-group">
+                              <span>{item.label}</span>
+                              <span className="executive-stage-row__confidence">{item.confidence_label}</span>
+                            </div>
+                            <div className="executive-stage-row__bar">
+                              <div className={`executive-stage-row__fill executive-stage-row__fill--${item.status}`} style={{ width: `${Math.min(100, item.score)}%` }} />
+                            </div>
+                            <strong>{item.score.toFixed(1)}</strong>
+                          </div>
+                        ))}
                       </div>
                     </article>
                   </section>

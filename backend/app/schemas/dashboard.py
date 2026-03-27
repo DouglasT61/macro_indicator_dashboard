@@ -424,10 +424,10 @@ class StagflationOverview(BaseModel):
 
 class MigrationOverview(BaseModel):
     summary: str
-    physical_score: float
-    domestic_score: float
-    financial_score: float
-    financial_minus_physical: float
+    lead_stage: str
+    lead_score: float
+    lead_confidence_label: str
+    items: list[OrderingStage] = Field(default_factory=list)
 
 
 class DashboardOverview(BaseModel):

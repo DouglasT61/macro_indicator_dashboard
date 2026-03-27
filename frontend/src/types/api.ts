@@ -443,10 +443,10 @@ export interface StagflationOverview {
 
 export interface MigrationOverview {
   summary: string;
-  physical_score: number;
-  domestic_score: number;
-  financial_score: number;
-  financial_minus_physical: number;
+  lead_stage: string;
+  lead_score: number;
+  lead_confidence_label: string;
+  items: OrderingStage[];
 }
 
 

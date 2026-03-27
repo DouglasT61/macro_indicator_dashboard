@@ -133,6 +133,7 @@ AUTO_OVERLAY_SOURCES = {
 }
 
 CAUSAL_LABELS = {
+    'hormuz_flow_stress': 'Hormuz flow stress',
     'marine_insurance_stress': 'Marine insurance stress',
     'oil_physical_stress': 'Oil physical stress',
     'dollar_funding_stress': 'Dollar funding stress',
@@ -603,14 +604,11 @@ def _build_stage_scores(snapshots: dict[str, dict[str, Any]]) -> dict[str, float
     return scores
 
 
-def _build_ordering_framework(snapshots: dict[str, dict[str, Any]]) -> dict[str, Any]:
-    stages = [
-        ('Shock', ['brent_prompt_spread', 'marine_insurance_stress', 'hormuz_tanker_transit_stress']),
-        ('Income Squeeze', ['external_importer_stress', 'household_real_income_squeeze', 'employment_tax_base_proxy']),
-        ('Labor / Receipts', ['payroll_momentum', 'employment_tax_base_proxy', 'tax_receipts_market_stress']),
-        ('Financial Tightening', ['jpy_usd_basis', 'synthetic_usd_funding_pressure', 'auction_stress', 'fima_repo_usage']),
-    ]
-    items = []
+def _build_stage_items(
+    snapshots: dict[str, dict[str, Any]],
+    stages: list[tuple[str, list[str]]],
+) -> list[dict[str, Any]]:
+    items: list[dict[str, Any]] = []
     for label, keys in stages:
         relevant = [snapshots[key] for key in keys if key in snapshots]
         raw_values = [_raw_indicator_score(snapshot) for snapshot in relevant]
@@ -626,6 +624,17 @@ def _build_ordering_framework(snapshots: dict[str, dict[str, Any]]) -> dict[str,
                 'confidence_label': _stage_confidence_label(confidence_score),
             }
         )
+    return items
+
+
+def _build_ordering_framework(snapshots: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    stages = [
+        ('Shock', ['brent_prompt_spread', 'marine_insurance_stress', 'hormuz_tanker_transit_stress']),
+        ('Income Squeeze', ['external_importer_stress', 'household_real_income_squeeze', 'employment_tax_base_proxy']),
+        ('Labor / Receipts', ['payroll_momentum', 'employment_tax_base_proxy', 'tax_receipts_market_stress']),
+        ('Financial Tightening', ['jpy_usd_basis', 'synthetic_usd_funding_pressure', 'auction_stress', 'fima_repo_usage']),
+    ]
+    items = _build_stage_items(snapshots, stages)
     lead = max(items, key=lambda item: item['score']) if items else {
         'label': 'Shock',
         'score': 0.0,
@@ -637,6 +646,60 @@ def _build_ordering_framework(snapshots: dict[str, dict[str, Any]]) -> dict[str,
         'Ordering discipline: physical shock first, household real-income squeeze next, then labor / receipts damage, '
         'and finally broader financial tightening and Fed plumbing stress.'
     )
+    return {
+        'summary': summary,
+        'lead_stage': lead['label'],
+        'lead_score': lead['score'],
+        'lead_confidence_label': lead['confidence_label'],
+        'items': items,
+    }
+
+
+def _build_shock_migration_overview(snapshots: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    stages = [
+        (
+            'Hormuz Trigger',
+            ['hormuz_tanker_transit_stress', 'marine_insurance_stress', 'tanker_freight_proxy', 'gulf_crude_dislocation'],
+        ),
+        (
+            'Inflation / Credibility',
+            ['expected_inflation_5y5y', 'inflation_expectations_level', 'expectations_entrenchment_score', 'external_importer_stress'],
+        ),
+        (
+            'Income / Output',
+            ['household_real_income_squeeze', 'employment_tax_base_proxy', 'payroll_momentum', 'consumer_credit_stress'],
+        ),
+        (
+            'Fiscal Capacity',
+            ['employment_tax_base_proxy', 'federal_receipts_quality', 'tax_receipts_market_stress', 'deficit_trend'],
+        ),
+        (
+            'Treasury / Fed Trap',
+            ['auction_stress', 'auction_belly_clearing_stress', 'treasury_liquidity_proxy', 'fima_repo_usage', 'fed_swap_line_usage', 'synthetic_usd_funding_pressure'],
+        ),
+    ]
+    items = _build_stage_items(snapshots, stages)
+    lead = max(items, key=lambda item: item['score']) if items else {
+        'label': 'Hormuz Trigger',
+        'score': 0.0,
+        'status': 'background',
+        'confidence_score': 0.0,
+        'confidence_label': 'demo-only',
+    }
+    hormuz_score = next((item['score'] for item in items if item['label'] == 'Hormuz Trigger'), 0.0)
+    inflation_score = next((item['score'] for item in items if item['label'] == 'Inflation / Credibility'), 0.0)
+    income_score = next((item['score'] for item in items if item['label'] == 'Income / Output'), 0.0)
+    fiscal_score = next((item['score'] for item in items if item['label'] == 'Fiscal Capacity'), 0.0)
+    treasury_score = next((item['score'] for item in items if item['label'] == 'Treasury / Fed Trap'), 0.0)
+
+    if hormuz_score >= 60 and inflation_score >= 55 and max(fiscal_score, treasury_score) < 45:
+        summary = 'Hormuz is confirming the physical shock, and the model is now seeing migration into inflation persistence before fiscal and Treasury stress fully dominate.'
+    elif hormuz_score >= 60 and inflation_score >= 55 and max(fiscal_score, treasury_score) >= 45:
+        summary = 'The Hormuz-triggered oil shock is now migrating into inflation, weaker fiscal capacity, and Treasury/Fed-trap conditions.'
+    elif hormuz_score >= 60:
+        summary = 'Hormuz is confirming a live physical shock, but the model still wants more downstream confirmation before treating it as fully systemic.'
+    else:
+        summary = 'The physical trigger is mixed. Downstream stagflation and Treasury stress should be read cautiously until Hormuz confirmation is stronger.'
     return {
         'summary': summary,
         'lead_stage': lead['label'],
@@ -668,24 +731,6 @@ def _build_stagflation_overview(snapshots: dict[str, dict[str, Any]]) -> dict[st
         'inflation_score': inflation_score,
         'growth_score': growth_score,
         'policy_constraint_score': policy_score,
-    }
-
-
-def _build_migration_overview(snapshots: dict[str, dict[str, Any]]) -> dict[str, Any]:
-    stages = _build_stage_scores(snapshots)
-    spread = round(stages['financial'] - stages['physical'], 2)
-    if stages['financial'] >= 60 and stages['physical'] >= 60:
-        summary = 'The shock is broadening from physical oil dislocation into funding, Treasury-demand, and Fed-plumbing stress.'
-    elif stages['physical'] >= 60:
-        summary = 'The shock is still predominantly physical. Funding and Treasury channels are not yet leading the move.'
-    else:
-        summary = 'Physical and financial stress remain mixed. The migration into broader nominal stress is incomplete.'
-    return {
-        'summary': summary,
-        'physical_score': stages['physical'],
-        'domestic_score': stages['domestic'],
-        'financial_score': stages['financial'],
-        'financial_minus_physical': spread,
     }
 
 
@@ -848,7 +893,7 @@ def get_dashboard_overview(db: Session) -> dict[str, Any]:
     current_data_mode = _derive_data_mode(snapshots, HEADLINE_KEYS)
     ordering_framework = _build_ordering_framework(snapshots)
     stagflation_overview = _build_stagflation_overview(snapshots)
-    migration_overview = _build_migration_overview(snapshots)
+    migration_overview = _build_shock_migration_overview(snapshots)
 
     return {
         'generated_at': datetime.now(timezone.utc),
