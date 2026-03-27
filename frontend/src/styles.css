@@ -53,6 +53,30 @@ textarea { resize: vertical; }
 .hero-bar h1 { margin: 0; font-size: clamp(1.8rem, 3vw, 3rem); }
 .hero-bar__subtext { max-width: 62rem; color: var(--muted); margin: 0.7rem 0 0; }
 .hero-bar__actions { display: flex; flex-wrap: wrap; gap: 0.8rem; align-content: flex-start; }
+.thesis-intro {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+.thesis-intro__card {
+  padding: 1rem 1.1rem;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: rgba(8, 17, 29, 0.88);
+  box-shadow: 0 14px 30px rgba(2, 6, 23, 0.22);
+}
+.thesis-intro__card h2,
+.thesis-intro__card p {
+  margin: 0;
+}
+.thesis-intro__card h2 {
+  margin-bottom: 0.55rem;
+  font-size: 1rem;
+}
+.thesis-intro__card p {
+  color: var(--muted);
+  line-height: 1.6;
+}
 .dashboard-tabs { display: flex; flex-wrap: wrap; gap: 0.65rem; }
 .dashboard-tab { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; width: 100%; background: rgba(8, 17, 29, 0.88); border-color: var(--border); padding: 0.65rem 0.95rem; }
 .dashboard-tab--active { border-color: rgba(56, 189, 248, 0.55); background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(8, 17, 29, 0.96)); }
@@ -298,7 +322,7 @@ textarea { resize: vertical; }
   .about-app-modal { padding: 0.75rem; }
   .about-app-modal__panel { max-height: 92vh; padding: 1rem; }
   .about-app-modal__header { flex-direction: column; }
-  .summary-grid, .narrative-grid, .state-space-metrics, .state-space-chart-grid, .state-space-chart-grid--compact, .episode-shape-row, .episode-card__lists, .state-space-forecast-grid, .state-space-calibration-grid, .regime-legend__grid { grid-template-columns: 1fr; }
+  .summary-grid, .narrative-grid, .state-space-metrics, .state-space-chart-grid, .state-space-chart-grid--compact, .episode-shape-row, .episode-card__lists, .state-space-forecast-grid, .state-space-calibration-grid, .regime-legend__grid, .thesis-intro { grid-template-columns: 1fr; }
   .hero-bar, .panel-shell__header, .panel-subsection__header, .settings-audit__row, .state-space-card__header, .panel-accordion__summary { flex-direction: column; }
   .crisis-monitor__thresholds, .panel-subsection__breadth, .panel-accordion__stats { text-align: left; justify-content: flex-start; }
   .compact-indicator, .compact-indicator__main { grid-template-columns: 1fr; }

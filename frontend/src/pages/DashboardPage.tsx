@@ -209,6 +209,28 @@ export function DashboardPage() {
         </div>
       </header>
 
+      <section className="thesis-intro">
+        <article className="thesis-intro__card">
+          <h2>What this app is testing</h2>
+          <p>
+            This dashboard is built around a specific macro thesis: an oil supply shock, especially one confirmed by constrained physical delivery
+            through the Strait of Hormuz and related shipping channels, can evolve into a stagflationary and eventually sovereign-financial
+            problem. The core risk is not just higher oil prices. It is higher oil prices at the same time that constrained energy delivery damages
+            production, employment, and the federal tax base. That combination can trap the Federal Reserve between inflation control, weaker
+            growth, and financial-stability concerns.
+          </p>
+        </article>
+        <article className="thesis-intro__card">
+          <h2>How to read it</h2>
+          <p>
+            The model follows the shock in sequence: oil supply shock and oil/shipping stress first, then inflation expectations and importer
+            stress, then income and output damage, then tax-base deterioration, then Treasury funding stress and Fed-plumbing strain. The regime
+            cards summarize where the system currently sits in that progression. The panels below show how the shock is moving from the physical oil
+            market into the financial system.
+          </p>
+        </article>
+      </section>
+
       <AboutAppModal content={guideContent} onClose={() => setAboutOpen(false)} open={aboutOpen} />
       <AdvancedAnalyticsModal onClose={() => setAdvancedOpen(false)} open={advancedOpen}>
         <div className="tab-stack">
