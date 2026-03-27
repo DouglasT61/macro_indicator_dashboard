@@ -334,6 +334,30 @@ export function DashboardPage() {
                 </CollapsibleSection>
               </section>
 
+              <section className="dashboard-anchor" id="executive-crisis">
+                <CollapsibleSection title="Fast-Moving Stress Panel" description="Simultaneity trigger for the fastest plumbing and oil-stress indicators.">
+                  <CrisisMonitor signals={overview.crisis_monitor} active={overview.systemic_stress_alert} />
+                </CollapsibleSection>
+              </section>
+
+              <section className="dashboard-anchor" id="executive-chain">
+                <CollapsibleSection title="Causal Chain" description="Base stress and recursive loop pressure across the transmission path.">
+                  <CausalChain nodes={overview.causal_chain} />
+                </CollapsibleSection>
+              </section>
+
+              <section className="dashboard-anchor" id="executive-narratives">
+                <CollapsibleSection title="Narratives" description="Daily, weekly, and escalation interpretations from the current state.">
+                  <NarrativePanel narratives={overview.narratives} />
+                </CollapsibleSection>
+              </section>
+
+              <section className="dashboard-anchor" id="executive-alerts">
+                <CollapsibleSection title="Alerts" description="Current operational alerts across thresholds, combinations, and econometric escalation.">
+                  <AlertList alerts={overview.alerts} />
+                </CollapsibleSection>
+              </section>
+
               <section className="dashboard-anchor" id="executive-stagflation">
                 <CollapsibleSection title="Stagflation Layer" description="Inflation pressure, weaker real activity, and policy constraint considered together.">
                   <section className="executive-insight-grid">
@@ -429,30 +453,6 @@ export function DashboardPage() {
                   ]}
                   events={overview.event_annotations}
                 />
-              </section>
-
-              <section className="dashboard-anchor" id="executive-crisis">
-                <CollapsibleSection title="Fast-Moving Stress Panel" description="Simultaneity trigger for the fastest plumbing and oil-stress indicators.">
-                  <CrisisMonitor signals={overview.crisis_monitor} active={overview.systemic_stress_alert} />
-                </CollapsibleSection>
-              </section>
-
-              <section className="dashboard-anchor" id="executive-chain">
-                <CollapsibleSection title="Causal Chain" description="Base stress and recursive loop pressure across the transmission path.">
-                  <CausalChain nodes={overview.causal_chain} />
-                </CollapsibleSection>
-              </section>
-
-              <section className="dashboard-anchor" id="executive-narratives">
-                <CollapsibleSection title="Narratives" description="Daily, weekly, and escalation interpretations from the current state.">
-                  <NarrativePanel narratives={overview.narratives} />
-                </CollapsibleSection>
-              </section>
-
-              <section className="dashboard-anchor" id="executive-alerts">
-                <CollapsibleSection title="Alerts" description="Current operational alerts across thresholds, combinations, and econometric escalation.">
-                  <AlertList alerts={overview.alerts} />
-                </CollapsibleSection>
               </section>
             </section>
           ) : null}
