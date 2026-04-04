@@ -43,10 +43,12 @@ def build_alerts(
 
     for key in [
         "brent_prompt_spread",
+        "oil_buffer_depletion_stress",
         "jpy_usd_basis",
         "sofr_spread",
         "move_index",
         "auction_stress",
+        "foreign_duration_sponsorship_stress",
         "fima_repo_usage",
         "fed_swap_line_usage",
         "consumer_credit_stress",
@@ -96,6 +98,26 @@ def build_alerts(
             "Auction clearing is deteriorating while Treasury volatility remains elevated.",
             ["auction_stress", "move_index"],
             "The chain can progress into dealer saturation and basis unwind pressure.",
+        )
+
+    if determine_status(latest_values.get("oil_buffer_depletion_stress", 0.0), thresholds.get("oil_buffer_depletion_stress")) in {"orange", "red"} and determine_status(latest_values.get("iea_importer_oil_cover_stress", 0.0), thresholds.get("iea_importer_oil_cover_stress")) in {"orange", "red"}:
+        severity = "critical" if latest_values.get("oil_buffer_depletion_stress", 0.0) >= float(thresholds["oil_buffer_depletion_stress"]["critical"]) else "warning"
+        add_alert(
+            severity,
+            "Oil reserve buffers are thinning across key importers",
+            "IEA reserve-cover depletion and importer-cover stress are aligning, suggesting the physical oil shock is exhausting its natural buffers.",
+            ["oil_buffer_depletion_stress", "iea_importer_oil_cover_stress", "external_importer_stress"],
+            "The next stage is stronger imported inflation pressure and a more persistent external-balance shock.",
+        )
+
+    if determine_status(latest_values.get("foreign_duration_sponsorship_stress", 0.0), thresholds.get("foreign_duration_sponsorship_stress")) in {"orange", "red"} and determine_status(latest_values.get("auction_foreign_sponsorship_stress", 0.0), thresholds.get("auction_foreign_sponsorship_stress")) in {"orange", "red"}:
+        severity = "critical" if latest_values.get("foreign_duration_sponsorship_stress", 0.0) >= float(thresholds["foreign_duration_sponsorship_stress"]["critical"]) else "warning"
+        add_alert(
+            severity,
+            "Foreign duration sponsorship is weakening",
+            "Slow BEA external-balance support and live auction sponsorship weakness are pointing in the same direction for U.S. duration demand.",
+            ["foreign_duration_sponsorship_stress", "auction_foreign_sponsorship_stress", "bea_foreign_financing_support"],
+            "The next stage is worse auction clearing, higher term premium, and greater Fed-plumbing pressure.",
         )
 
     fima_streak = _rising_streak(recent_history.get("fima_repo_usage", []))

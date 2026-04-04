@@ -20,6 +20,11 @@
       "critical": 75.0,
       "direction": "high"
     },
+    "gfw_red_sea_port_stress": {
+      "warning": 55.0,
+      "critical": 75.0,
+      "direction": "high"
+    },
     "lng_proxy": {
       "warning": 58.0,
       "critical": 75.0,
@@ -300,6 +305,11 @@
       "critical": 72.0,
       "direction": "high"
     },
+    "world_bank_importer_vulnerability": {
+      "warning": 55.0,
+      "critical": 75.0,
+      "direction": "high"
+    },
     "external_importer_stress": {
       "warning": 58.0,
       "critical": 78.0,
@@ -312,6 +322,41 @@
     },
     "tax_receipts_market_stress": {
       "warning": 55.0,
+      "critical": 75.0,
+      "direction": "high"
+    },
+    "iea_oil_cover_days": {
+      "warning": 130.0,
+      "critical": 110.0,
+      "direction": "low"
+    },
+    "iea_public_stock_share": {
+      "warning": 45.0,
+      "critical": 30.0,
+      "direction": "low"
+    },
+    "oil_buffer_depletion_stress": {
+      "warning": 58.0,
+      "critical": 76.0,
+      "direction": "high"
+    },
+    "iea_importer_oil_cover_stress": {
+      "warning": 55.0,
+      "critical": 74.0,
+      "direction": "high"
+    },
+    "bea_net_iip_burden": {
+      "warning": 24.0,
+      "critical": 28.0,
+      "direction": "high"
+    },
+    "bea_foreign_financing_support": {
+      "warning": 350.0,
+      "critical": 150.0,
+      "direction": "low"
+    },
+    "foreign_duration_sponsorship_stress": {
+      "warning": 58.0,
       "critical": 75.0,
       "direction": "high"
     }
@@ -350,15 +395,21 @@
       },
       {
         "indicator": "hormuz_tanker_transit_stress",
-        "weight": 0.12,
+        "weight": 0.17,
         "mode": "stress",
-        "description": "PortWatch shows tanker transit deterioration through the Strait of Hormuz."
+        "description": "PortWatch shows live tanker transit deterioration through the Strait of Hormuz; this is the lead physical flow signal."
+      },
+      {
+        "indicator": "gfw_red_sea_port_stress",
+        "weight": 0.07,
+        "mode": "stress",
+        "description": "Global Fishing Watch provides secondary public AIS confirmation that port activity is deteriorating around the regional shipping network."
       },
       {
         "indicator": "marine_insurance_stress",
-        "weight": 0.14,
+        "weight": 0.09,
         "mode": "stress",
-        "description": "Manual marine insurance stress overlay."
+        "description": "SEC and public-source insurance stress confirm the disruption is being acknowledged in structured disclosures and market commentary."
       },
       {
         "indicator": "oil_price",
@@ -469,6 +520,12 @@
         "description": "Local-currency oil stress in major importer regions is feeding imported inflation and current-account strain."
       },
       {
+        "indicator": "world_bank_importer_vulnerability",
+        "weight": 0.04,
+        "mode": "stress",
+        "description": "World Bank structural importer vulnerability suggests the external shock is landing on balance sheets that were already exposed."
+      },
+      {
         "indicator": "household_real_income_squeeze",
         "weight": 0.06,
         "mode": "stress",
@@ -479,6 +536,36 @@
         "weight": 0.02,
         "mode": "stress",
         "description": "Equity volatility is rising, hinting that the nominal shock is starting to tighten financial conditions."
+      },
+      {
+        "indicator": "oil_buffer_depletion_stress",
+        "weight": 0.06,
+        "mode": "stress",
+        "description": "IEA reserve-cover deterioration suggests the physical oil shock can persist instead of mean-reverting quickly."
+      },
+      {
+        "indicator": "iea_importer_oil_cover_stress",
+        "weight": 0.04,
+        "mode": "stress",
+        "description": "Reserve-cover deterioration across key importers is raising the odds of imported inflation persistence."
+      },
+      {
+        "indicator": "bea_net_iip_burden",
+        "weight": 0.04,
+        "mode": "stress",
+        "description": "A larger external liability burden makes Treasury demand more sensitive to a sustained external shock."
+      },
+      {
+        "indicator": "bea_foreign_financing_support",
+        "weight": 0.03,
+        "mode": "stress",
+        "description": "Weaker liability-side financing support implies less structural foreign sponsorship of U.S. duration."
+      },
+      {
+        "indicator": "foreign_duration_sponsorship_stress",
+        "weight": 0.04,
+        "mode": "stress",
+        "description": "Foreign-duration sponsorship is softening, but not yet in outright break territory."
       }
     ],
     "convex": [
@@ -514,9 +601,21 @@
       },
       {
         "indicator": "hormuz_tanker_transit_stress",
-        "weight": 0.09,
+        "weight": 0.11,
         "mode": "stress",
         "description": "Hormuz tanker transit stress confirms the shipping shock is constraining flows."
+      },
+      {
+        "indicator": "gfw_red_sea_port_stress",
+        "weight": 0.07,
+        "mode": "stress",
+        "description": "Global Fishing Watch port-visit deterioration is secondary confirmation that the disruption is broadening beyond a single chokepoint print."
+      },
+      {
+        "indicator": "marine_insurance_stress",
+        "weight": 0.05,
+        "mode": "stress",
+        "description": "Structured disclosures and insurance commentary confirm the shipping shock is persisting rather than clearing quickly."
       },
       {
         "indicator": "jpy_usd_basis",
@@ -651,6 +750,12 @@
         "description": "Japan, Europe, and China are absorbing a compounded local-currency energy shock."
       },
       {
+        "indicator": "world_bank_importer_vulnerability",
+        "weight": 0.05,
+        "mode": "stress",
+        "description": "Structural current-account and import dependence make importer stress more likely to migrate into funding and demand channels."
+      },
+      {
         "indicator": "vix_index",
         "weight": 0.05,
         "mode": "stress",
@@ -673,6 +778,36 @@
         "weight": 0.04,
         "mode": "stress",
         "description": "Receipts-sensitive market stress confirms the migration from inflation shock into fiscal strain."
+      },
+      {
+        "indicator": "oil_buffer_depletion_stress",
+        "weight": 0.06,
+        "mode": "stress",
+        "description": "Buffer depletion is making the oil shock more path dependent and harder to absorb."
+      },
+      {
+        "indicator": "iea_importer_oil_cover_stress",
+        "weight": 0.06,
+        "mode": "stress",
+        "description": "Importer reserve-cover stress is increasing the chance that energy strain migrates into funding channels."
+      },
+      {
+        "indicator": "bea_net_iip_burden",
+        "weight": 0.05,
+        "mode": "stress",
+        "description": "A heavier external-balance burden raises convexity in foreign demand for Treasuries."
+      },
+      {
+        "indicator": "bea_foreign_financing_support",
+        "weight": 0.04,
+        "mode": "stress",
+        "description": "Soft liability-side financing support suggests a weaker marginal foreign bid for duration."
+      },
+      {
+        "indicator": "foreign_duration_sponsorship_stress",
+        "weight": 0.08,
+        "mode": "stress",
+        "description": "Foreign-duration sponsorship is weakening alongside importer and auction stress."
       }
     ],
     "break": [
@@ -839,6 +974,12 @@
         "description": "Foreign importer balance-sheet stress is raising the odds of unstable marginal UST demand and Fed-plumbing pressure."
       },
       {
+        "indicator": "world_bank_importer_vulnerability",
+        "weight": 0.05,
+        "mode": "stress",
+        "description": "Structural importer fragility raises the odds that the external shock converts into unstable UST demand and fiscal-policy constraint."
+      },
+      {
         "indicator": "tax_receipts_market_stress",
         "weight": 0.08,
         "mode": "stress",
@@ -849,6 +990,36 @@
         "weight": 0.04,
         "mode": "stress",
         "description": "High equity volatility is consistent with a broader risk-premium shock and tighter financial conditions."
+      },
+      {
+        "indicator": "oil_buffer_depletion_stress",
+        "weight": 0.03,
+        "mode": "stress",
+        "description": "Depleted oil buffers reduce the odds that the physical shock self-heals before financial stress bites."
+      },
+      {
+        "indicator": "iea_importer_oil_cover_stress",
+        "weight": 0.04,
+        "mode": "stress",
+        "description": "Importer reserve-cover strain is consistent with unstable external demand for safe-duration assets."
+      },
+      {
+        "indicator": "bea_net_iip_burden",
+        "weight": 0.05,
+        "mode": "stress",
+        "description": "The external financing burden is large enough that weaker sponsorship can amplify a Treasury break."
+      },
+      {
+        "indicator": "bea_foreign_financing_support",
+        "weight": 0.05,
+        "mode": "stress",
+        "description": "Weak BEA financing support points to less durable foreign absorption of new Treasury supply."
+      },
+      {
+        "indicator": "foreign_duration_sponsorship_stress",
+        "weight": 0.1,
+        "mode": "stress",
+        "description": "Foreign-duration sponsorship is deteriorating in a way that can destabilize sovereign clearing."
       }
     ]
   },
@@ -869,6 +1040,7 @@
   "causal_groups": {
     "hormuz_flow_stress": [
       "hormuz_tanker_transit_stress",
+      "gfw_red_sea_port_stress",
       "marine_insurance_stress",
       "tanker_freight_proxy",
       "tanker_disruption_score",
@@ -876,6 +1048,7 @@
     ],
     "marine_insurance_stress": [
       "marine_insurance_stress",
+      "gfw_red_sea_port_stress",
       "tanker_disruption_score",
       "tanker_freight_proxy",
       "geopolitical_escalation_toggle",
@@ -886,17 +1059,23 @@
       "wti_prompt_spread",
       "oil_price",
       "lng_proxy",
+      "gfw_red_sea_port_stress",
+      "marine_insurance_stress",
       "murban_wti_spread",
       "oman_wti_spread",
       "gulf_crude_dislocation",
-      "iaea_nuclear_ambiguity"
+      "iaea_nuclear_ambiguity",
+      "iea_oil_cover_days",
+      "iea_public_stock_share",
+      "oil_buffer_depletion_stress"
     ],
     "dollar_funding_stress": [
       "jpy_usd_basis",
       "eur_usd_basis",
       "sofr_spread",
       "synthetic_usd_funding_pressure",
-      "external_importer_stress"
+      "external_importer_stress",
+      "world_bank_importer_vulnerability"
     ],
     "ust_demand_stress": [
       "auction_stress",
@@ -904,7 +1083,12 @@
       "thirty_year_yield",
       "term_premium_proxy",
       "expected_inflation_5y5y",
-      "external_importer_stress"
+      "external_importer_stress",
+      "world_bank_importer_vulnerability",
+      "auction_foreign_sponsorship_stress",
+      "bea_net_iip_burden",
+      "bea_foreign_financing_support",
+      "foreign_duration_sponsorship_stress"
     ],
     "repo_basis_stress": [
       "treasury_liquidity_proxy",
@@ -949,8 +1133,10 @@
       "oil_in_yen_stress",
       "oil_in_eur_stress",
       "oil_in_cny_stress",
+      "world_bank_importer_vulnerability",
       "external_importer_stress",
-      "usd_index_proxy"
+      "usd_index_proxy",
+      "iea_importer_oil_cover_stress"
     ],
     "household_tax_stress": [
       "household_real_income_squeeze",
@@ -973,12 +1159,12 @@
       {
         "from": "geopolitical_trigger_stress",
         "to": "hormuz_flow_stress",
-        "weight": 0.4
+        "weight": 0.48
       },
       {
         "from": "geopolitical_trigger_stress",
         "to": "marine_insurance_stress",
-        "weight": 0.46
+        "weight": 0.28
       },
       {
         "from": "geopolitical_trigger_stress",
@@ -993,7 +1179,7 @@
       {
         "from": "hormuz_flow_stress",
         "to": "oil_physical_stress",
-        "weight": 0.44
+        "weight": 0.5
       },
       {
         "from": "hormuz_flow_stress",
@@ -1013,7 +1199,7 @@
       {
         "from": "marine_insurance_stress",
         "to": "oil_physical_stress",
-        "weight": 0.34
+        "weight": 0.22
       },
       {
         "from": "oil_physical_stress",
@@ -1133,24 +1319,24 @@
     ],
     "regime_sensitivity": {
       "sticky": {
-        "hormuz_flow_stress": 0.04,
+        "hormuz_flow_stress": 0.05,
         "marine_insurance_stress": 0.02,
         "oil_physical_stress": 0.04,
         "inflation_repression_stress": 0.03,
         "geopolitical_trigger_stress": 0.015,
         "expectations_credibility_stress": 0.04,
-        "external_importer_stress": 0.03,
+        "external_importer_stress": 0.04,
         "household_tax_stress": 0.03
       },
       "convex": {
-        "hormuz_flow_stress": 0.04,
+        "hormuz_flow_stress": 0.045,
         "oil_physical_stress": 0.04,
         "dollar_funding_stress": 0.06,
         "ust_demand_stress": 0.05,
         "repo_basis_stress": 0.06,
         "geopolitical_trigger_stress": 0.06,
         "expectations_credibility_stress": 0.05,
-        "external_importer_stress": 0.06,
+        "external_importer_stress": 0.07,
         "household_tax_stress": 0.04
       },
       "break": {
@@ -1162,7 +1348,7 @@
         "inflation_repression_stress": 0.05,
         "geopolitical_trigger_stress": 0.075,
         "expectations_credibility_stress": 0.05,
-        "external_importer_stress": 0.06,
+        "external_importer_stress": 0.07,
         "household_tax_stress": 0.08
       }
     }
@@ -1262,6 +1448,13 @@
         0.0,
         0.0,
         0.04
+      ],
+      "gfw_red_sea_port_stress": [
+        0.66,
+        0.06,
+        0.0,
+        0.0,
+        0.05
       ],
       "lng_proxy": [
         0.46,
@@ -1592,6 +1785,13 @@
         0.06,
         0.1
       ],
+      "world_bank_importer_vulnerability": [
+        0.04,
+        0.26,
+        0.18,
+        0.02,
+        0.18
+      ],
       "household_real_income_squeeze": [
         0.12,
         0.08,
@@ -1605,6 +1805,55 @@
         0.18,
         0.02,
         0.58
+      ],
+      "iea_oil_cover_days": [
+        0.62,
+        0.06,
+        0.0,
+        0.0,
+        0.16
+      ],
+      "iea_public_stock_share": [
+        0.48,
+        0.04,
+        0.0,
+        0.0,
+        0.08
+      ],
+      "oil_buffer_depletion_stress": [
+        0.68,
+        0.14,
+        0.04,
+        0.0,
+        0.2
+      ],
+      "iea_importer_oil_cover_stress": [
+        0.18,
+        0.36,
+        0.18,
+        0.02,
+        0.14
+      ],
+      "bea_net_iip_burden": [
+        0.0,
+        0.06,
+        0.42,
+        0.08,
+        0.24
+      ],
+      "bea_foreign_financing_support": [
+        0.0,
+        0.04,
+        0.34,
+        0.04,
+        0.16
+      ],
+      "foreign_duration_sponsorship_stress": [
+        0.02,
+        0.18,
+        0.62,
+        0.14,
+        0.12
       ]
     },
     "regime_loadings": {
@@ -1675,10 +1924,11 @@
       "max_multiplier": 1.6,
       "cluster_profiles": {
         "shipping": {
-          "marine_insurance_stress": 1.45,
-          "tanker_disruption_score": 1.45,
+          "marine_insurance_stress": 1.18,
+          "tanker_disruption_score": 1.12,
           "tanker_freight_proxy": 1.3,
-          "hormuz_tanker_transit_stress": 1.45,
+          "hormuz_tanker_transit_stress": 1.52,
+          "gfw_red_sea_port_stress": 1.18,
           "brent_prompt_spread": 1.15,
           "wti_prompt_spread": 1.1,
           "jpy_usd_basis": 0.92,
@@ -1693,9 +1943,14 @@
           "governance_fragmentation": 1.08,
           "expected_inflation_5y5y": 1.04,
           "inflation_expectations_level": 1.04,
+          "world_bank_importer_vulnerability": 1.06,
           "external_importer_stress": 1.08,
           "oil_in_yen_stress": 1.1,
-          "oil_in_eur_stress": 1.08
+          "oil_in_eur_stress": 1.08,
+          "iea_oil_cover_days": 1.18,
+          "iea_public_stock_share": 1.08,
+          "oil_buffer_depletion_stress": 1.28,
+          "iea_importer_oil_cover_stress": 1.06
         },
         "funding": {
           "jpy_usd_basis": 1.4,
@@ -1706,6 +1961,7 @@
           "fed_swap_line_usage": 1.15,
           "treasury_basis_proxy": 1.15,
           "marine_insurance_stress": 0.85,
+          "gfw_red_sea_port_stress": 0.92,
           "payroll_momentum": 1.05,
           "temp_help_stress": 1.08,
           "employment_tax_base_proxy": 1.04,
@@ -1716,12 +1972,17 @@
           "expected_inflation_5y5y": 1.05,
           "survey_market_expectations_gap": 1.08,
           "expectations_entrenchment_score": 1.08,
+          "world_bank_importer_vulnerability": 1.2,
           "external_importer_stress": 1.18,
           "oil_in_yen_stress": 1.16,
           "oil_in_eur_stress": 1.1,
           "oil_in_cny_stress": 1.08,
           "vix_index": 1.08,
-          "tax_receipts_market_stress": 1.1
+          "tax_receipts_market_stress": 1.1,
+          "iea_importer_oil_cover_stress": 1.16,
+          "bea_net_iip_burden": 1.08,
+          "bea_foreign_financing_support": 1.1,
+          "foreign_duration_sponsorship_stress": 1.18
         },
         "plumbing": {
           "auction_stress": 1.3,
@@ -1736,6 +1997,7 @@
           "employment_tax_base_proxy": 1.1,
           "hours_worked_momentum": 1.05,
           "synthetic_usd_funding_pressure": 1.1,
+          "world_bank_importer_vulnerability": 1.14,
           "iaea_nuclear_ambiguity": 1.05,
           "governance_fragmentation": 1.06,
           "interceptor_depletion": 1.05,
@@ -1744,14 +2006,19 @@
           "expectations_entrenchment_score": 1.1,
           "external_importer_stress": 1.14,
           "tax_receipts_market_stress": 1.12,
-          "vix_index": 1.12
+          "vix_index": 1.12,
+          "iea_importer_oil_cover_stress": 1.08,
+          "bea_net_iip_burden": 1.14,
+          "bea_foreign_financing_support": 1.14,
+          "foreign_duration_sponsorship_stress": 1.22
         },
         "energy": {
           "brent_prompt_spread": 1.4,
           "wti_prompt_spread": 1.35,
           "tanker_freight_proxy": 1.15,
-          "hormuz_tanker_transit_stress": 1.28,
-          "marine_insurance_stress": 1.05,
+          "hormuz_tanker_transit_stress": 1.34,
+          "gfw_red_sea_port_stress": 1.16,
+          "marine_insurance_stress": 0.98,
           "tips_vs_nominals": 1.18,
           "private_credit_stress": 1.08,
           "jpy_usd_basis": 0.95,
@@ -1772,11 +2039,16 @@
           "inflation_expectations_curvature": 1.08,
           "survey_market_expectations_gap": 1.06,
           "expectations_entrenchment_score": 1.18,
+          "world_bank_importer_vulnerability": 1.14,
           "external_importer_stress": 1.22,
           "oil_in_yen_stress": 1.28,
           "oil_in_eur_stress": 1.16,
           "oil_in_cny_stress": 1.1,
-          "household_real_income_squeeze": 1.14
+          "household_real_income_squeeze": 1.14,
+          "iea_oil_cover_days": 1.16,
+          "iea_public_stock_share": 1.08,
+          "oil_buffer_depletion_stress": 1.28,
+          "iea_importer_oil_cover_stress": 1.14
         }
       },
       "regime_profiles": {
@@ -1784,9 +2056,10 @@
           "brent_prompt_spread": 1.22,
           "wti_prompt_spread": 1.18,
           "tanker_freight_proxy": 1.12,
-          "hormuz_tanker_transit_stress": 1.18,
-          "marine_insurance_stress": 1.15,
-          "tanker_disruption_score": 1.15,
+          "hormuz_tanker_transit_stress": 1.28,
+          "gfw_red_sea_port_stress": 1.08,
+          "marine_insurance_stress": 1.02,
+          "tanker_disruption_score": 1.04,
           "oil_price": 1.1,
           "tips_vs_nominals": 1.08,
           "wage_stickiness": 1.16,
@@ -1802,9 +2075,16 @@
           "inflation_expectations_slope": 1.08,
           "survey_market_expectations_gap": 1.08,
           "expectations_entrenchment_score": 1.18,
+          "world_bank_importer_vulnerability": 1.08,
           "external_importer_stress": 1.12,
           "oil_in_yen_stress": 1.14,
-          "household_real_income_squeeze": 1.12
+          "household_real_income_squeeze": 1.12,
+          "iea_oil_cover_days": 1.14,
+          "iea_public_stock_share": 1.08,
+          "oil_buffer_depletion_stress": 1.18,
+          "bea_net_iip_burden": 1.08,
+          "bea_foreign_financing_support": 1.06,
+          "foreign_duration_sponsorship_stress": 1.08
         },
         "convex": {
           "jpy_usd_basis": 1.22,
@@ -1817,6 +2097,9 @@
           "payroll_momentum": 1.08,
           "temp_help_stress": 1.1,
           "synthetic_usd_funding_pressure": 1.18,
+          "hormuz_tanker_transit_stress": 1.14,
+          "marine_insurance_stress": 1.02,
+          "gfw_red_sea_port_stress": 1.04,
           "murban_wti_spread": 1.08,
           "oman_wti_spread": 1.08,
           "gulf_crude_dislocation": 1.12,
@@ -1828,10 +2111,16 @@
           "inflation_expectations_curvature": 1.12,
           "survey_market_expectations_gap": 1.1,
           "expectations_entrenchment_score": 1.12,
+          "world_bank_importer_vulnerability": 1.18,
           "external_importer_stress": 1.18,
           "oil_in_yen_stress": 1.18,
           "oil_in_eur_stress": 1.1,
-          "vix_index": 1.1
+          "vix_index": 1.1,
+          "oil_buffer_depletion_stress": 1.14,
+          "iea_importer_oil_cover_stress": 1.14,
+          "bea_net_iip_burden": 1.1,
+          "bea_foreign_financing_support": 1.1,
+          "foreign_duration_sponsorship_stress": 1.18
         },
         "break": {
           "auction_stress": 1.2,
@@ -1846,6 +2135,7 @@
           "employment_tax_base_proxy": 1.18,
           "payroll_momentum": 1.12,
           "synthetic_usd_funding_pressure": 1.12,
+          "world_bank_importer_vulnerability": 1.16,
           "p_and_i_circular_stress": 1.08,
           "iaea_nuclear_ambiguity": 1.18,
           "interceptor_depletion": 1.16,
@@ -1856,7 +2146,11 @@
           "external_importer_stress": 1.14,
           "tax_receipts_market_stress": 1.18,
           "vix_index": 1.14,
-          "household_real_income_squeeze": 1.12
+          "household_real_income_squeeze": 1.12,
+          "iea_importer_oil_cover_stress": 1.08,
+          "bea_net_iip_burden": 1.12,
+          "bea_foreign_financing_support": 1.14,
+          "foreign_duration_sponsorship_stress": 1.22
         }
       }
     }

@@ -23,6 +23,7 @@ HEADLINE_KEYS = [
     'thirty_year_yield',
     'fima_repo_usage',
     'auction_stress',
+    'foreign_duration_sponsorship_stress',
 ]
 
 CRISIS_KEYS = [
@@ -39,7 +40,13 @@ PANEL_LAYOUT = {
             'id': 'oil-shipping-core',
             'title': 'Oil / Shipping View',
             'description': 'Physical scarcity, marine insurance, freight stress, and Gulf-U.S. crude dislocation.',
-            'series': ['brent_prompt_spread', 'wti_prompt_spread', 'murban_wti_spread', 'oman_wti_spread', 'gulf_crude_dislocation', 'tanker_freight_proxy', 'hormuz_tanker_transit_stress', 'lng_proxy', 'marine_insurance_stress', 'tanker_disruption_score'],
+            'series': ['brent_prompt_spread', 'wti_prompt_spread', 'murban_wti_spread', 'oman_wti_spread', 'gulf_crude_dislocation', 'tanker_freight_proxy', 'hormuz_tanker_transit_stress', 'gfw_red_sea_port_stress', 'lng_proxy', 'marine_insurance_stress', 'tanker_disruption_score'],
+        },
+        {
+            'id': 'oil-security-buffers',
+            'title': 'Oil Security / Buffers',
+            'description': 'IEA reserve-cover depth and public-stock mix as structural buffers against a persistent supply shock.',
+            'series': ['iea_oil_cover_days', 'iea_public_stock_share', 'oil_buffer_depletion_stress'],
         },
         {
             'id': 'geopolitical-triggers',
@@ -59,7 +66,7 @@ PANEL_LAYOUT = {
             'id': 'external-importer',
             'title': 'External Importer Stress',
             'description': 'Local-currency oil stress for Japan, Europe, and China as a bridge into UST demand and Fed plumbing.',
-            'series': ['oil_in_yen_stress', 'oil_in_eur_stress', 'oil_in_cny_stress', 'external_importer_stress'],
+            'series': ['oil_in_yen_stress', 'oil_in_eur_stress', 'oil_in_cny_stress', 'iea_importer_oil_cover_stress', 'world_bank_importer_vulnerability', 'external_importer_stress'],
         },
         {
             'id': 'fx-funding-support',
@@ -74,6 +81,12 @@ PANEL_LAYOUT = {
             'title': 'UST / Funding View',
             'description': 'Duration clearing, yields, term premium, auctions, and FIMA use.',
             'series': ['ten_year_yield', 'thirty_year_yield', 'term_premium_proxy', 'auction_stress', 'auction_clearing_stress', 'auction_belly_clearing_stress', 'auction_foreign_sponsorship_stress', 'auction_issuance_mix_stress', 'auction_coupon_cluster_stress', 'fima_repo_usage', 'fed_swap_line_usage'],
+        },
+        {
+            'id': 'foreign-sponsorship-backdrop',
+            'title': 'Foreign Sponsorship Backdrop',
+            'description': 'Slow external-balance backdrop and composite foreign-duration sponsorship stress for UST demand.',
+            'series': ['bea_net_iip_burden', 'bea_foreign_financing_support', 'foreign_duration_sponsorship_stress'],
         },
         {
             'id': 'inflation-expectations',
@@ -121,7 +134,7 @@ MANUAL_LABELS = {
 }
 
 AUTO_OVERLAY_SOURCES = {
-    'marine_insurance_stress': 'auto/beinsure-site-scan',
+    'marine_insurance_stress': 'auto/sec-edgar-watchlist',
     'tanker_disruption_score': 'auto/public-shipping-scan',
     'private_credit_stress': 'auto/public-private-credit-scan',
     'geopolitical_escalation_toggle': 'auto/public-news-scan',
@@ -593,9 +606,9 @@ def _stage_confidence_label(confidence: float) -> str:
 
 def _build_stage_scores(snapshots: dict[str, dict[str, Any]]) -> dict[str, float]:
     stage_inputs = {
-        'physical': ['brent_prompt_spread', 'tanker_freight_proxy', 'marine_insurance_stress', 'hormuz_tanker_transit_stress', 'gulf_crude_dislocation'],
+        'physical': ['brent_prompt_spread', 'tanker_freight_proxy', 'marine_insurance_stress', 'hormuz_tanker_transit_stress', 'gulf_crude_dislocation', 'oil_buffer_depletion_stress'],
         'domestic': ['household_real_income_squeeze', 'employment_tax_base_proxy', 'tax_receipts_market_stress', 'consumer_credit_stress'],
-        'financial': ['jpy_usd_basis', 'synthetic_usd_funding_pressure', 'auction_stress', 'treasury_liquidity_proxy', 'fima_repo_usage'],
+        'financial': ['jpy_usd_basis', 'synthetic_usd_funding_pressure', 'auction_stress', 'treasury_liquidity_proxy', 'fima_repo_usage', 'foreign_duration_sponsorship_stress'],
     }
     scores: dict[str, float] = {}
     for stage, keys in stage_inputs.items():
@@ -629,10 +642,10 @@ def _build_stage_items(
 
 def _build_ordering_framework(snapshots: dict[str, dict[str, Any]]) -> dict[str, Any]:
     stages = [
-        ('Shock', ['brent_prompt_spread', 'marine_insurance_stress', 'hormuz_tanker_transit_stress']),
-        ('Income Squeeze', ['external_importer_stress', 'household_real_income_squeeze', 'employment_tax_base_proxy']),
+        ('Shock', ['brent_prompt_spread', 'marine_insurance_stress', 'hormuz_tanker_transit_stress', 'oil_buffer_depletion_stress']),
+        ('Income Squeeze', ['external_importer_stress', 'iea_importer_oil_cover_stress', 'household_real_income_squeeze', 'employment_tax_base_proxy']),
         ('Labor / Receipts', ['payroll_momentum', 'employment_tax_base_proxy', 'tax_receipts_market_stress']),
-        ('Financial Tightening', ['jpy_usd_basis', 'synthetic_usd_funding_pressure', 'auction_stress', 'fima_repo_usage']),
+        ('Financial Tightening', ['jpy_usd_basis', 'synthetic_usd_funding_pressure', 'auction_stress', 'fima_repo_usage', 'foreign_duration_sponsorship_stress']),
     ]
     items = _build_stage_items(snapshots, stages)
     lead = max(items, key=lambda item: item['score']) if items else {
@@ -659,11 +672,11 @@ def _build_shock_migration_overview(snapshots: dict[str, dict[str, Any]]) -> dic
     stages = [
         (
             'Hormuz Trigger',
-            ['hormuz_tanker_transit_stress', 'marine_insurance_stress', 'tanker_freight_proxy', 'gulf_crude_dislocation'],
+            ['hormuz_tanker_transit_stress', 'marine_insurance_stress', 'tanker_freight_proxy', 'gulf_crude_dislocation', 'oil_buffer_depletion_stress'],
         ),
         (
             'Inflation / Credibility',
-            ['expected_inflation_5y5y', 'inflation_expectations_level', 'expectations_entrenchment_score', 'external_importer_stress'],
+            ['expected_inflation_5y5y', 'inflation_expectations_level', 'expectations_entrenchment_score', 'external_importer_stress', 'iea_importer_oil_cover_stress'],
         ),
         (
             'Income / Output',
@@ -675,7 +688,7 @@ def _build_shock_migration_overview(snapshots: dict[str, dict[str, Any]]) -> dic
         ),
         (
             'Treasury / Fed Trap',
-            ['auction_stress', 'auction_belly_clearing_stress', 'treasury_liquidity_proxy', 'fima_repo_usage', 'fed_swap_line_usage', 'synthetic_usd_funding_pressure'],
+            ['auction_stress', 'auction_belly_clearing_stress', 'treasury_liquidity_proxy', 'fima_repo_usage', 'fed_swap_line_usage', 'synthetic_usd_funding_pressure', 'foreign_duration_sponsorship_stress'],
         ),
     ]
     items = _build_stage_items(snapshots, stages)
@@ -805,9 +818,9 @@ def _avg_normalized(snapshots: dict[str, dict[str, Any]], keys: list[str]) -> fl
 
 
 def _build_interpretation_chart(snapshots: dict[str, dict[str, Any]]) -> dict[str, Any]:
-    sticky_keys = ['brent_prompt_spread', 'wti_prompt_spread', 'tanker_freight_proxy', 'household_real_income_squeeze']
-    convex_keys = ['jpy_usd_basis', 'sofr_spread', 'move_index', 'synthetic_usd_funding_pressure', 'external_importer_stress']
-    break_keys = ['auction_stress', 'treasury_liquidity_proxy', 'fima_repo_usage', 'tax_receipts_market_stress']
+    sticky_keys = ['brent_prompt_spread', 'wti_prompt_spread', 'tanker_freight_proxy', 'oil_buffer_depletion_stress', 'household_real_income_squeeze']
+    convex_keys = ['jpy_usd_basis', 'sofr_spread', 'move_index', 'synthetic_usd_funding_pressure', 'external_importer_stress', 'iea_importer_oil_cover_stress']
+    break_keys = ['auction_stress', 'treasury_liquidity_proxy', 'fima_repo_usage', 'foreign_duration_sponsorship_stress', 'tax_receipts_market_stress']
 
     timeline_lookup: dict[Any, dict[str, float]] = {}
     for key in sticky_keys + convex_keys + break_keys:

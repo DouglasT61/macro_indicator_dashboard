@@ -1,21 +1,33 @@
 from __future__ import annotations
 
+import io
 from datetime import date, datetime, timezone
 
+import openpyxl
+
+from app.collectors.bea_iea_support import parse_bea_iip_article
 from app.collectors.public_data import (
+    CollectedSeries,
+    PublicDataCollector,
     YahooBar,
     _active_contracts_for_day,
+    _build_bea_iip_histories,
+    _build_foreign_duration_sponsorship_history,
+    _build_iea_oil_security_histories,
     _build_basis_proxy_series,
+    _build_consumer_credit_composite_history,
     _build_front_contract_history,
     _build_period_change_history,
     _build_payroll_tax_base_history,
     _build_pointwise_series,
+    _build_ranked_stress_history,
     _build_synthetic_ctd_basis_history,
     _build_treasury_depth_history,
     _compute_auction_stress_histories,
     _compute_auction_stress_history,
     _densify_daily,
     _generate_contract_specs,
+    _parse_nyfed_household_credit_workbook,
 )
 
 
@@ -305,3 +317,206 @@ def test_payroll_tax_base_history_combines_payrolls_wages_and_hours() -> None:
 
     assert len(history) >= 1
     assert history[0][1] > 0
+
+
+def test_ranked_stress_history_rises_with_higher_levels_and_worsening_momentum() -> None:
+    observations = [
+        (date(2025, 3, 31), 2.1),
+        (date(2025, 6, 30), 2.3),
+        (date(2025, 9, 30), 2.6),
+        (date(2025, 12, 31), 3.1),
+        (date(2026, 3, 31), 4.0),
+    ]
+
+    history = _build_ranked_stress_history(observations, start=date(2025, 3, 31), end=date(2026, 3, 31), window=5)
+
+    assert history[0][1] < history[-1][1]
+    assert history[-1][1] >= 80.0
+
+
+def test_parse_nyfed_household_credit_workbook_reads_card_and_auto_all_age_series() -> None:
+    workbook = openpyxl.Workbook()
+    default_sheet = workbook.active
+    workbook.remove(default_sheet)
+    card_sheet = workbook.create_sheet('Page 27 Data')
+    auto_sheet = workbook.create_sheet('Page 26 Data')
+    for sheet in (card_sheet, auto_sheet):
+        sheet.append(['title'])
+        sheet.append(['Percent'])
+        sheet.append(['quarter', '18-29', '30-39', '40-49', '50-59', '60-69', '70+', 'all'])
+    card_sheet.append(['25:Q3', None, None, None, None, None, None, 4.9])
+    card_sheet.append(['25:Q4', None, None, None, None, None, None, 5.4])
+    auto_sheet.append(['25:Q3', None, None, None, None, None, None, 2.2])
+    auto_sheet.append(['25:Q4', None, None, None, None, None, None, 2.6])
+    buffer = io.BytesIO()
+    workbook.save(buffer)
+    workbook.close()
+
+    card_history, auto_history = _parse_nyfed_household_credit_workbook(
+        buffer.getvalue(),
+        card_sheet='Page 27 Data',
+        auto_sheet='Page 26 Data',
+    )
+
+    assert card_history[-1] == (date(2025, 12, 31), 5.4)
+    assert auto_history[-1] == (date(2025, 12, 31), 2.6)
+
+
+def test_consumer_credit_composite_requires_broad_confirmation_to_break_out() -> None:
+    start = date(2026, 3, 1)
+    end = date(2026, 3, 3)
+
+    single_block = _build_consumer_credit_composite_history(
+        [
+            ('bank_quality', [(datetime(2026, 3, 1, tzinfo=timezone.utc), 88.0)], 0.30),
+            ('household_ccp_quality', [(datetime(2026, 3, 1, tzinfo=timezone.utc), 35.0)], 0.20),
+            ('lender_tightening', [(datetime(2026, 3, 1, tzinfo=timezone.utc), 30.0)], 0.20),
+            ('borrowing_cost', [(datetime(2026, 3, 1, tzinfo=timezone.utc), 28.0)], 0.15),
+            ('household_strain', [(datetime(2026, 3, 1, tzinfo=timezone.utc), 32.0)], 0.15),
+        ],
+        start=start,
+        end=end,
+    )
+    broad_breakout = _build_consumer_credit_composite_history(
+        [
+            ('bank_quality', [(datetime(2026, 3, 1, tzinfo=timezone.utc), 82.0)], 0.30),
+            ('household_ccp_quality', [(datetime(2026, 3, 1, tzinfo=timezone.utc), 76.0)], 0.20),
+            ('lender_tightening', [(datetime(2026, 3, 1, tzinfo=timezone.utc), 74.0)], 0.20),
+            ('borrowing_cost', [(datetime(2026, 3, 1, tzinfo=timezone.utc), 70.0)], 0.15),
+            ('household_strain', [(datetime(2026, 3, 1, tzinfo=timezone.utc), 66.0)], 0.15),
+        ],
+        start=start,
+        end=end,
+    )
+
+    assert single_block[-1][1] <= 62.0
+    assert broad_breakout[-1][1] > single_block[-1][1]
+
+
+def test_collect_consumer_credit_series_builds_composite_from_fred_nyfed_and_household_inputs(monkeypatch) -> None:
+    collector = PublicDataCollector()
+    start = date(2026, 1, 1)
+    end = date(2026, 3, 31)
+
+    fred_map = {
+        'DRCCLACBS': [(date(2025, 3, 31), 2.0), (date(2025, 6, 30), 2.2), (date(2025, 9, 30), 2.5), (date(2025, 12, 31), 2.9), (date(2026, 3, 31), 3.4)],
+        'DRALACBS': [(date(2025, 3, 31), 1.6), (date(2025, 6, 30), 1.7), (date(2025, 9, 30), 1.9), (date(2025, 12, 31), 2.1), (date(2026, 3, 31), 2.4)],
+        'CORCCACBS': [(date(2025, 3, 31), 3.0), (date(2025, 6, 30), 3.2), (date(2025, 9, 30), 3.4), (date(2025, 12, 31), 3.8), (date(2026, 3, 31), 4.4)],
+        'CORCACBS': [(date(2025, 3, 31), 2.0), (date(2025, 6, 30), 2.1), (date(2025, 9, 30), 2.2), (date(2025, 12, 31), 2.4), (date(2026, 3, 31), 2.7)],
+        'TERMCBCCALLNS': [(date(2025, 1, 1), 20.1), (date(2025, 6, 1), 20.7), (date(2025, 12, 1), 21.5), (date(2026, 3, 1), 22.2)],
+        'DRTSCLCC': [(date(2025, 3, 31), 8.0), (date(2025, 6, 30), 12.0), (date(2025, 9, 30), 18.0), (date(2025, 12, 31), 28.0), (date(2026, 3, 31), 35.0)],
+        'STDSOTHCONS': [(date(2025, 3, 31), 4.0), (date(2025, 6, 30), 7.0), (date(2025, 9, 30), 12.0), (date(2025, 12, 31), 18.0), (date(2026, 3, 31), 24.0)],
+    }
+
+    def fake_fetch_fred_csv(self, client, series_id, fetch_start, fetch_end, transform=None):
+        observations = fred_map[series_id]
+        if transform is None:
+            return observations
+        return [(observed_at, transform(value)) for observed_at, value in observations]
+
+    def fake_fetch_nyfed_household_credit_transition_histories(self, client):
+        return (
+            [(date(2025, 3, 31), 4.3), (date(2025, 6, 30), 4.5), (date(2025, 9, 30), 4.9), (date(2025, 12, 31), 5.2), (date(2026, 3, 31), 5.6)],
+            [(date(2025, 3, 31), 2.0), (date(2025, 6, 30), 2.1), (date(2025, 9, 30), 2.2), (date(2025, 12, 31), 2.4), (date(2026, 3, 31), 2.7)],
+        )
+
+    monkeypatch.setattr(PublicDataCollector, '_fetch_fred_csv', fake_fetch_fred_csv)
+    monkeypatch.setattr(PublicDataCollector, '_fetch_nyfed_household_credit_transition_histories', fake_fetch_nyfed_household_credit_transition_histories)
+
+    temp_help = _densify_daily(
+        [(date(2025, 12, 31), -1.0), (date(2026, 3, 31), -5.5)],
+        start=start,
+        end=end,
+    )
+    tax_base = _densify_daily(
+        [(date(2025, 12, 31), 3.2), (date(2026, 3, 31), 0.5)],
+        start=start,
+        end=end,
+    )
+    income_squeeze = _densify_daily(
+        [(date(2025, 12, 31), 54.0), (date(2026, 3, 31), 70.0)],
+        start=start,
+        end=end,
+    )
+    collected = {
+        'temp_help_stress': CollectedSeries('temp_help_stress', 'fred/TEMPHELPS-YOY', temp_help),
+        'employment_tax_base_proxy': CollectedSeries('employment_tax_base_proxy', 'proxy/fred-payroll-tax-base', tax_base),
+        'household_real_income_squeeze': CollectedSeries('household_real_income_squeeze', 'support/income-energy-squeeze', income_squeeze),
+    }
+
+    series, status = collector._collect_consumer_credit_series(object(), start, end, collected)
+
+    assert 'consumer_credit_stress' in series
+    assert series['consumer_credit_stress'].source == 'support/fred-nyfed-consumer-credit-composite'
+    assert series['consumer_credit_stress'].history[-1][1] >= 58.0
+    assert 'New York Fed household transitions' in status
+
+
+def test_parse_bea_iip_article_captures_signed_financial_transactions() -> None:
+    raw_html = """
+    <html>
+      <head>
+        <title>SCB, A Look at the U.S. International Investment Position: Fourth Quarter and Year 2025, January 2026</title>
+      </head>
+      <body>
+        <p>The net international investment position decreased from -$26.23 trillion at the end of the third quarter to -$27.54 trillion at the end of the fourth quarter.</p>
+        <p>U.S. assets increased by $1.72 trillion to a total of $38.49 trillion.</p>
+        <p>U.S. liabilities increased by $3.03 trillion to a total of $66.03 trillion.</p>
+        <p>Financial transactions reduced U.S. liabilities by $182.4 billion in the fourth quarter.</p>
+      </body>
+    </html>
+    """
+
+    observation = parse_bea_iip_article(raw_html)
+
+    assert observation is not None
+    assert observation.observed_at == date(2025, 12, 31)
+    assert observation.net_iip_trillion == -27.54
+    assert observation.liability_financial_transactions_billion == -182.4
+
+
+def test_iea_oil_security_histories_build_cover_and_buffer_stress() -> None:
+    start = date(2026, 1, 1)
+    end = date(2026, 3, 31)
+    observations = [
+        type('Obs', (), {'observed_at': date(2025, 12, 31), 'country_name': 'Total IEA net importers', 'total_days': 141.0, 'industry_days': 79.0, 'public_days': 62.0})(),
+        type('Obs', (), {'observed_at': date(2025, 12, 31), 'country_name': 'Total IEA Europe', 'total_days': 130.0, 'industry_days': 75.0, 'public_days': 55.0})(),
+        type('Obs', (), {'observed_at': date(2025, 12, 31), 'country_name': 'Japan', 'total_days': 208.0, 'industry_days': 91.0, 'public_days': 117.0})(),
+        type('Obs', (), {'observed_at': date(2025, 12, 31), 'country_name': 'Korea', 'total_days': 200.0, 'industry_days': 92.0, 'public_days': 108.0})(),
+        type('Obs', (), {'observed_at': date(2026, 3, 31), 'country_name': 'Total IEA net importers', 'total_days': 118.0, 'industry_days': 76.0, 'public_days': 42.0})(),
+        type('Obs', (), {'observed_at': date(2026, 3, 31), 'country_name': 'Total IEA Europe', 'total_days': 110.0, 'industry_days': 70.0, 'public_days': 40.0})(),
+        type('Obs', (), {'observed_at': date(2026, 3, 31), 'country_name': 'Japan', 'total_days': 165.0, 'industry_days': 86.0, 'public_days': 79.0})(),
+        type('Obs', (), {'observed_at': date(2026, 3, 31), 'country_name': 'Korea', 'total_days': 158.0, 'industry_days': 84.0, 'public_days': 74.0})(),
+    ]
+
+    histories = _build_iea_oil_security_histories(observations, start, end)
+
+    assert histories['iea_oil_cover_days'][-1][1] == 118.0
+    assert round(histories['iea_public_stock_share'][-1][1], 2) == 35.59
+    assert histories['oil_buffer_depletion_stress'][-1][1] > histories['oil_buffer_depletion_stress'][0][1]
+    assert histories['iea_importer_oil_cover_stress'][-1][1] > 50.0
+
+
+def test_bea_and_foreign_duration_histories_build_structural_sponsorship_overlay() -> None:
+    start = date(2026, 1, 1)
+    end = date(2026, 3, 31)
+    observations = [
+        type('Obs', (), {'observed_at': date(2025, 12, 31), 'net_iip_trillion': -27.54, 'liability_financial_transactions_billion': -182.4})(),
+        type('Obs', (), {'observed_at': date(2026, 3, 31), 'net_iip_trillion': -28.10, 'liability_financial_transactions_billion': 90.0})(),
+    ]
+
+    bea_histories = _build_bea_iip_histories(observations, start, end)
+    foreign_duration = _build_foreign_duration_sponsorship_history(
+        start,
+        end,
+        _densify_daily([(date(2025, 12, 31), 56.0), (date(2026, 3, 31), 74.0)], start, end),
+        _densify_daily([(date(2025, 12, 31), 52.0), (date(2026, 3, 31), 70.0)], start, end),
+        _densify_daily([(date(2025, 12, 31), 8.0), (date(2026, 3, 31), 28.0)], start, end),
+        _densify_daily([(date(2025, 12, 31), 48.0), (date(2026, 3, 31), 67.0)], start, end),
+        bea_histories['bea_net_iip_burden'],
+        bea_histories['bea_foreign_financing_support'],
+    )
+
+    assert bea_histories['bea_net_iip_burden'][-1][1] == 28.1
+    assert bea_histories['bea_foreign_financing_support'][-1][1] == 90.0
+    assert foreign_duration[-1][1] > foreign_duration[0][1]

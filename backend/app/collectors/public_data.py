@@ -11,6 +11,13 @@ from typing import Callable, Iterable
 
 import httpx
 
+from app.collectors.bea_iea_support import (
+    BEAIIPObservation,
+    IEAOilStockObservation,
+    fetch_bea_iip_observations,
+    fetch_iea_oil_stock_observations,
+)
+
 
 FRED_BASE_URL = 'https://fred.stlouisfed.org/graph/fredgraph.csv'
 TREASURY_AUCTIONS_URL = 'https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v1/accounting/od/auctions_query'
@@ -24,6 +31,7 @@ YAHOO_CHART_URL = 'https://query1.finance.yahoo.com/v8/finance/chart/{symbol}'
 TRADINGVIEW_SYMBOL_URL = 'https://www.tradingview.com/symbols/{symbol}/'
 FYICENTER_MOVE_URL = 'https://finance.fyicenter.com/1000140_NYSE_%5EMOVE-ICE_BofAML_MOVE_Index.html'
 GME_DATA_URL = 'https://www.gulfmerc.com/gme-product-services/gme-data'
+NYFED_HOUSEHOLD_CREDIT_IFRAME_URL = 'https://www.newyorkfed.org/householdcredit/hhdc-iframe'
 TREASURY_HISTORY_DAYS = 730
 
 MONTH_CODES = {
@@ -46,7 +54,6 @@ FRED_DIRECT_SERIES: dict[str, tuple[str, Callable[[float], float]]] = {
     'oil_price': ('DCOILBRENTEU', lambda value: value),
     'credit_spreads': ('BAMLH0A0HYM2', lambda value: value * 100.0),
     'usd_index_proxy': ('DTWEXBGS', lambda value: value),
-    'consumer_credit_stress': ('DRCCLACBS', lambda value: value * 20.0),
     'japan_short_rate': ('IRSTCI01JPM156N', lambda value: value),
     'unemployment_rate': ('UNRATE', lambda value: value),
     'tanker_freight_proxy': ('TSIFRGHT', lambda value: max(10.0, min(100.0, (value - 80.0) * 1.3))),
@@ -155,14 +162,23 @@ class PublicDataCollector:
             collected.update(yahoo_series)
             statuses['yahoo_market'] = yahoo_status
 
-        try:
-            if status_callback:
-                status_callback('market_data: support')
-            support_series, support_status = self._collect_support_series(start, end, collected)
-        except Exception as exc:
-            support_series, support_status = {}, f'Support collector failed: {exc.__class__.__name__}.'
-        collected.update(support_series)
-        statuses['support'] = support_status
+            try:
+                if status_callback:
+                    status_callback('market_data: support')
+                support_series, support_status = self._collect_support_series(client, start, end, collected)
+            except Exception as exc:
+                support_series, support_status = {}, f'Support collector failed: {exc.__class__.__name__}.'
+            collected.update(support_series)
+            statuses['support'] = support_status
+
+            try:
+                if status_callback:
+                    status_callback('market_data: consumer_credit')
+                consumer_credit_series, consumer_credit_status = self._collect_consumer_credit_series(client, start, end, collected)
+            except Exception as exc:
+                consumer_credit_series, consumer_credit_status = {}, f'Consumer credit collector failed: {exc.__class__.__name__}.'
+            collected.update(consumer_credit_series)
+            statuses['consumer_credit'] = consumer_credit_status
 
         return CollectionResult(series=collected, provider_status=statuses)
 
@@ -360,6 +376,7 @@ class PublicDataCollector:
 
     def _collect_support_series(
         self,
+        client: httpx.Client,
         start: date,
         end: date,
         collected: dict[str, CollectedSeries],
@@ -450,11 +467,44 @@ class PublicDataCollector:
                 )
                 status_parts.append('oil-in-yuan stress')
 
+        try:
+            iea_observations = fetch_iea_oil_stock_observations(client, start - timedelta(days=540), end)
+            iea_histories = _build_iea_oil_security_histories(iea_observations, start, end)
+            if iea_histories.get('iea_oil_cover_days'):
+                support['iea_oil_cover_days'] = CollectedSeries(
+                    key='iea_oil_cover_days',
+                    source='iea/netimports-total-importers',
+                    history=iea_histories['iea_oil_cover_days'],
+                )
+            if iea_histories.get('iea_public_stock_share'):
+                support['iea_public_stock_share'] = CollectedSeries(
+                    key='iea_public_stock_share',
+                    source='iea/netimports-total-importers',
+                    history=iea_histories['iea_public_stock_share'],
+                )
+            if iea_histories.get('oil_buffer_depletion_stress'):
+                support['oil_buffer_depletion_stress'] = CollectedSeries(
+                    key='oil_buffer_depletion_stress',
+                    source='support/iea-oil-buffer-depletion',
+                    history=iea_histories['oil_buffer_depletion_stress'],
+                )
+            if iea_histories.get('iea_importer_oil_cover_stress'):
+                support['iea_importer_oil_cover_stress'] = CollectedSeries(
+                    key='iea_importer_oil_cover_stress',
+                    source='support/iea-key-importer-cover-stress',
+                    history=iea_histories['iea_importer_oil_cover_stress'],
+                )
+            if any(iea_histories.values()):
+                status_parts.append('IEA oil reserve-cover support')
+        except Exception:
+            pass
+
         importer_history = _build_weighted_composite_history(
             [
-                (support.get('oil_in_yen_stress').history if support.get('oil_in_yen_stress') else [], 0.45),
-                (support.get('oil_in_eur_stress').history if support.get('oil_in_eur_stress') else [], 0.35),
-                (support.get('oil_in_cny_stress').history if support.get('oil_in_cny_stress') else [], 0.20),
+                (support.get('oil_in_yen_stress').history if support.get('oil_in_yen_stress') else [], 0.35),
+                (support.get('oil_in_eur_stress').history if support.get('oil_in_eur_stress') else [], 0.25),
+                (support.get('oil_in_cny_stress').history if support.get('oil_in_cny_stress') else [], 0.15),
+                (support.get('iea_importer_oil_cover_stress').history if support.get('iea_importer_oil_cover_stress') else [], 0.25),
             ],
             start,
             end,
@@ -466,6 +516,26 @@ class PublicDataCollector:
                 history=importer_history,
             )
             status_parts.append('external importer stress')
+
+        try:
+            bea_observations = fetch_bea_iip_observations(client)
+            bea_histories = _build_bea_iip_histories(bea_observations, start, end)
+            if bea_histories.get('bea_net_iip_burden'):
+                support['bea_net_iip_burden'] = CollectedSeries(
+                    key='bea_net_iip_burden',
+                    source='bea/iip-quarterly',
+                    history=bea_histories['bea_net_iip_burden'],
+                )
+            if bea_histories.get('bea_foreign_financing_support'):
+                support['bea_foreign_financing_support'] = CollectedSeries(
+                    key='bea_foreign_financing_support',
+                    source='bea/iip-quarterly',
+                    history=bea_histories['bea_foreign_financing_support'],
+                )
+            if any(bea_histories.values()):
+                status_parts.append('BEA IIP sponsorship backdrop')
+        except Exception:
+            pass
 
         if importer_history and tax_base:
             tax_base_stress = _build_threshold_stress_history(tax_base.history, warning=3.0, critical=0.0, direction='low', start=start, end=end)
@@ -518,9 +588,171 @@ class PublicDataCollector:
                 )
                 status_parts.append('tax-receipts market stress')
 
+        foreign_duration_history = _build_foreign_duration_sponsorship_history(
+            start,
+            end,
+            collected.get('auction_foreign_sponsorship_stress').history if collected.get('auction_foreign_sponsorship_stress') else [],
+            collected.get('auction_stress').history if collected.get('auction_stress') else [],
+            collected.get('fima_repo_usage').history if collected.get('fima_repo_usage') else [],
+            support.get('external_importer_stress').history if support.get('external_importer_stress') else [],
+            support.get('bea_net_iip_burden').history if support.get('bea_net_iip_burden') else [],
+            support.get('bea_foreign_financing_support').history if support.get('bea_foreign_financing_support') else [],
+        )
+        if foreign_duration_history:
+            support['foreign_duration_sponsorship_stress'] = CollectedSeries(
+                key='foreign_duration_sponsorship_stress',
+                source='support/bea-auction-fima-sponsorship',
+                history=foreign_duration_history,
+            )
+            status_parts.append('foreign duration sponsorship stress')
+
         if not support:
             return {}, 'FX support layer incomplete; synthetic funding, importer, and receipts composites were unavailable on this refresh.'
         return support, f"Support layer is live for {', '.join(status_parts)}."
+
+    def _collect_consumer_credit_series(
+        self,
+        client: httpx.Client,
+        start: date,
+        end: date,
+        collected: dict[str, CollectedSeries],
+    ) -> tuple[dict[str, CollectedSeries], str]:
+        fetch_start = start - timedelta(days=3650)
+        failures: list[str] = []
+
+        def _fetch(series_id: str) -> list[tuple[date, float]] | None:
+            try:
+                return self._fetch_fred_csv(client, series_id, fetch_start, end)
+            except Exception:
+                failures.append(series_id)
+                return None
+
+        card_delinquency = _fetch('DRCCLACBS')
+        auto_delinquency = _fetch('DRALACBS')
+        card_chargeoffs = _fetch('CORCCACBS')
+        consumer_chargeoffs = _fetch('CORCACBS')
+        card_apr = _fetch('TERMCBCCALLNS')
+        card_tightening = _fetch('DRTSCLCC')
+        consumer_tightening = _fetch('STDSOTHCONS')
+
+        card_delinquency_stress = _build_ranked_stress_history(card_delinquency or [], start, end)
+        auto_delinquency_stress = _build_ranked_stress_history(auto_delinquency or [], start, end)
+        card_chargeoff_stress = _build_ranked_stress_history(card_chargeoffs or [], start, end)
+        consumer_chargeoff_stress = _build_ranked_stress_history(consumer_chargeoffs or [], start, end)
+        card_apr_stress = _build_ranked_stress_history(card_apr or [], start, end, window=36)
+        card_tightening_stress = _build_ranked_stress_history(card_tightening or [], start, end)
+        consumer_tightening_stress = _build_ranked_stress_history(consumer_tightening or [], start, end)
+
+        bank_quality = _build_weighted_composite_history(
+            [
+                (card_delinquency_stress, 0.30),
+                (auto_delinquency_stress, 0.25),
+                (card_chargeoff_stress, 0.25),
+                (consumer_chargeoff_stress, 0.20),
+            ],
+            start,
+            end,
+        )
+        lender_tightening = _build_weighted_composite_history(
+            [
+                (card_tightening_stress, 0.60),
+                (consumer_tightening_stress, 0.40),
+            ],
+            start,
+            end,
+        )
+
+        household_ccp_card: list[tuple[date, float]] = []
+        household_ccp_auto: list[tuple[date, float]] = []
+        try:
+            household_ccp_card, household_ccp_auto = self._fetch_nyfed_household_credit_transition_histories(client)
+        except Exception:
+            failures.append('NYFED_HOUSEHOLD_CREDIT')
+
+        household_ccp_quality = _build_weighted_composite_history(
+            [
+                (_build_ranked_stress_history(household_ccp_card, start, end), 0.60),
+                (_build_ranked_stress_history(household_ccp_auto, start, end), 0.40),
+            ],
+            start,
+            end,
+        )
+
+        temp_help_history = collected.get('temp_help_stress')
+        employment_tax_base_history = collected.get('employment_tax_base_proxy')
+        household_real_income_history = collected.get('household_real_income_squeeze')
+        household_strain = _build_weighted_composite_history(
+            [
+                (
+                    _build_threshold_stress_history(
+                        temp_help_history.history,
+                        warning=-2.0,
+                        critical=-6.0,
+                        direction='low',
+                        start=start,
+                        end=end,
+                    ) if temp_help_history else [],
+                    0.40,
+                ),
+                (
+                    _build_threshold_stress_history(
+                        employment_tax_base_history.history,
+                        warning=3.0,
+                        critical=0.0,
+                        direction='low',
+                        start=start,
+                        end=end,
+                    ) if employment_tax_base_history else [],
+                    0.35,
+                ),
+                (household_real_income_history.history if household_real_income_history else [], 0.25),
+            ],
+            start,
+            end,
+        )
+
+        composite = _build_consumer_credit_composite_history(
+            [
+                ('bank_quality', bank_quality, 0.30),
+                ('household_ccp_quality', household_ccp_quality, 0.20),
+                ('lender_tightening', lender_tightening, 0.20),
+                ('borrowing_cost', card_apr_stress, 0.15),
+                ('household_strain', household_strain, 0.15),
+            ],
+            start,
+            end,
+        )
+        if not composite:
+            detail = ', '.join(failures[:6]) if failures else 'no component histories'
+            return {}, f'Consumer credit composite unavailable; using demo fallback. Failures: {detail}.'
+
+        status_parts: list[str] = []
+        if bank_quality:
+            status_parts.append('bank delinquency and charge-off quality')
+        if household_ccp_quality:
+            status_parts.append('New York Fed household transitions')
+        if lender_tightening:
+            status_parts.append('bank lending standards')
+        if card_apr_stress:
+            status_parts.append('card borrowing costs')
+        if household_strain:
+            status_parts.append('household strain confirmation')
+
+        status = (
+            'Consumer credit composite is live for '
+            + ', '.join(status_parts)
+            + '.'
+        )
+        if failures:
+            status += f" Partial fallbacks remain for: {', '.join(failures[:6])}."
+
+        return {
+            'consumer_credit_stress': CollectedSeries(
+                key='consumer_credit_stress',
+                source='support/fred-nyfed-consumer-credit-composite',
+                history=composite,
+            )
+        }, status
 
     def _collect_treasury_series(
         self,
@@ -1014,6 +1246,28 @@ class PublicDataCollector:
             raise ValueError(f'No observations returned for {series_id}')
         return observations
 
+    def _fetch_nyfed_household_credit_transition_histories(
+        self,
+        client: httpx.Client,
+    ) -> tuple[list[tuple[date, float]], list[tuple[date, float]]]:
+        page = client.get(NYFED_HOUSEHOLD_CREDIT_IFRAME_URL)
+        page.raise_for_status()
+        match = re.search(
+            r'href="(?P<path>/medialibrary/interactives/householdcredit/data/xls/HHD_C_Report_[^"]+)"',
+            page.text,
+            flags=re.IGNORECASE,
+        )
+        if match is None:
+            raise ValueError('Unable to locate New York Fed household-credit workbook link')
+        workbook_url = f"https://www.newyorkfed.org{match.group('path')}"
+        workbook = client.get(workbook_url)
+        workbook.raise_for_status()
+        return _parse_nyfed_household_credit_workbook(
+            workbook.content,
+            auto_sheet='Page 26 Data',
+            card_sheet='Page 27 Data',
+        )
+
     def _fetch_ecb_deposit_rate_history(
         self,
         client: httpx.Client,
@@ -1310,6 +1564,58 @@ def _densify_daily(observations: list[tuple[date, float]], start: date, end: dat
         dense.append((_timestamp_for_day(current), last_value))
         current += timedelta(days=1)
     return dense
+
+
+def _quarter_label_to_date(value: str) -> date | None:
+    match = re.fullmatch(r'(?P<year>\d{2}):Q(?P<quarter>[1-4])', value.strip())
+    if match is None:
+        return None
+    year = int(match.group('year'))
+    quarter = int(match.group('quarter'))
+    calendar_year = 2000 + year if year < 70 else 1900 + year
+    month = quarter * 3
+    day = 31 if month in {3, 12} else 30
+    return date(calendar_year, month, day)
+
+
+def _parse_nyfed_transition_sheet(
+    worksheet: object,
+) -> list[tuple[date, float]]:
+    observations: list[tuple[date, float]] = []
+    for row in worksheet.iter_rows(min_row=4, values_only=True):
+        quarter_label = row[0] if row else None
+        if not isinstance(quarter_label, str):
+            continue
+        observed_at = _quarter_label_to_date(quarter_label)
+        if observed_at is None:
+            continue
+        value = row[7] if len(row) > 7 else None
+        if not isinstance(value, (int, float)):
+            continue
+        observations.append((observed_at, float(value)))
+    if not observations:
+        raise ValueError('No all-age transition observations found in New York Fed workbook sheet')
+    return observations
+
+
+def _parse_nyfed_household_credit_workbook(
+    workbook_bytes: bytes,
+    *,
+    auto_sheet: str,
+    card_sheet: str,
+) -> tuple[list[tuple[date, float]], list[tuple[date, float]]]:
+    try:
+        import openpyxl
+    except ImportError as exc:
+        raise RuntimeError('openpyxl is required to parse the New York Fed household-credit workbook') from exc
+
+    workbook = openpyxl.load_workbook(io.BytesIO(workbook_bytes), data_only=True, read_only=True)
+    try:
+        auto_history = _parse_nyfed_transition_sheet(workbook[auto_sheet])
+        card_history = _parse_nyfed_transition_sheet(workbook[card_sheet])
+    finally:
+        workbook.close()
+    return card_history, auto_history
 
 
 def _build_pointwise_series(
@@ -1955,6 +2261,192 @@ def _build_local_currency_oil_stress_history(
     return _forward_fill_history(values, start, end)
 
 
+def _build_iea_oil_security_histories(
+    observations: list[IEAOilStockObservation],
+    start: date,
+    end: date,
+) -> dict[str, list[tuple[datetime, float]]]:
+    total_cover_obs = _extract_iea_country_series(observations, 'Total IEA net importers', 'total_days')
+    europe_cover_obs = _extract_iea_country_series(observations, 'Total IEA Europe', 'total_days')
+    japan_cover_obs = _extract_iea_country_series(observations, 'Japan', 'total_days')
+    korea_cover_obs = _extract_iea_country_series(observations, 'Korea', 'total_days')
+
+    public_share_obs: list[tuple[date, float]] = []
+    for item in observations:
+        if item.country_name != 'Total IEA net importers':
+            continue
+        industry_days = float(item.industry_days or 0.0)
+        public_days = float(item.public_days or 0.0)
+        denominator = industry_days + public_days
+        if denominator <= 0:
+            continue
+        public_share_obs.append((item.observed_at, round((public_days / denominator) * 100.0, 6)))
+
+    total_cover_history = _densify_daily(total_cover_obs, start, end)
+    public_share_history = _densify_daily(public_share_obs, start, end)
+    total_cover_stress = _build_threshold_stress_history(
+        total_cover_history,
+        warning=130.0,
+        critical=110.0,
+        direction='low',
+        start=start,
+        end=end,
+    )
+    public_share_stress = _build_threshold_stress_history(
+        public_share_history,
+        warning=45.0,
+        critical=30.0,
+        direction='low',
+        start=start,
+        end=end,
+    )
+    cover_change_obs = _build_iea_cover_change_observations(total_cover_obs, lookback=3)
+    cover_change_stress = _build_ranked_stress_history(cover_change_obs, start, end, inverse=True)
+
+    europe_cover_stress = _build_threshold_stress_history(
+        _densify_daily(europe_cover_obs, start, end),
+        warning=125.0,
+        critical=105.0,
+        direction='low',
+        start=start,
+        end=end,
+    )
+    japan_cover_stress = _build_threshold_stress_history(
+        _densify_daily(japan_cover_obs, start, end),
+        warning=170.0,
+        critical=140.0,
+        direction='low',
+        start=start,
+        end=end,
+    )
+    korea_cover_stress = _build_threshold_stress_history(
+        _densify_daily(korea_cover_obs, start, end),
+        warning=170.0,
+        critical=140.0,
+        direction='low',
+        start=start,
+        end=end,
+    )
+
+    importer_cover_stress = _build_weighted_composite_history(
+        [
+            (japan_cover_stress, 0.40),
+            (europe_cover_stress, 0.35),
+            (korea_cover_stress, 0.15),
+            (total_cover_stress, 0.10),
+        ],
+        start,
+        end,
+    )
+    oil_buffer_history = _build_weighted_composite_history(
+        [
+            (total_cover_stress, 0.55),
+            (cover_change_stress, 0.25),
+            (public_share_stress, 0.20),
+        ],
+        start,
+        end,
+    )
+
+    return {
+        'iea_oil_cover_days': total_cover_history,
+        'iea_public_stock_share': public_share_history,
+        'oil_buffer_depletion_stress': oil_buffer_history,
+        'iea_importer_oil_cover_stress': importer_cover_stress,
+    }
+
+
+def _extract_iea_country_series(
+    observations: list[IEAOilStockObservation],
+    country_name: str,
+    field: str,
+) -> list[tuple[date, float]]:
+    values: list[tuple[date, float]] = []
+    for item in observations:
+        if item.country_name != country_name:
+            continue
+        value = getattr(item, field)
+        if value is None:
+            continue
+        values.append((item.observed_at, float(value)))
+    return values
+
+
+def _build_iea_cover_change_observations(
+    observations: list[tuple[date, float]],
+    *,
+    lookback: int,
+) -> list[tuple[date, float]]:
+    ordered = sorted(observations, key=lambda item: item[0])
+    if len(ordered) <= lookback:
+        return []
+    return [
+        (ordered[index][0], round(ordered[index][1] - ordered[index - lookback][1], 6))
+        for index in range(lookback, len(ordered))
+    ]
+
+
+def _build_bea_iip_histories(
+    observations: list[BEAIIPObservation],
+    start: date,
+    end: date,
+) -> dict[str, list[tuple[datetime, float]]]:
+    net_iip = [(item.observed_at, abs(float(item.net_iip_trillion))) for item in observations]
+    financing_support = [(item.observed_at, float(item.liability_financial_transactions_billion)) for item in observations]
+    return {
+        'bea_net_iip_burden': _densify_daily(net_iip, start, end),
+        'bea_foreign_financing_support': _densify_daily(financing_support, start, end),
+    }
+
+
+def _build_foreign_duration_sponsorship_history(
+    start: date,
+    end: date,
+    auction_foreign_history: list[tuple[datetime, float]],
+    auction_stress_history: list[tuple[datetime, float]],
+    fima_history: list[tuple[datetime, float]],
+    external_importer_history: list[tuple[datetime, float]],
+    bea_burden_history: list[tuple[datetime, float]],
+    bea_financing_support_history: list[tuple[datetime, float]],
+) -> list[tuple[datetime, float]]:
+    fima_stress = _build_threshold_stress_history(
+        fima_history,
+        warning=18.0,
+        critical=35.0,
+        direction='high',
+        start=start,
+        end=end,
+    )
+    bea_burden_stress = _build_threshold_stress_history(
+        bea_burden_history,
+        warning=24.0,
+        critical=28.0,
+        direction='high',
+        start=start,
+        end=end,
+    )
+    bea_financing_stress = _build_threshold_stress_history(
+        bea_financing_support_history,
+        warning=350.0,
+        critical=150.0,
+        direction='low',
+        start=start,
+        end=end,
+    )
+    return _build_weighted_composite_history(
+        [
+            (auction_foreign_history, 0.30),
+            (auction_stress_history, 0.10),
+            (fima_stress, 0.15),
+            (external_importer_history, 0.20),
+            (bea_burden_stress, 0.10),
+            (bea_financing_stress, 0.15),
+        ],
+        start,
+        end,
+    )
+
+
 def _build_threshold_stress_history(
     history: list[tuple[datetime, float]],
     *,
@@ -1979,6 +2471,34 @@ def _build_threshold_stress_history(
     return _forward_fill_history(values, start, end)
 
 
+def _build_ranked_stress_history(
+    observations: list[tuple[date, float]],
+    start: date,
+    end: date,
+    *,
+    window: int = 32,
+    inverse: bool = False,
+) -> list[tuple[datetime, float]]:
+    if not observations:
+        return []
+    ordered = sorted(observations, key=lambda item: item[0])
+    values_only = [float(value) for _, value in ordered]
+    ranked: list[tuple[date, float]] = []
+    for index, (observed_at, current_value) in enumerate(ordered):
+        sample = values_only[max(0, index - window + 1):index + 1]
+        percentile = _percentile_rank(sample, float(current_value), inverse=inverse)
+        momentum_sample: list[float] = []
+        current_change = 0.0
+        if index > 0:
+            current_change = float(current_value) - values_only[index - 1]
+            for change_index in range(max(1, index - window + 1), index + 1):
+                momentum_sample.append(values_only[change_index] - values_only[change_index - 1])
+        momentum = _percentile_rank(momentum_sample, current_change, inverse=inverse) if momentum_sample else 50.0
+        stress = (0.82 * percentile) + (0.18 * momentum)
+        ranked.append((observed_at, round(max(0.0, min(100.0, stress)), 6)))
+    return _densify_daily(ranked, start, end)
+
+
 def _build_weighted_composite_history(
     weighted_histories: list[tuple[list[tuple[datetime, float]], float]],
     start: date,
@@ -1999,6 +2519,52 @@ def _build_weighted_composite_history(
             numerator += history_map[day] * weight
             denominator += weight
         values.append((_timestamp_for_day(day), round(numerator / denominator, 6)))
+    return _forward_fill_history(values, start, end)
+
+
+def _build_consumer_credit_composite_history(
+    blocks: list[tuple[str, list[tuple[datetime, float]], float]],
+    start: date,
+    end: date,
+) -> list[tuple[datetime, float]]:
+    usable = [(name, history, weight) for name, history, weight in blocks if history and weight > 0]
+    if not usable:
+        return []
+    maps = [(name, {timestamp.date(): float(value) for timestamp, value in history}, weight) for name, history, weight in usable]
+    common_days = set.intersection(*(set(history_map) for _, history_map, _ in maps))
+    if not common_days:
+        return []
+
+    values: list[tuple[datetime, float]] = []
+    for day in sorted(common_days):
+        numerator = 0.0
+        denominator = 0.0
+        block_values: dict[str, float] = {}
+        for name, history_map, weight in maps:
+            value = history_map[day]
+            block_values[name] = value
+            numerator += value * weight
+            denominator += weight
+        score = numerator / denominator if denominator > 0 else 0.0
+        warning_count = sum(1 for value in block_values.values() if value >= 58.0)
+        critical_count = sum(1 for value in block_values.values() if value >= 72.0)
+
+        if warning_count <= 1:
+            score = min(score, 62.0)
+        elif warning_count >= 3:
+            score += 4.0
+
+        if critical_count >= 2:
+            score += 5.0
+
+        if (
+            block_values.get('bank_quality', 0.0) >= 65.0
+            and block_values.get('household_ccp_quality', 0.0) >= 65.0
+            and block_values.get('household_strain', 0.0) >= 55.0
+        ):
+            score += 4.0
+
+        values.append((_timestamp_for_day(day), round(max(0.0, min(100.0, score)), 6)))
     return _forward_fill_history(values, start, end)
 
 
