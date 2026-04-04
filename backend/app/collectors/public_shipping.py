@@ -12,10 +12,14 @@ import httpx
 EIA_CHOKEPOINTS_URL = 'https://www.eia.gov/international/content/analysis/special_topics/World_Oil_Transit_Chokepoints/'
 AISHUB_WS_URL = 'https://data.aishub.net/ws.php'
 PORTWATCH_HORMUZ_QUERY_URL = 'https://services9.arcgis.com/weJ1QsnbMYJlCHdG/ArcGIS/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query'
+GLOBAL_FISHING_WATCH_EVENTS_URL = 'https://gateway.api.globalfishingwatch.org/v3/events'
 PORTWATCH_FIELDS = 'date,portid,portname,n_tanker,n_total,capacity_tanker,capacity'
 USER_AGENT = 'Mozilla/5.0 macro-stress-dashboard/0.1'
 RED_SEA_BBOX = {'latmin': 11.0, 'latmax': 21.5, 'lonmin': 41.0, 'lonmax': 45.5}
 HORMUZ_BBOX = {'latmin': 24.0, 'latmax': 28.5, 'lonmin': 54.0, 'lonmax': 58.5}
+RED_SEA_POLYGON_WKT = 'POLYGON((41 11, 45.5 11, 45.5 21.5, 41 21.5, 41 11))'
+HORMUZ_POLYGON_WKT = 'POLYGON((54 24, 58.5 24, 58.5 28.5, 54 28.5, 54 24))'
+GFW_PORT_VISITS_DATASET = 'public-global-port-visits-events:v3.0'
 
 
 @dataclass(slots=True)
@@ -27,6 +31,14 @@ class TankerDisruptionAssessment:
 
 @dataclass(slots=True)
 class HormuzTransitAssessment:
+    score: float
+    notes: str
+    source: str
+    history: list[tuple[datetime, float]]
+
+
+@dataclass(slots=True)
+class GlobalFishingWatchAssessment:
     score: float
     notes: str
     source: str
@@ -46,6 +58,33 @@ def _safe_float(value: object) -> float | None:
         return float(value)
     except (TypeError, ValueError):
         return None
+
+
+def _extract_timestamp(value: object) -> datetime | None:
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value.astimezone(UTC) if value.tzinfo else value.replace(tzinfo=UTC)
+    if isinstance(value, str):
+        stripped = value.strip()
+        if not stripped:
+            return None
+        try:
+            return datetime.fromisoformat(stripped.replace('Z', '+00:00')).astimezone(UTC)
+        except ValueError:
+            return None
+    if isinstance(value, (int, float)):
+        return _parse_portwatch_datetime(value)
+    return None
+
+
+def _lookup_nested(mapping: dict[str, object], path: tuple[str, ...]) -> object | None:
+    current: object = mapping
+    for key in path:
+        if not isinstance(current, dict):
+            return None
+        current = current.get(key)
+    return current
 
 
 def _parse_portwatch_datetime(value: object) -> datetime | None:
@@ -155,34 +194,46 @@ def _fetch_aishub_area_count(client: httpx.Client, username: str, bbox: dict[str
     return _count_aishub_objects(payload)
 
 
-def collect_tanker_disruption_assessment(aishub_username: str | None, timeout_seconds: float = 20.0) -> TankerDisruptionAssessment:
+def collect_tanker_disruption_assessment(
+    aishub_username: str | None,
+    global_fishing_watch_api_key: str | None = None,
+    timeout_seconds: float = 20.0,
+) -> TankerDisruptionAssessment:
     with httpx.Client(timeout=timeout_seconds, headers={'User-Agent': USER_AGENT}, follow_redirects=True) as client:
         eia_response = client.get(EIA_CHOKEPOINTS_URL)
         eia_response.raise_for_status()
         assessment = score_eia_chokepoint_page(eia_response.text)
 
-        if not aishub_username:
+        if aishub_username:
+            try:
+                red_sea_count = _fetch_aishub_area_count(client, aishub_username, RED_SEA_BBOX)
+                hormuz_count = _fetch_aishub_area_count(client, aishub_username, HORMUZ_BBOX)
+            except Exception:
+                assessment.notes = assessment.notes + '; AISHub request unavailable'
+            else:
+                counts = [count for count in (red_sea_count, hormuz_count) if count is not None]
+                if counts:
+                    traffic_penalty = 0.0
+                    if red_sea_count is not None and red_sea_count < 25:
+                        traffic_penalty += 8.0
+                    if hormuz_count is not None and hormuz_count < 20:
+                        traffic_penalty += 6.0
+                    assessment.score = round(max(10.0, min(90.0, assessment.score + traffic_penalty)), 2)
+                    assessment.notes = assessment.notes + f'; AISHub counts red_sea={red_sea_count}, hormuz={hormuz_count}'
+                    assessment.source = 'eia/chokepoints+aishub'
+        else:
             assessment.notes = assessment.notes + '; AISHub not configured'
-            return assessment
 
+    if global_fishing_watch_api_key:
         try:
-            red_sea_count = _fetch_aishub_area_count(client, aishub_username, RED_SEA_BBOX)
-            hormuz_count = _fetch_aishub_area_count(client, aishub_username, HORMUZ_BBOX)
+            gfw = collect_global_fishing_watch_assessment(global_fishing_watch_api_key, timeout_seconds=timeout_seconds)
         except Exception:
-            assessment.notes = assessment.notes + '; AISHub request unavailable'
-            return assessment
-
-        counts = [count for count in (red_sea_count, hormuz_count) if count is not None]
-        if counts:
-            traffic_penalty = 0.0
-            if red_sea_count is not None and red_sea_count < 25:
-                traffic_penalty += 8.0
-            if hormuz_count is not None and hormuz_count < 20:
-                traffic_penalty += 6.0
-            assessment.score = round(max(10.0, min(90.0, assessment.score + traffic_penalty)), 2)
-            assessment.notes = assessment.notes + f'; AISHub counts red_sea={red_sea_count}, hormuz={hormuz_count}'
-            assessment.source = 'eia/chokepoints+aishub'
-        return assessment
+            assessment.notes = assessment.notes + '; Global Fishing Watch unavailable'
+        else:
+            assessment.score = round(max(10.0, min(95.0, 0.72 * assessment.score + 0.28 * gfw.score)), 2)
+            assessment.notes = assessment.notes + f'; GFW signal={gfw.score:.2f}'
+            assessment.source = f'{assessment.source}+gfw' if assessment.source != 'eia/chokepoints' else 'eia/chokepoints+gfw'
+    return assessment
 
 
 def _fetch_portwatch_hormuz_rows(client: httpx.Client) -> list[dict[str, object]]:
@@ -214,6 +265,139 @@ def _window_average(values: list[float], end_index: int, window: int) -> float:
     start_index = max(0, end_index - window + 1)
     sample = values[start_index:end_index + 1]
     return sum(sample) / max(len(sample), 1)
+
+
+def _fetch_gfw_event_rows(
+    client: httpx.Client,
+    api_key: str,
+    *,
+    geometry_wkt: str,
+    start: date,
+    end: date,
+) -> list[dict[str, object]]:
+    response = client.get(
+        GLOBAL_FISHING_WATCH_EVENTS_URL,
+        headers={
+            'Authorization': f'Bearer {api_key}',
+            'User-Agent': USER_AGENT,
+        },
+        params={
+            'datasets[0]': GFW_PORT_VISITS_DATASET,
+            'start-date': start.isoformat(),
+            'end-date': end.isoformat(),
+            'geometry': geometry_wkt,
+            'limit': 2000,
+            'offset': 0,
+        },
+    )
+    response.raise_for_status()
+    payload = response.json()
+    if isinstance(payload, dict):
+        for key in ('entries', 'data', 'events'):
+            value = payload.get(key)
+            if isinstance(value, list):
+                return [item for item in value if isinstance(item, dict)]
+    if isinstance(payload, list):
+        return [item for item in payload if isinstance(item, dict)]
+    return []
+
+
+def build_gfw_port_activity_stress_history(
+    red_sea_rows: list[dict[str, object]],
+    hormuz_rows: list[dict[str, object]],
+    *,
+    start: date,
+    end: date,
+) -> list[tuple[datetime, float]]:
+    def _daily_counts(rows: list[dict[str, object]]) -> dict[date, float]:
+        counts: dict[date, float] = {}
+        for row in rows:
+            observed_at = None
+            for path in (
+                ('start',),
+                ('startDate',),
+                ('start_date',),
+                ('eventStart',),
+                ('eventInfo', 'start'),
+                ('eventInfo', 'startDate'),
+                ('portVisit', 'start'),
+                ('portVisit', 'startDate'),
+            ):
+                observed_at = _extract_timestamp(_lookup_nested(row, path))
+                if observed_at is not None:
+                    break
+            if observed_at is None:
+                continue
+            counts[observed_at.date()] = counts.get(observed_at.date(), 0.0) + 1.0
+        return counts
+
+    def _dense_counts(counts: dict[date, float]) -> list[tuple[datetime, float]]:
+        history: list[tuple[datetime, float]] = []
+        current = start
+        while current <= end:
+            history.append((datetime.combine(current, datetime.min.time(), tzinfo=UTC).replace(hour=12), counts.get(current, 0.0)))
+            current += timedelta(days=1)
+        return history
+
+    def _region_stress(history: list[tuple[datetime, float]]) -> list[tuple[datetime, float]]:
+        values = [value for _, value in history]
+        series: list[tuple[datetime, float]] = []
+        prior_drop = 0.0
+        for index, (timestamp, _) in enumerate(history):
+            avg_7 = _window_average(values, index, 7)
+            avg_30 = _window_average(values, index, 30)
+            drop = max(0.0, (avg_30 - avg_7) / max(avg_30, 1.0))
+            acceleration = max(0.0, drop - prior_drop)
+            prior_drop = drop
+            score = 22.0 + 92.0 * drop + 18.0 * acceleration
+            series.append((timestamp, round(max(10.0, min(95.0, score)), 6)))
+        return series
+
+    red_history = _region_stress(_dense_counts(_daily_counts(red_sea_rows)))
+    hormuz_history = _region_stress(_dense_counts(_daily_counts(hormuz_rows)))
+    if not red_history and not hormuz_history:
+        return []
+
+    composite: list[tuple[datetime, float]] = []
+    total_points = max(len(red_history), len(hormuz_history))
+    for index in range(total_points):
+        timestamp = red_history[index][0] if index < len(red_history) else hormuz_history[index][0]
+        red_value = red_history[index][1] if index < len(red_history) else 10.0
+        hormuz_value = hormuz_history[index][1] if index < len(hormuz_history) else 10.0
+        composite.append((timestamp, round(0.65 * red_value + 0.35 * hormuz_value, 6)))
+    return composite
+
+
+def collect_global_fishing_watch_assessment(
+    api_key: str,
+    *,
+    timeout_seconds: float = 20.0,
+    days: int = 90,
+    end_date: date | None = None,
+) -> GlobalFishingWatchAssessment:
+    end = end_date or date.today()
+    start = end - timedelta(days=days - 1)
+    with httpx.Client(timeout=timeout_seconds, headers={'User-Agent': USER_AGENT}, follow_redirects=True) as client:
+        red_sea_rows = _fetch_gfw_event_rows(client, api_key, geometry_wkt=RED_SEA_POLYGON_WKT, start=start, end=end)
+        hormuz_rows = _fetch_gfw_event_rows(client, api_key, geometry_wkt=HORMUZ_POLYGON_WKT, start=start, end=end)
+
+    history = build_gfw_port_activity_stress_history(red_sea_rows, hormuz_rows, start=start, end=end)
+    if not history:
+        raise ValueError('Global Fishing Watch event history is empty')
+
+    checked_at = datetime.now(UTC).isoformat()
+    notes = (
+        'Global Fishing Watch port-visit scan: '
+        f'red_sea_events={len(red_sea_rows)}; hormuz_events={len(hormuz_rows)}; '
+        'stress is based on 7-day versus 30-day deterioration in public port-visit events. '
+        f'source=global-fishing-watch; checked={checked_at}; items={len(red_sea_rows) + len(hormuz_rows)}; signal={history[-1][1]:.2f}'
+    )
+    return GlobalFishingWatchAssessment(
+        score=round(history[-1][1], 2),
+        notes=notes,
+        source='gfw/public-port-visits',
+        history=history,
+    )
 
 
 def build_hormuz_transit_stress_history(rows: list[dict[str, object]]) -> list[tuple[datetime, float]]:

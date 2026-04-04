@@ -1,17 +1,61 @@
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime, timedelta
 from urllib.parse import urljoin, urlparse
 
 import httpx
 
 
 BEINSURE_BASE_URL = 'https://beinsure.com'
+SEC_COMPANY_TICKERS_URL = 'https://www.sec.gov/files/company_tickers.json'
+SEC_SUBMISSIONS_URL = 'https://data.sec.gov/submissions/CIK{cik}.json'
+SEC_ARCHIVES_URL = 'https://www.sec.gov/Archives/edgar/data/{cik_numeric}/{accession}/{document}'
 USER_AGENT = 'Mozilla/5.0 macro-stress-dashboard/0.1'
 MAX_CANDIDATES = 24
 MAX_ARTICLES = 8
+MAX_SEC_FILINGS = 16
+SEC_FORMS = {'8-K', '6-K', '10-Q', '10-K', '20-F', '40-F'}
+SEC_WATCHLIST = [
+    ('FRO', 'Frontline'),
+    ('STNG', 'Scorpio Tankers'),
+    ('TNK', 'Teekay Tankers'),
+    ('INSW', 'International Seaways'),
+    ('DHT', 'DHT Holdings'),
+    ('ZIM', 'ZIM Integrated Shipping'),
+    ('ACGL', 'Arch Capital'),
+    ('RNR', 'RenaissanceRe'),
+    ('WRB', 'W. R. Berkley'),
+    ('AJG', 'Arthur J. Gallagher'),
+]
+SEC_KEYWORD_WEIGHTS = {
+    'red sea': 10.0,
+    'bab el mandeb': 10.0,
+    'strait of hormuz': 12.0,
+    'war risk': 10.0,
+    'marine insurance': 8.0,
+    'rerouting': 7.0,
+    'rerouted': 7.0,
+    'shipping disruption': 7.0,
+    'transit disruption': 7.0,
+    'insurance premium': 8.0,
+    'premiums increased': 7.0,
+    'premium increases': 7.0,
+    'listed area': 6.0,
+    'middle east': 5.0,
+    'suez canal': 6.0,
+    'gulf of aden': 7.0,
+    'security incident': 6.0,
+    'hostilities': 6.0,
+}
+SEC_NEGATIVE_WEIGHTS = {
+    'no material impact': 10.0,
+    'not material': 8.0,
+    'immaterial': 8.0,
+    'no significant impact': 8.0,
+}
 SEED_URLS = [
     'https://beinsure.com/news/',
     'https://beinsure.com/faq_category/marine-insurance/',
@@ -91,6 +135,16 @@ class ArticleAssessment:
     score: float
     relevance: float
     article_date: str | None
+
+
+@dataclass(slots=True)
+class SecFilingAssessment:
+    ticker: str
+    company_name: str
+    form: str
+    filed_at: date
+    score: float
+    highlights: list[str]
 
 
 @dataclass(slots=True)
@@ -185,6 +239,106 @@ def score_article(url: str, html: str) -> ArticleAssessment:
     )
 
 
+def _safe_json(response: httpx.Response) -> dict | list | None:
+    try:
+        return response.json()
+    except json.JSONDecodeError:
+        return None
+
+
+def _fetch_sec_company_tickers(client: httpx.Client) -> dict[str, str]:
+    response = client.get(SEC_COMPANY_TICKERS_URL)
+    response.raise_for_status()
+    payload = _safe_json(response)
+    if not isinstance(payload, dict):
+        return {}
+
+    mapping: dict[str, str] = {}
+    for value in payload.values():
+        if not isinstance(value, dict):
+            continue
+        ticker = str(value.get('ticker') or '').upper().strip()
+        cik = str(value.get('cik_str') or '').strip()
+        if not ticker or not cik:
+            continue
+        mapping[ticker] = cik.zfill(10)
+    return mapping
+
+
+def _score_sec_filing_text(text: str) -> tuple[float, list[str]]:
+    lowered = _strip_html(text).lower()
+    positive = 0.0
+    highlights: list[str] = []
+    for term, weight in SEC_KEYWORD_WEIGHTS.items():
+        if term in lowered:
+            positive += weight
+            highlights.append(term)
+    negative = sum(weight for term, weight in SEC_NEGATIVE_WEIGHTS.items() if term in lowered)
+    score = 28.0 + 0.85 * positive - 0.7 * negative
+    return max(10.0, min(90.0, round(score, 2))), highlights[:4]
+
+
+def _recent_sec_filings(payload: dict[str, object]) -> list[dict[str, str]]:
+    filings = payload.get('filings') if isinstance(payload, dict) else None
+    recent = filings.get('recent') if isinstance(filings, dict) else None
+    if not isinstance(recent, dict):
+        return []
+
+    forms = recent.get('form')
+    dates = recent.get('filingDate')
+    accession_numbers = recent.get('accessionNumber')
+    primary_documents = recent.get('primaryDocument')
+    if not all(isinstance(item, list) for item in [forms, dates, accession_numbers, primary_documents]):
+        return []
+
+    rows: list[dict[str, str]] = []
+    for form, filing_date, accession, primary_document in zip(forms, dates, accession_numbers, primary_documents):
+        rows.append(
+            {
+                'form': str(form or ''),
+                'filing_date': str(filing_date or ''),
+                'accession_number': str(accession or ''),
+                'primary_document': str(primary_document or ''),
+            }
+        )
+    return rows
+
+
+def aggregate_sec_filing_assessments(filings: list[SecFilingAssessment]) -> MarineInsuranceAssessment:
+    if not filings:
+        raise ValueError('No SEC filings matched the marine-insurance watchlist')
+
+    ordered = sorted(filings, key=lambda item: (item.filed_at, item.score), reverse=True)
+    selected = ordered[:MAX_SEC_FILINGS]
+    weighted_score = 0.0
+    total_weight = 0.0
+    highlight_labels: list[str] = []
+    for index, filing in enumerate(selected):
+        recency_weight = max(1.0, len(selected) - index)
+        weighted_score += filing.score * recency_weight
+        total_weight += recency_weight
+        highlight_labels.append(f'{filing.ticker} {filing.form} {filing.filed_at.isoformat()}')
+
+    composite = weighted_score / max(total_weight, 1.0)
+    checked_at = datetime.now(UTC).isoformat()
+    notes = (
+        'Auto-scored from SEC EDGAR watchlist; '
+        'source=sec-edgar-watchlist; '
+        f'checked={checked_at}; '
+        f'items={len(selected)}; '
+        f'signal={composite:.2f}; '
+        f'highlights={" | ".join(highlight_labels[:4])}'
+    )
+    return MarineInsuranceAssessment(
+        score=round(composite, 2),
+        source='sec/edgar-watchlist',
+        notes=notes,
+        article_date=selected[0].filed_at.isoformat(),
+        article_count=len(selected),
+        top_articles=highlight_labels[:4],
+    )
+
+
 def aggregate_article_assessments(articles: list[ArticleAssessment]) -> MarineInsuranceAssessment:
     if not articles:
         return MarineInsuranceAssessment(
@@ -217,6 +371,67 @@ def aggregate_article_assessments(articles: list[ArticleAssessment]) -> MarineIn
 
 
 def collect_marine_insurance_assessment(timeout_seconds: float = 20.0) -> MarineInsuranceAssessment:
+    with httpx.Client(timeout=timeout_seconds, headers={'User-Agent': USER_AGENT}, follow_redirects=True) as client:
+        try:
+            ticker_map = _fetch_sec_company_tickers(client)
+            assessments: list[SecFilingAssessment] = []
+            cutoff = date.today() - timedelta(days=365)
+            for ticker, company_name in SEC_WATCHLIST:
+                cik = ticker_map.get(ticker)
+                if not cik:
+                    continue
+                response = client.get(SEC_SUBMISSIONS_URL.format(cik=cik))
+                response.raise_for_status()
+                payload = _safe_json(response)
+                if not isinstance(payload, dict):
+                    continue
+                cik_numeric = str(int(cik))
+                for filing in _recent_sec_filings(payload):
+                    form = filing['form']
+                    if form not in SEC_FORMS:
+                        continue
+                    try:
+                        filed_at = date.fromisoformat(filing['filing_date'])
+                    except ValueError:
+                        continue
+                    if filed_at < cutoff:
+                        continue
+                    accession_number = filing['accession_number']
+                    primary_document = filing['primary_document']
+                    if not accession_number or not primary_document:
+                        continue
+                    document_url = SEC_ARCHIVES_URL.format(
+                        cik_numeric=cik_numeric,
+                        accession=accession_number.replace('-', ''),
+                        document=primary_document,
+                    )
+                    try:
+                        filing_response = client.get(document_url)
+                        filing_response.raise_for_status()
+                    except Exception:
+                        continue
+                    score, highlights = _score_sec_filing_text(filing_response.text)
+                    if len(highlights) < 2 and score < 45:
+                        continue
+                    assessments.append(
+                        SecFilingAssessment(
+                            ticker=ticker,
+                            company_name=company_name,
+                            form=form,
+                            filed_at=filed_at,
+                            score=score,
+                            highlights=highlights,
+                        )
+                    )
+                    if len(assessments) >= MAX_SEC_FILINGS:
+                        break
+                if len(assessments) >= MAX_SEC_FILINGS:
+                    break
+            if assessments:
+                return aggregate_sec_filing_assessments(assessments)
+        except Exception:
+            pass
+
     candidate_urls: list[str] = []
     seen_urls: set[str] = set()
     article_assessments: list[ArticleAssessment] = []

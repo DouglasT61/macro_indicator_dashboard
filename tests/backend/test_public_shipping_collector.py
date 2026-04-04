@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 
 from app.collectors.public_shipping import (
+    build_gfw_port_activity_stress_history,
     build_hormuz_transit_stress_history,
     score_eia_chokepoint_page,
 )
@@ -43,3 +44,27 @@ def test_build_hormuz_transit_stress_history_rises_when_tanker_calls_drop() -> N
     assert len(history) == 40
     assert history[-1][1] > history[10][1]
     assert history[-1][1] >= 55.0
+
+
+def test_build_gfw_port_activity_stress_history_rises_when_recent_events_drop() -> None:
+    red_sea_rows: list[dict[str, object]] = []
+    hormuz_rows: list[dict[str, object]] = []
+    for day in range(1, 41):
+        current_date = datetime(2026, 2 if day <= 28 else 3, day if day <= 28 else day - 28, tzinfo=UTC)
+        red_count = 6 if day <= 20 else 2
+        hormuz_count = 4 if day <= 20 else 1
+        for _ in range(red_count):
+            red_sea_rows.append({'startDate': current_date.isoformat()})
+        for _ in range(hormuz_count):
+            hormuz_rows.append({'eventInfo': {'start': current_date.isoformat()}})
+
+    history = build_gfw_port_activity_stress_history(
+        red_sea_rows,
+        hormuz_rows,
+        start=datetime(2026, 2, 1, tzinfo=UTC).date(),
+        end=datetime(2026, 3, 12, tzinfo=UTC).date(),
+    )
+
+    assert len(history) == 40
+    assert history[-1][1] > history[10][1]
+    assert history[-1][1] >= 50.0

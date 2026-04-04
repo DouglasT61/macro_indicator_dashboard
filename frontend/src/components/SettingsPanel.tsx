@@ -26,8 +26,8 @@ const MANUAL_KEYS = [
 ];
 
 const MANUAL_HELP: Record<string, string> = {
-  marine_insurance_stress: 'Auto-refresh scans Beinsure marine and war-risk articles. You can still override it manually.',
-  tanker_disruption_score: 'Auto-refresh uses public shipping sources, currently EIA chokepoint context plus optional AISHub if configured.',
+  marine_insurance_stress: 'Auto-refresh now scores an SEC EDGAR watchlist of shippers, tanker owners, and insurers, with Beinsure fallback if filings are unavailable.',
+  tanker_disruption_score: 'Auto-refresh uses EIA chokepoint context plus optional AISHub and Global Fishing Watch when configured.',
   private_credit_stress: 'Auto-refresh now scores a public proxy basket using BIZD, BKLN, and HYG.',
   geopolitical_escalation_toggle: 'Auto-refresh now scans public news for chokepoint and shipping-escalation headlines and sets this toggle probabilistically.',
   central_bank_intervention_toggle: 'Auto-refresh now scans official Federal Reserve feeds for intervention and liquidity-backstop language.',
@@ -38,8 +38,8 @@ const MANUAL_HELP: Record<string, string> = {
 };
 
 const SOURCE_LABELS: Record<string, string> = {
-  marine_insurance_stress: 'Beinsure site scan',
-  tanker_disruption_score: 'Public shipping sources',
+  marine_insurance_stress: 'SEC EDGAR watchlist',
+  tanker_disruption_score: 'Public shipping sources + GFW',
   private_credit_stress: 'Public private-credit market composite',
   geopolitical_escalation_toggle: 'Public geopolitical news scan',
   central_bank_intervention_toggle: 'Official Federal Reserve feed scan',

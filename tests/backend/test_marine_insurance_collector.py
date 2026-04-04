@@ -1,8 +1,13 @@
+from datetime import date
+
 from app.collectors.marine_insurance import (
     ArticleAssessment,
+    SecFilingAssessment,
     aggregate_article_assessments,
+    aggregate_sec_filing_assessments,
     extract_relevant_links,
     score_article,
+    _score_sec_filing_text,
 )
 
 
@@ -54,3 +59,40 @@ def test_aggregate_article_assessments_weights_more_relevant_articles() -> None:
     assert aggregate.score > 50
     assert aggregate.article_count == 2
     assert aggregate.source == 'beinsure/site_scan'
+
+
+def test_score_sec_filing_text_detects_shipping_and_war_risk_language() -> None:
+    text = '''
+    The Red Sea security environment forced rerouting around the Cape of Good Hope.
+    War risk insurance premium increases affected voyage economics.
+    Management disclosed additional marine insurance costs and transit disruption.
+    '''
+    score, highlights = _score_sec_filing_text(text)
+    assert score >= 50
+    assert 'red sea' in highlights
+    assert 'war risk' in highlights
+
+
+def test_aggregate_sec_filing_assessments_prefers_recent_high_signal_filings() -> None:
+    filings = [
+        SecFilingAssessment(
+            ticker='STNG',
+            company_name='Scorpio Tankers',
+            form='6-K',
+            filed_at=date(2026, 3, 20),
+            score=72.0,
+            highlights=['red sea', 'war risk'],
+        ),
+        SecFilingAssessment(
+            ticker='ACGL',
+            company_name='Arch Capital',
+            form='10-K',
+            filed_at=date(2026, 2, 10),
+            score=48.0,
+            highlights=['insurance premium'],
+        ),
+    ]
+    aggregate = aggregate_sec_filing_assessments(filings)
+    assert aggregate.score > 55
+    assert aggregate.source == 'sec/edgar-watchlist'
+    assert aggregate.article_count == 2

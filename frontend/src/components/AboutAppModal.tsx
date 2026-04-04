@@ -42,7 +42,7 @@ export function AboutAppModal({ content, open, onClose }: AboutAppModalProps) {
         <div className="about-app-modal__header">
           <div>
             <p className="eyebrow">About This App</p>
-            <h2>User Guide</h2>
+            <h2>Dashboard Guide</h2>
           </div>
           <button className="button-secondary" onClick={onClose} type="button">
             Close

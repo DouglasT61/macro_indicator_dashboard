@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     eia_api_key: str | None = None
     market_data_api_key: str | None = None
     aishub_username: str | None = None
+    global_fishing_watch_api_key: str | None = None
 
     model_config = SettingsConfigDict(
         env_file=".env",

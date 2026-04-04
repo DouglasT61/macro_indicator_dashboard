@@ -19,7 +19,12 @@ from app.collectors.public_manual_overlays import (
     collect_p_and_i_circular_stress,
     collect_private_credit_stress,
 )
-from app.collectors.public_shipping import collect_hormuz_transit_assessment, collect_tanker_disruption_assessment
+from app.collectors.public_shipping import (
+    collect_global_fishing_watch_assessment,
+    collect_hormuz_transit_assessment,
+    collect_tanker_disruption_assessment,
+)
+from app.collectors.world_bank import collect_world_bank_importer_vulnerability
 from app.core.config import get_settings
 from app.models import Alert, EventAnnotation, IndicatorSeries, IndicatorValue, ManualInput, RegimeScore
 from app.regime_engine.config_loader import load_file_config
@@ -251,16 +256,20 @@ def _refresh_public_overlays(
             status_callback('Refreshing overlay: marine_insurance_stress')
         marine = collect_marine_insurance_assessment(timeout_seconds=8.0)
         _upsert_manual_overlay(db, 'marine_insurance_stress', marine.score, marine.notes, commit=commit)
-        messages.append('Marine insurance overlay refreshed from Beinsure site scan.')
+        messages.append('Marine insurance overlay refreshed from SEC EDGAR watchlist, with news-scan fallback if filings are unavailable.')
     except Exception:
         messages.append('Marine insurance overlay remains manual/demo; site scan unavailable on this refresh.')
 
     try:
         if status_callback:
             status_callback('Refreshing overlay: tanker_disruption_score')
-        tanker = collect_tanker_disruption_assessment(settings.aishub_username, timeout_seconds=8.0)
+        tanker = collect_tanker_disruption_assessment(
+            settings.aishub_username,
+            settings.global_fishing_watch_api_key,
+            timeout_seconds=8.0,
+        )
         _upsert_manual_overlay(db, 'tanker_disruption_score', tanker.score, tanker.notes, commit=commit)
-        messages.append('Tanker disruption overlay refreshed from public shipping sources.')
+        messages.append('Tanker disruption overlay refreshed from public shipping sources, including Global Fishing Watch when configured.')
     except Exception:
         messages.append('Tanker disruption overlay remains manual/demo; public shipping sources unavailable on this refresh.')
 
@@ -334,6 +343,32 @@ def _build_demo_baseline(end_date: date | None = None) -> dict[str, list[tuple[d
     return generate_demo_history(days=LIVE_HISTORY_DAYS, end_date=end_date)
 
 
+def _blend_histories(
+    primary: list[tuple[datetime, float]],
+    secondary: list[tuple[datetime, float]],
+    *,
+    primary_weight: float,
+    secondary_weight: float,
+) -> list[tuple[datetime, float]]:
+    if not primary or not secondary:
+        return primary or secondary
+
+    primary_map = {timestamp.date(): float(value) for timestamp, value in primary}
+    secondary_map = {timestamp.date(): float(value) for timestamp, value in secondary}
+    common_days = sorted(set(primary_map) & set(secondary_map))
+    if not common_days:
+        return primary
+
+    history: list[tuple[datetime, float]] = []
+    for current in common_days:
+        blended = (
+            primary_map[current] * primary_weight
+            + secondary_map[current] * secondary_weight
+        ) / max(primary_weight + secondary_weight, 1e-9)
+        history.append((datetime.combine(current, datetime.min.time(), tzinfo=timezone.utc).replace(hour=12), round(blended, 6)))
+    return history
+
+
 def _build_series_payloads(
     end_date: date | None = None,
     status_callback: Callable[[str], None] | None = None,
@@ -390,6 +425,54 @@ def _build_series_payloads(
         provider_messages['shipping_data'] = 'PortWatch Strait of Hormuz tanker transit data is live.'
     except Exception:
         provider_messages['shipping_data'] = 'PortWatch Hormuz transit data unavailable on this refresh; demo fallback remains active.'
+
+    if settings.global_fishing_watch_api_key:
+        try:
+            if status_callback:
+                status_callback('shipping_data: global_fishing_watch')
+            gfw = collect_global_fishing_watch_assessment(
+                settings.global_fishing_watch_api_key,
+                timeout_seconds=8.0,
+                days=LIVE_HISTORY_DAYS,
+                end_date=end_date,
+            )
+            baseline['gfw_red_sea_port_stress'] = gfw.history
+            source_map['gfw_red_sea_port_stress'] = gfw.source
+            provider_messages['shipping_data'] = (
+                f"{provider_messages['shipping_data']} Global Fishing Watch port-visit stress is live."
+            ).strip()
+        except Exception:
+            provider_messages['shipping_data'] = (
+                f"{provider_messages['shipping_data']} Global Fishing Watch unavailable on this refresh."
+            ).strip()
+    else:
+        provider_messages['shipping_data'] = (
+            f"{provider_messages['shipping_data']} Global Fishing Watch not configured."
+        ).strip()
+
+    try:
+        if status_callback:
+            status_callback('market_data: world_bank')
+        world_bank = collect_world_bank_importer_vulnerability(
+            timeout_seconds=8.0,
+            days=LIVE_HISTORY_DAYS,
+            end_date=end_date,
+        )
+        baseline['world_bank_importer_vulnerability'] = world_bank.history
+        source_map['world_bank_importer_vulnerability'] = world_bank.source
+        if baseline.get('external_importer_stress'):
+            blended = _blend_histories(
+                baseline['external_importer_stress'],
+                world_bank.history,
+                primary_weight=0.78,
+                secondary_weight=0.22,
+            )
+            if blended:
+                baseline['external_importer_stress'] = blended
+                source_map['external_importer_stress'] = 'support/local-oil-stress+worldbank-vulnerability'
+        provider_messages['world_bank_status'] = 'World Bank structural importer-vulnerability indicators are live.'
+    except Exception:
+        provider_messages['world_bank_status'] = 'World Bank importer-vulnerability indicators unavailable on this refresh; fallback remains active.'
 
     live_count = sum(1 for source in source_map.values() if not source.startswith('demo/'))
     if live_count == 0:
