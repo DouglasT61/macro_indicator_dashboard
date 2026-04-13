@@ -222,6 +222,14 @@ def evaluate_regimes(
         scores[regime_name] = round(total, 2)
         drivers_by_regime[regime_name] = sorted(all_drivers, key=lambda item: item['contribution'], reverse=True)
 
+    if not scores:
+        return {
+            'scores': {},
+            'current_regime': None,
+            'drivers': {},
+            'summary': {},
+            'propagation': propagation,
+        }
     current_regime = max(scores, key=scores.get)
     return {
         'scores': scores,
@@ -249,9 +257,9 @@ def build_regime_history(
         history.append(
             {
                 'timestamp': timestamp,
-                'sticky_score': evaluation['scores']['sticky'],
-                'convex_score': evaluation['scores']['convex'],
-                'break_score': evaluation['scores']['break'],
+                'sticky_score': evaluation['scores'].get('sticky', 0.0),
+                'convex_score': evaluation['scores'].get('convex', 0.0),
+                'break_score': evaluation['scores'].get('break', 0.0),
                 'explanation': evaluation,
             }
         )

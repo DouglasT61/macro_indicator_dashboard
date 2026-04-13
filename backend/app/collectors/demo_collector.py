@@ -51,7 +51,6 @@ def _value_for_key(key: str, index: int, total_days: int) -> float:
         "expectations_entrenchment_score": 34 + 3.5 * pulse + 44 * wave**1.28,
         "eur_usd_spot": 1.09 + 0.012 * pulse - 0.035 * wave**1.15,
         "usd_jpy_spot": 147 + 1.6 * pulse_fast + 9.5 * wave**1.12,
-        "usd_jpy_spot": 147 + 1.6 * pulse_fast + 9.5 * wave**1.12,
         "usd_cny_spot": 7.05 + 0.03 * pulse + 0.48 * wave**1.1,
         "sofr_rate": 4.65 + 0.04 * pulse - 0.95 * drift,
         "ecb_deposit_rate": 4.0 + 0.02 * pulse - 1.75 * drift,
@@ -92,7 +91,12 @@ def _value_for_key(key: str, index: int, total_days: int) -> float:
         "credit_spreads": 118 + 6 * pulse + 73 * wave**1.22,
         "usd_index_proxy": 101.5 + 0.5 * pulse_fast + 7.5 * wave**1.2,
     }
-    return round(formulas[key], 3)
+    value = formulas.get(key)
+    if value is None:
+        import warnings
+        warnings.warn(f"demo_collector: no formula for key '{key}', returning 50.0", stacklevel=2)
+        return 50.0
+    return round(value, 3)
 
 
 def generate_demo_history(days: int = 180, end_date: date | None = None) -> dict[str, list[tuple[datetime, float]]]:

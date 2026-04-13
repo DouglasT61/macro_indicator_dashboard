@@ -223,8 +223,13 @@ def collect_marine_insurance_assessment(timeout_seconds: float = 20.0) -> Marine
 
     with httpx.Client(timeout=timeout_seconds, headers={'User-Agent': USER_AGENT}, follow_redirects=True) as client:
         for seed_url in SEED_URLS:
-            response = client.get(seed_url)
-            response.raise_for_status()
+            try:
+                response = client.get(seed_url)
+                response.raise_for_status()
+            except Exception:
+                # Seed URL failure is non-fatal: skip and continue with any
+                # candidate URLs already gathered from other seed pages.
+                continue
             if seed_url not in seen_urls:
                 seen_urls.add(seed_url)
                 candidate_urls.append(seed_url)

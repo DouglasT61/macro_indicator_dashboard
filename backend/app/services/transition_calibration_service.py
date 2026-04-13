@@ -3,55 +3,7 @@ from __future__ import annotations
 from math import sqrt
 from typing import Any
 
-
-def _transpose(matrix: list[list[float]]) -> list[list[float]]:
-    return [list(column) for column in zip(*matrix)]
-
-
-def _mat_mul(left: list[list[float]], right: list[list[float]]) -> list[list[float]]:
-    rows = len(left)
-    cols = len(right[0])
-    inner = len(right)
-    return [
-        [sum(left[row][idx] * right[idx][col] for idx in range(inner)) for col in range(cols)]
-        for row in range(rows)
-    ]
-
-
-def _solve_linear_system(matrix: list[list[float]], vector: list[float]) -> list[float]:
-    size = len(vector)
-    augmented = [row[:] + [vector[index]] for index, row in enumerate(matrix)]
-
-    for pivot_col in range(size):
-        pivot_row = max(range(pivot_col, size), key=lambda row: abs(augmented[row][pivot_col]))
-        if abs(augmented[pivot_row][pivot_col]) < 1e-9:
-            augmented[pivot_row][pivot_col] = 1e-9
-        if pivot_row != pivot_col:
-            augmented[pivot_col], augmented[pivot_row] = augmented[pivot_row], augmented[pivot_col]
-
-        pivot_value = augmented[pivot_col][pivot_col]
-        augmented[pivot_col] = [value / pivot_value for value in augmented[pivot_col]]
-
-        for row in range(size):
-            if row == pivot_col:
-                continue
-            factor = augmented[row][pivot_col]
-            augmented[row] = [
-                augmented[row][col] - factor * augmented[pivot_col][col]
-                for col in range(size + 1)
-            ]
-
-    return [augmented[row][-1] for row in range(size)]
-
-
-def _fit_ridge_coefficients(inputs: list[list[float]], targets: list[float], ridge: float = 18.0) -> list[float]:
-    design = [[1.0, *row] for row in inputs]
-    design_t = _transpose(design)
-    xtx = _mat_mul(design_t, design)
-    for index in range(len(xtx)):
-        xtx[index][index] += ridge if index > 0 else ridge * 0.1
-    xty = [sum(design_t[row][col] * targets[col] for col in range(len(targets))) for row in range(len(design_t))]
-    return _solve_linear_system(xtx, xty)
+from app.services.linalg_utils import _fit_ridge_coefficients, _mat_mul, _transpose
 
 
 def _fit_quality(fit_rmse: float) -> tuple[str, float]:

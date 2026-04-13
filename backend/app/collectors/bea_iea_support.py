@@ -160,8 +160,13 @@ def fetch_iea_latest_month(client: httpx.Client) -> tuple[int, int]:
     response = client.get(IEA_NETIMPORTS_LATEST_URL)
     response.raise_for_status()
     payload = response.json()
-    year = int(payload['year'])
-    month = int(payload['month'])
+    try:
+        year = int(payload['year'])
+        month = int(payload['month'])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ValueError(
+            f"IEA latest-month response missing expected 'year'/'month' keys: {payload!r}"
+        ) from exc
     return year, month
 
 

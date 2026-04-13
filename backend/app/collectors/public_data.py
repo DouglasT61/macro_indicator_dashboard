@@ -1238,9 +1238,11 @@ class PublicDataCollector:
         for row in reader:
             value = row.get(value_field)
             observed_at = row.get('observation_date')
-            if value in {None, '', '.'} or observed_at in {None, ''}:
+            if observed_at in {None, ''}:
                 continue
-            numeric_value = float(value)
+            numeric_value = _safe_float(value)
+            if numeric_value is None:
+                continue
             observations.append((date.fromisoformat(observed_at), transform(numeric_value) if transform else numeric_value))
         if not observations:
             raise ValueError(f'No observations returned for {series_id}')
@@ -2599,12 +2601,21 @@ def _sample_stddev(values: list[float]) -> float:
 
 
 def _safe_float(value: object) -> float | None:
-    if value in {None, '', 'null', 'None'}:
+    """Convert value to float, returning None for missing, non-numeric, NaN, or Inf inputs.
+
+    FRED and other public APIs occasionally return sentinel strings ('nan', 'NaN', 'NA')
+    or Python math.nan via float('nan'). Both SQLite (silent) and PostgreSQL (DataError)
+    handle these differently, so we reject them here before any DB write.
+    """
+    if value in {None, '', 'null', 'None', 'nan', 'NaN', 'NA', '#N/A', '.'}:
         return None
     try:
-        return float(value)
+        result = float(value)
     except (TypeError, ValueError):
         return None
+    if math.isnan(result) or math.isinf(result):
+        return None
+    return result
 
 
 def _parse_term_years(term: str | None) -> int | None:

@@ -387,8 +387,13 @@ def collect_central_bank_intervention_signal(timeout_seconds: float = 20.0) -> O
 
     with httpx.Client(timeout=timeout_seconds, headers={'User-Agent': USER_AGENT}, follow_redirects=True) as client:
         for url in FED_RSS_URLS:
-            response = client.get(url)
-            response.raise_for_status()
+            try:
+                response = client.get(url)
+                response.raise_for_status()
+            except Exception:
+                # Individual feed failure is non-fatal; continue with any
+                # articles already collected from other Fed RSS URLs.
+                continue
             for item in _parse_rss_items(response.text):
                 published = _parse_isoish_datetime(item['pub_date'])
                 if published is None or published < cutoff:

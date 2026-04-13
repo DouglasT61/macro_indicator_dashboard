@@ -7,6 +7,21 @@ from typing import Any
 from app.services.analytics import determine_status
 
 
+def _get_critical(thresholds: dict[str, Any], key: str, default: float = float("inf")) -> float:
+    """Safely retrieve the 'critical' threshold value for a key.
+
+    Returns *default* (inf) when the key or 'critical' sub-key is absent so that
+    severity falls back to 'warning' rather than crashing on an incomplete config override.
+    """
+    entry = thresholds.get(key)
+    if not isinstance(entry, dict):
+        return default
+    try:
+        return float(entry.get("critical", default))
+    except (TypeError, ValueError):
+        return default
+
+
 def _rising_streak(values: Sequence[float]) -> int:
     if len(values) < 2:
         return 0
@@ -101,7 +116,7 @@ def build_alerts(
         )
 
     if determine_status(latest_values.get("oil_buffer_depletion_stress", 0.0), thresholds.get("oil_buffer_depletion_stress")) in {"orange", "red"} and determine_status(latest_values.get("iea_importer_oil_cover_stress", 0.0), thresholds.get("iea_importer_oil_cover_stress")) in {"orange", "red"}:
-        severity = "critical" if latest_values.get("oil_buffer_depletion_stress", 0.0) >= float(thresholds["oil_buffer_depletion_stress"]["critical"]) else "warning"
+        severity = "critical" if latest_values.get("oil_buffer_depletion_stress", 0.0) >= _get_critical(thresholds, "oil_buffer_depletion_stress") else "warning"
         add_alert(
             severity,
             "Oil reserve buffers are thinning across key importers",
@@ -111,7 +126,7 @@ def build_alerts(
         )
 
     if determine_status(latest_values.get("foreign_duration_sponsorship_stress", 0.0), thresholds.get("foreign_duration_sponsorship_stress")) in {"orange", "red"} and determine_status(latest_values.get("auction_foreign_sponsorship_stress", 0.0), thresholds.get("auction_foreign_sponsorship_stress")) in {"orange", "red"}:
-        severity = "critical" if latest_values.get("foreign_duration_sponsorship_stress", 0.0) >= float(thresholds["foreign_duration_sponsorship_stress"]["critical"]) else "warning"
+        severity = "critical" if latest_values.get("foreign_duration_sponsorship_stress", 0.0) >= _get_critical(thresholds, "foreign_duration_sponsorship_stress") else "warning"
         add_alert(
             severity,
             "Foreign duration sponsorship is weakening",
@@ -174,7 +189,7 @@ def build_alerts(
         )
 
     if temp_help_status in {"orange", "red"} and determine_status(latest_values.get("consumer_credit_stress", 0.0), thresholds.get("consumer_credit_stress")) in {"orange", "red"}:
-        severity = "critical" if temp_help_status == "red" and latest_values.get("consumer_credit_stress", 0.0) >= float(thresholds["consumer_credit_stress"]["critical"]) else "warning"
+        severity = "critical" if temp_help_status == "red" and latest_values.get("consumer_credit_stress", 0.0) >= _get_critical(thresholds, "consumer_credit_stress") else "warning"
         add_alert(
             severity,
             "Temp-help deterioration is leaking into household credit",
@@ -194,7 +209,7 @@ def build_alerts(
         )
 
     if determine_status(latest_values.get("p_and_i_circular_stress", 0.0), thresholds.get("p_and_i_circular_stress")) in {"orange", "red"} and determine_status(latest_values.get("hormuz_tanker_transit_stress", 0.0), thresholds.get("hormuz_tanker_transit_stress")) in {"orange", "red"}:
-        severity = "critical" if latest_values.get("p_and_i_circular_stress", 0.0) >= float(thresholds["p_and_i_circular_stress"]["critical"]) else "warning"
+        severity = "critical" if latest_values.get("p_and_i_circular_stress", 0.0) >= _get_critical(thresholds, "p_and_i_circular_stress") else "warning"
         add_alert(
             severity,
             "Insurance withdrawal and Hormuz transit stress are aligning",
@@ -204,7 +219,7 @@ def build_alerts(
         )
 
     if determine_status(latest_values.get("iaea_nuclear_ambiguity", 0.0), thresholds.get("iaea_nuclear_ambiguity")) in {"orange", "red"} and determine_status(latest_values.get("brent_prompt_spread", 0.0), thresholds.get("brent_prompt_spread")) in {"orange", "red"}:
-        severity = "critical" if latest_values.get("iaea_nuclear_ambiguity", 0.0) >= float(thresholds["iaea_nuclear_ambiguity"]["critical"]) else "warning"
+        severity = "critical" if latest_values.get("iaea_nuclear_ambiguity", 0.0) >= _get_critical(thresholds, "iaea_nuclear_ambiguity") else "warning"
         add_alert(
             severity,
             "Nuclear ambiguity is reinforcing the oil shock",
@@ -214,7 +229,7 @@ def build_alerts(
         )
 
     if determine_status(latest_values.get("interceptor_depletion", 0.0), thresholds.get("interceptor_depletion")) in {"orange", "red"} and determine_status(latest_values.get("tanker_freight_proxy", 0.0), thresholds.get("tanker_freight_proxy")) in {"orange", "red"}:
-        severity = "critical" if latest_values.get("interceptor_depletion", 0.0) >= float(thresholds["interceptor_depletion"]["critical"]) else "warning"
+        severity = "critical" if latest_values.get("interceptor_depletion", 0.0) >= _get_critical(thresholds, "interceptor_depletion") else "warning"
         add_alert(
             severity,
             "Interceptor burn-rate pressure is lifting shipping stress",
@@ -224,7 +239,7 @@ def build_alerts(
         )
 
     if determine_status(latest_values.get("governance_fragmentation", 0.0), thresholds.get("governance_fragmentation")) in {"orange", "red"} and determine_status(latest_values.get("jpy_usd_basis", 0.0), thresholds.get("jpy_usd_basis")) in {"orange", "red"}:
-        severity = "critical" if latest_values.get("governance_fragmentation", 0.0) >= float(thresholds["governance_fragmentation"]["critical"]) else "warning"
+        severity = "critical" if latest_values.get("governance_fragmentation", 0.0) >= _get_critical(thresholds, "governance_fragmentation") else "warning"
         add_alert(
             severity,
             "Governance fragmentation is extending disruption half-life",

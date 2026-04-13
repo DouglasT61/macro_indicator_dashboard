@@ -6,6 +6,7 @@ from typing import Any
 from app.services.analytics import clamp, normalize_value
 from app.services.backtest_service import EPISODE_TEMPLATES, extract_snapshot_profile, infer_episode_cluster
 from app.services.filter_calibration_service import fit_filter_calibration
+from app.services.linalg_utils import _diag, _fit_ridge_coefficients, _mat_mul, _solve_linear_system, _transpose
 from app.services.transition_calibration_service import fit_transition_calibration
 
 
@@ -71,33 +72,25 @@ def _mat_vec_mul(matrix: list[list[float]], vector: list[float]) -> list[float]:
     return [sum(cell * vector[col] for col, cell in enumerate(row)) for row in matrix]
 
 
-def _mat_mul(left: list[list[float]], right: list[list[float]]) -> list[list[float]]:
-    rows = len(left)
-    cols = len(right[0])
-    inner = len(right)
-    return [
-        [sum(left[row][idx] * right[idx][col] for idx in range(inner)) for col in range(cols)]
-        for row in range(rows)
-    ]
-
-
-def _transpose(matrix: list[list[float]]) -> list[list[float]]:
-    return [list(column) for column in zip(*matrix)]
-
-
-def _diag(values: list[float]) -> list[list[float]]:
-    size = len(values)
-    return [[values[row] if row == col else 0.0 for col in range(size)] for row in range(size)]
-
 
 def _softmax(scores: dict[str, float], temperature: float = 18.0) -> dict[str, float]:
-    del temperature
-    positive_scores = {key: max(0.0, float(value)) for key, value in scores.items()}
-    total = sum(positive_scores.values())
+    """Convert raw scores to a probability distribution using temperature-scaled softmax.
+
+    A higher temperature produces a flatter (more uncertain) distribution; a lower
+    temperature sharpens it toward the dominant regime.  The default of 18.0 keeps
+    behaviour close to linear normalisation for typical score ranges (0–100).
+    """
+    if not scores:
+        return {}
+    import math as _math
+    scaled = {key: float(value) / max(temperature, 1e-9) for key, value in scores.items()}
+    max_val = max(scaled.values())  # numerical stability: subtract max before exp
+    exps = {key: _math.exp(val - max_val) for key, val in scaled.items()}
+    total = sum(exps.values())
     if total <= 0:
-        equal_share = round(100.0 / max(1, len(positive_scores)), 2)
-        return {key: equal_share for key in positive_scores}
-    return {key: round((value / total) * 100.0, 2) for key, value in positive_scores.items()}
+        equal_share = round(100.0 / max(1, len(scores)), 2)
+        return {key: equal_share for key in scores}
+    return {key: round((val / total) * 100.0, 2) for key, val in exps.items()}
 
 
 def _dominant_regime(probabilities: dict[str, float]) -> str:
@@ -255,19 +248,38 @@ def _build_measurement_histories(
     return sorted(timestamps), histories
 
 
+_CARRY_FORWARD_MAX_DAYS = 7  # stale observations older than this are dropped
+
+
 def _carry_forward_observations(
     timestamps: list[datetime],
     histories: dict[str, dict[datetime, float]],
+    max_staleness_days: int = _CARRY_FORWARD_MAX_DAYS,
 ) -> list[dict[str, float]]:
+    """Carry the most recent observation forward in time, but only up to
+    *max_staleness_days* days.  Observations older than the limit are discarded
+    so that a single very old data point cannot influence the Kalman filter
+    indefinitely.
+    """
+    from datetime import timedelta as _timedelta
+
+    max_delta = _timedelta(days=max_staleness_days)
     carried: dict[str, float] = {}
+    carried_at: dict[str, datetime] = {}
     rows: list[dict[str, float]] = []
     for timestamp in timestamps:
         row: dict[str, float] = {}
         for key, history in histories.items():
             if timestamp in history:
                 carried[key] = history[timestamp]
+                carried_at[key] = timestamp
             if key in carried:
-                row[key] = carried[key]
+                if timestamp - carried_at[key] <= max_delta:
+                    row[key] = carried[key]
+                else:
+                    # Observation has gone stale — remove from carried state
+                    del carried[key]
+                    del carried_at[key]
         rows.append(row)
     return rows
 
@@ -285,60 +297,6 @@ def _configured_regime_scores(values: list[float], state_config: dict[str, Any])
         scores[regime] = round(clamp(weighted / normalizer), 2)
     return scores
 
-
-def _solve_linear_system(matrix: list[list[float]], vector: list[float]) -> list[float]:
-    size = len(vector)
-    augmented = [row[:] + [vector[index]] for index, row in enumerate(matrix)]
-
-    for pivot_col in range(size):
-        pivot_row = max(range(pivot_col, size), key=lambda row: abs(augmented[row][pivot_col]))
-        if abs(augmented[pivot_row][pivot_col]) < 1e-9:
-            augmented[pivot_row][pivot_col] = 1e-9
-        if pivot_row != pivot_col:
-            augmented[pivot_col], augmented[pivot_row] = augmented[pivot_row], augmented[pivot_col]
-
-        pivot_value = augmented[pivot_col][pivot_col]
-        augmented[pivot_col] = [value / pivot_value for value in augmented[pivot_col]]
-
-        for row in range(size):
-            if row == pivot_col:
-                continue
-            factor = augmented[row][pivot_col]
-            augmented[row] = [
-                augmented[row][col] - factor * augmented[pivot_col][col]
-                for col in range(size + 1)
-            ]
-
-    return [augmented[row][-1] for row in range(size)]
-
-
-def _fit_ridge_coefficients(
-    inputs: list[list[float]],
-    targets: list[float],
-    ridge: float = 12.0,
-    sample_weights: list[float] | None = None,
-    anchor: list[float] | None = None,
-    anchor_strength: float = 0.0,
-) -> list[float]:
-    design = [[1.0, *row] for row in inputs]
-    design_t = _transpose(design)
-    weights = sample_weights or [1.0 for _ in targets]
-    weighted_design = [
-        [design[row][col] * weights[row] for col in range(len(design[row]))]
-        for row in range(len(design))
-    ]
-    xtx = _mat_mul(design_t, weighted_design)
-    weighted_targets = [targets[row] * weights[row] for row in range(len(targets))]
-    xty = [sum(design_t[row][col] * weighted_targets[col] for col in range(len(targets))) for row in range(len(design_t))]
-
-    if anchor is None:
-        anchor = [0.0 for _ in range(len(xtx))]
-    for index in range(len(xtx)):
-        penalty = ridge if index > 0 else ridge * 0.1
-        prior_penalty = anchor_strength if index > 0 else anchor_strength * 0.1
-        xtx[index][index] += penalty + prior_penalty
-        xty[index] += float(anchor[index]) * prior_penalty
-    return _solve_linear_system(xtx, xty)
 
 
 def _template_state_vector(
@@ -966,13 +924,32 @@ def _run_filter(
                 for row in range(len(state_keys))
             ]
             state = [clamp(state[index] + kalman_gain[index] * innovation) for index in range(len(state_keys))]
-            updated_covariance: list[list[float]] = []
-            for row in range(len(state_keys)):
-                updated_row: list[float] = []
-                for col in range(len(state_keys)):
-                    reduction = kalman_gain[row] * sum(loading[idx] * covariance[idx][col] for idx in range(len(state_keys)))
-                    updated_row.append(max(0.0, covariance[row][col] - reduction))
-                updated_covariance.append(updated_row)
+            # Joseph-form covariance update: P = (I - K·H)·P·(I - K·H)ᵀ + K·R·Kᵀ
+            # Numerically superior to the simplified P = P - K·H·P because it
+            # preserves symmetry and positive-definiteness under floating-point rounding.
+            n = len(state_keys)
+            # Build (I - K·H): imkh[i][j] = δ(i,j) - K[i]*H[j]
+            imkh = [
+                [
+                    (1.0 if row == col else 0.0) - kalman_gain[row] * loading[col]
+                    for col in range(n)
+                ]
+                for row in range(n)
+            ]
+            # Left-multiply: tmp = (I - K·H) · P
+            tmp = [
+                [sum(imkh[row][k] * covariance[k][col] for k in range(n)) for col in range(n)]
+                for row in range(n)
+            ]
+            # Right-multiply by (I - K·H)ᵀ and add K·R·Kᵀ
+            updated_covariance = [
+                [
+                    sum(tmp[row][k] * imkh[col][k] for k in range(n))
+                    + kalman_gain[row] * measurement_noise * kalman_gain[col]
+                    for col in range(n)
+                ]
+                for row in range(n)
+            ]
             covariance = updated_covariance
             innovations.append(abs(innovation) / max(10.0, innovation_variance ** 0.5))
             if timestamp == latest_measurement_timestamp:
