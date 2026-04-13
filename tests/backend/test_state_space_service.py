@@ -132,7 +132,7 @@ def test_state_space_uses_configured_layer_without_live_calibration_blend() -> N
     result = evaluate_state_space(snapshots, CONFIG, 'Sticky Inflation')
 
     assert result['current_regime'] == 'convex'
-    assert result['diagnostics']['confidence_band'] == 'Fragile'
+    assert result['diagnostics']['confidence_band'] == 'Watch'  # real softmax (temp=18) amplifies score gaps vs old broken linear normalisation
     assert result['calibration']['method'] == 'configured latent-state monitor'
     assert result['calibration']['blend_weight'] == 0.0
     assert result['calibration']['base_blend_weight'] == 0.0
