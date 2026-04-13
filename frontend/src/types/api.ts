@@ -450,6 +450,14 @@ export interface MigrationOverview {
 }
 
 
+export interface HormuzTrafficStats {
+  latest_count: number;
+  avg_30d: number;
+  avg_longterm: number;
+  latest_date: string;
+  source: string;
+}
+
 export interface DashboardOverview {
   generated_at: string;
   data_mode: string;
@@ -473,6 +481,7 @@ export interface DashboardOverview {
   ordering_framework: OrderingFrameworkOverview;
   stagflation_overview: StagflationOverview;
   migration_overview: MigrationOverview;
+  hormuz_traffic: HormuzTrafficStats | null;
 }
 
 export interface SettingsResponse {

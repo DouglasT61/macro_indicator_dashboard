@@ -21,7 +21,7 @@ from app.collectors.public_manual_overlays import (
 )
 from app.collectors.public_shipping import collect_hormuz_transit_assessment, collect_tanker_disruption_assessment
 from app.core.config import get_settings
-from app.models import Alert, EventAnnotation, IndicatorSeries, IndicatorValue, ManualInput, RegimeScore
+from app.models import Alert, AppSetting, EventAnnotation, IndicatorSeries, IndicatorValue, ManualInput, RegimeScore
 from app.regime_engine.config_loader import load_file_config
 from app.regime_engine.engine import build_regime_history
 from app.seed.catalog import MANUAL_INPUT_DEFAULTS, SERIES_DEFINITIONS
@@ -31,6 +31,32 @@ from app.services.settings_service import get_imported_series_keys, get_source_s
 
 LIVE_HISTORY_DAYS = 180
 settings = get_settings()
+
+HORMUZ_TRAFFIC_SETTING_KEY = 'hormuz_traffic_stats'
+
+
+def _upsert_hormuz_traffic_stats(db: Session, stats: object) -> None:
+    """Persist PortWatch tanker-count statistics to AppSetting for dashboard display."""
+    from app.collectors.public_shipping import HormuzTrafficStats
+    if not isinstance(stats, HormuzTrafficStats):
+        return
+    payload = {
+        'latest_count': stats.latest_count,
+        'avg_30d': stats.avg_30d,
+        'avg_longterm': stats.avg_longterm,
+        'latest_date': stats.latest_date,
+        'source': 'portwatch/hormuz-transits',
+    }
+    setting = db.query(AppSetting).filter(AppSetting.key == HORMUZ_TRAFFIC_SETTING_KEY).one_or_none()
+    if setting is None:
+        from datetime import datetime, timezone
+        setting = AppSetting(key=HORMUZ_TRAFFIC_SETTING_KEY, value_json=payload, updated_at=datetime.now(timezone.utc))
+        db.add(setting)
+    else:
+        setting.value_json = payload
+        from datetime import datetime, timezone
+        setting.updated_at = datetime.now(timezone.utc)
+    db.commit()
 
 
 def ensure_series_registry(db: Session) -> dict[str, IndicatorSeries]:
@@ -388,6 +414,8 @@ def _build_series_payloads(
         baseline['hormuz_tanker_transit_stress'] = hormuz.history
         source_map['hormuz_tanker_transit_stress'] = hormuz.source
         provider_messages['shipping_data'] = 'PortWatch Strait of Hormuz tanker transit data is live.'
+        if hormuz.traffic_stats is not None:
+            _upsert_hormuz_traffic_stats(db, hormuz.traffic_stats)
     except Exception:
         provider_messages['shipping_data'] = 'PortWatch Hormuz transit data unavailable on this refresh; demo fallback remains active.'
 

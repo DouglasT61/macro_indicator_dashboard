@@ -7,7 +7,7 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from app.alerts.engine import build_state_space_alerts
-from app.models import Alert, EventAnnotation, IndicatorSeries, IndicatorValue, ManualInput, RegimeScore
+from app.models import Alert, AppSetting, EventAnnotation, IndicatorSeries, IndicatorValue, ManualInput, RegimeScore
 from app.regime_engine.config_loader import load_effective_config
 from app.services.analytics import determine_status, normalize_value, rolling_change
 from app.services.backtest_service import build_backtest_overview
@@ -869,6 +869,24 @@ def _build_interpretation_chart(snapshots: dict[str, dict[str, Any]]) -> dict[st
     }
 
 
+def _load_hormuz_traffic_stats(db: Session) -> dict[str, Any] | None:
+    """Read the cached PortWatch tanker-count statistics from AppSetting."""
+    row = db.query(AppSetting).filter(AppSetting.key == 'hormuz_traffic_stats').one_or_none()
+    if row is None or not isinstance(row.value_json, dict):
+        return None
+    data = row.value_json
+    required = {'latest_count', 'avg_30d', 'avg_longterm', 'latest_date'}
+    if not required.issubset(data.keys()):
+        return None
+    return {
+        'latest_count': float(data['latest_count']),
+        'avg_30d': float(data['avg_30d']),
+        'avg_longterm': float(data['avg_longterm']),
+        'latest_date': str(data['latest_date']),
+        'source': str(data.get('source', 'portwatch/hormuz-transits')),
+    }
+
+
 def get_dashboard_overview(db: Session) -> dict[str, Any]:
     config = load_effective_config(db)
     series_map = _build_series_map(db)
@@ -955,4 +973,5 @@ def get_dashboard_overview(db: Session) -> dict[str, Any]:
         'ordering_framework': ordering_framework,
         'stagflation_overview': stagflation_overview,
         'migration_overview': migration_overview,
+        'hormuz_traffic': _load_hormuz_traffic_stats(db),
     }

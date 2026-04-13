@@ -26,11 +26,21 @@ class TankerDisruptionAssessment:
 
 
 @dataclass(slots=True)
+class HormuzTrafficStats:
+    """Raw tanker-count statistics derived from PortWatch daily transit data."""
+    latest_count: float        # most recent day's tanker call count
+    avg_30d: float             # 30-day rolling average
+    avg_longterm: float        # full-history average (all available PortWatch rows)
+    latest_date: str           # ISO date string of the most recent data point
+
+
+@dataclass(slots=True)
 class HormuzTransitAssessment:
     score: float
     notes: str
     source: str
     history: list[tuple[datetime, float]]
+    traffic_stats: HormuzTrafficStats | None = None
 
 
 def _strip_html(value: str) -> str:
@@ -271,6 +281,34 @@ def build_hormuz_transit_stress_history(rows: list[dict[str, object]]) -> list[t
     return history
 
 
+def _build_hormuz_traffic_stats(rows: list[dict[str, object]]) -> HormuzTrafficStats:
+    """Derive yesterday's count, 30-day average, and long-term average from raw PortWatch rows."""
+    daily_counts: dict[date, float] = {}
+    for row in rows:
+        observed_at = _parse_portwatch_datetime(row.get('date'))
+        if observed_at is None:
+            continue
+        day = observed_at.date()
+        daily_counts[day] = daily_counts.get(day, 0.0) + (_safe_float(row.get('n_tanker')) or 0.0)
+
+    if not daily_counts:
+        return HormuzTrafficStats(latest_count=0.0, avg_30d=0.0, avg_longterm=0.0, latest_date='')
+
+    ordered_days = sorted(daily_counts)
+    counts = [daily_counts[d] for d in ordered_days]
+    latest_date = ordered_days[-1]
+    latest_count = daily_counts[latest_date]
+    recent_30 = counts[-30:] if len(counts) >= 30 else counts
+    avg_30d = round(sum(recent_30) / len(recent_30), 1)
+    avg_longterm = round(sum(counts) / len(counts), 1)
+    return HormuzTrafficStats(
+        latest_count=round(latest_count, 1),
+        avg_30d=avg_30d,
+        avg_longterm=avg_longterm,
+        latest_date=latest_date.isoformat(),
+    )
+
+
 def collect_hormuz_transit_assessment(timeout_seconds: float = 20.0) -> HormuzTransitAssessment:
     with httpx.Client(timeout=timeout_seconds, headers={'User-Agent': USER_AGENT}, follow_redirects=True) as client:
         rows = _fetch_portwatch_hormuz_rows(client)
@@ -297,4 +335,5 @@ def collect_hormuz_transit_assessment(timeout_seconds: float = 20.0) -> HormuzTr
         notes=notes,
         source='portwatch/hormuz-transits',
         history=history,
+        traffic_stats=_build_hormuz_traffic_stats(rows),
     )

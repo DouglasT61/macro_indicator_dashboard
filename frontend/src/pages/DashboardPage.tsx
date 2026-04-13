@@ -7,6 +7,7 @@ import { AlertList } from '../components/AlertList';
 import { CausalChain } from '../components/CausalChain';
 import { CrisisMonitor } from '../components/CrisisMonitor';
 import { EpisodeComparisonPanel } from '../components/EpisodeComparisonPanel';
+import { HormuzTrafficCard } from '../components/HormuzTrafficCard';
 import { NarrativePanel } from '../components/NarrativePanel';
 import { PanelSection } from '../components/PanelSection';
 import { SettingsPanel } from '../components/SettingsPanel';
@@ -215,11 +216,12 @@ export function DashboardPage() {
           <p>
             This dashboard is built around a specific macro thesis: an oil supply shock, especially one confirmed by constrained physical delivery
             through the Strait of Hormuz and related shipping channels, can evolve into a stagflationary and eventually sovereign-financial
-            problem. The core risk is not just higher oil prices. It is higher oil prices at the same time that constrained energy delivery damages
+            problem. The core risk is not just higher oil prices — it is higher oil prices at the same time that constrained energy delivery damages
             production, employment, and the federal tax base. That combination can trap the Federal Reserve between inflation control, weaker
             growth, and financial-stability concerns.
           </p>
         </article>
+        <HormuzTrafficCard stats={overview.hormuz_traffic ?? null} />
         <article className="thesis-intro__card">
           <h2>How to read it</h2>
           <p>

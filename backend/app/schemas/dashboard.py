@@ -430,6 +430,14 @@ class MigrationOverview(BaseModel):
     items: list[OrderingStage] = Field(default_factory=list)
 
 
+class HormuzTrafficStats(BaseModel):
+    latest_count: float
+    avg_30d: float
+    avg_longterm: float
+    latest_date: str
+    source: str = 'portwatch/hormuz-transits'
+
+
 class DashboardOverview(BaseModel):
     generated_at: datetime
     data_mode: str
@@ -450,3 +458,4 @@ class DashboardOverview(BaseModel):
     ordering_framework: OrderingFrameworkOverview
     stagflation_overview: StagflationOverview
     migration_overview: MigrationOverview
+    hormuz_traffic: HormuzTrafficStats | None = None
