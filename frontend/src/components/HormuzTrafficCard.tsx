@@ -21,12 +21,14 @@ function fmt(n: number) {
 }
 
 export function HormuzTrafficCard({ stats }: HormuzTrafficCardProps) {
-  const isLive = stats !== null;
+  const hasData = stats !== null;
+  const isLive = hasData && stats.source.includes('portwatch');
+  const isDemo = hasData && stats.source.includes('demo');
 
   const latestCount = stats?.latest_count ?? null;
   const avg30d = stats?.avg_30d ?? null;
   const avgLongterm = stats?.avg_longterm ?? null;
-  const latestDate = stats?.latest_date ?? null;
+  const latestDate = (stats?.latest_date && stats.latest_date !== 'demo') ? stats.latest_date : null;
 
   // Colour the focal number relative to long-term average
   let focalTone: 'normal' | 'warn' | 'stress' = 'normal';
@@ -40,7 +42,9 @@ export function HormuzTrafficCard({ stats }: HormuzTrafficCardProps) {
     <article className="thesis-intro__card hormuz-card">
       <div className="hormuz-card__header">
         <h2>Hormuz daily tanker transits</h2>
-        <span className="hormuz-card__badge">{isLive ? 'PortWatch live' : 'no data'}</span>
+        <span className={`hormuz-card__badge hormuz-card__badge--${isLive ? 'live' : isDemo ? 'demo' : 'none'}`}>
+          {isLive ? 'PortWatch live' : isDemo ? 'demo' : 'no data'}
+        </span>
       </div>
 
       <div className="hormuz-card__context">
@@ -68,7 +72,12 @@ export function HormuzTrafficCard({ stats }: HormuzTrafficCardProps) {
         <span className="hormuz-card__focal-label">tankers / day</span>
       </div>
 
-      {!isLive && (
+      {isDemo && (
+        <p className="hormuz-card__unavailable">
+          Demo values shown. Live PortWatch data will replace these on the next successful refresh.
+        </p>
+      )}
+      {!hasData && (
         <p className="hormuz-card__unavailable">
           Live PortWatch data will populate on next refresh when the feed is available.
         </p>

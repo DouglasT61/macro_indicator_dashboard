@@ -107,6 +107,9 @@ textarea { resize: vertical; }
   white-space: nowrap;
   flex-shrink: 0;
 }
+.hormuz-card__badge--live  { color: #4ade80; }
+.hormuz-card__badge--demo  { color: #f59e0b; }
+.hormuz-card__badge--none  { color: #64748b; }
 .hormuz-card__context {
   display: flex;
   flex-direction: column;

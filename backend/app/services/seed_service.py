@@ -19,7 +19,7 @@ from app.collectors.public_manual_overlays import (
     collect_p_and_i_circular_stress,
     collect_private_credit_stress,
 )
-from app.collectors.public_shipping import collect_hormuz_transit_assessment, collect_tanker_disruption_assessment
+from app.collectors.public_shipping import HormuzTrafficStats, collect_hormuz_transit_assessment, collect_tanker_disruption_assessment
 from app.core.config import get_settings
 from app.models import Alert, AppSetting, EventAnnotation, IndicatorSeries, IndicatorValue, ManualInput, RegimeScore
 from app.regime_engine.config_loader import load_file_config
@@ -34,29 +34,38 @@ settings = get_settings()
 
 HORMUZ_TRAFFIC_SETTING_KEY = 'hormuz_traffic_stats'
 
+# Plausible demo values based on historical PortWatch Strait of Hormuz averages.
+# Roughly 18–22 tankers transit per day across the ~5-year PortWatch record.
+_DEMO_HORMUZ_TRAFFIC = HormuzTrafficStats(
+    latest_count=19.0,
+    avg_30d=19.8,
+    avg_longterm=21.2,
+    latest_date='demo',
+)
 
-def _upsert_hormuz_traffic_stats(db: Session, stats: object) -> None:
+
+def _upsert_hormuz_traffic_stats(db: Session, stats: HormuzTrafficStats, *, commit: bool = True) -> None:
     """Persist PortWatch tanker-count statistics to AppSetting for dashboard display."""
-    from app.collectors.public_shipping import HormuzTrafficStats
-    if not isinstance(stats, HormuzTrafficStats):
-        return
     payload = {
         'latest_count': stats.latest_count,
         'avg_30d': stats.avg_30d,
         'avg_longterm': stats.avg_longterm,
         'latest_date': stats.latest_date,
-        'source': 'portwatch/hormuz-transits',
+        'source': 'portwatch/hormuz-transits' if stats.latest_date != 'demo' else 'demo/hormuz-transits',
     }
     setting = db.query(AppSetting).filter(AppSetting.key == HORMUZ_TRAFFIC_SETTING_KEY).one_or_none()
     if setting is None:
-        from datetime import datetime, timezone
         setting = AppSetting(key=HORMUZ_TRAFFIC_SETTING_KEY, value_json=payload, updated_at=datetime.now(timezone.utc))
         db.add(setting)
     else:
+        # Only overwrite a live reading with a demo value if no live data has been stored yet
+        existing_source = (setting.value_json or {}).get('source', '')
+        if stats.latest_date == 'demo' and 'portwatch' in existing_source:
+            return
         setting.value_json = payload
-        from datetime import datetime, timezone
         setting.updated_at = datetime.now(timezone.utc)
-    db.commit()
+    if commit:
+        db.commit()
 
 
 def ensure_series_registry(db: Session) -> dict[str, IndicatorSeries]:
@@ -363,7 +372,7 @@ def _build_demo_baseline(end_date: date | None = None) -> dict[str, list[tuple[d
 def _build_series_payloads(
     end_date: date | None = None,
     status_callback: Callable[[str], None] | None = None,
-) -> tuple[dict[str, list[tuple[datetime, float]]], dict[str, str], dict[str, str], str]:
+) -> tuple[dict[str, list[tuple[datetime, float]]], dict[str, str], dict[str, str], str, HormuzTrafficStats | None]:
     baseline = _build_demo_baseline(end_date=end_date)
     source_map = {definition.key: definition.source for definition in SERIES_DEFINITIONS}
     provider_messages = {
@@ -374,6 +383,7 @@ def _build_series_payloads(
         'shipping_data': 'Demo shipping chokepoint data active; PortWatch integration can override Hormuz transit stress when available.',
     }
     data_mode = 'demo'
+    collected_traffic_stats: HormuzTrafficStats | None = None
 
     try:
         collection = PublicDataCollector(timeout_seconds=12.0).collect(
@@ -415,7 +425,7 @@ def _build_series_payloads(
         source_map['hormuz_tanker_transit_stress'] = hormuz.source
         provider_messages['shipping_data'] = 'PortWatch Strait of Hormuz tanker transit data is live.'
         if hormuz.traffic_stats is not None:
-            _upsert_hormuz_traffic_stats(db, hormuz.traffic_stats)
+            collected_traffic_stats = hormuz.traffic_stats
     except Exception:
         provider_messages['shipping_data'] = 'PortWatch Hormuz transit data unavailable on this refresh; demo fallback remains active.'
 
@@ -426,7 +436,7 @@ def _build_series_payloads(
         data_mode = 'live'
     else:
         data_mode = 'mixed'
-    return baseline, source_map, provider_messages, data_mode
+    return baseline, source_map, provider_messages, data_mode, collected_traffic_stats
 
 
 def seed_demo_data(db: Session) -> None:
@@ -452,7 +462,7 @@ def seed_demo_data(db: Session) -> None:
             seed_events(db)
             return
 
-        history_map, source_map, provider_messages, data_mode = _build_series_payloads()
+        history_map, source_map, provider_messages, data_mode, traffic_stats = _build_series_payloads()
         for definition in missing_definitions:
             history = history_map[definition.key]
             records = compute_series_metrics(history, config['thresholds'].get(definition.key))
@@ -461,12 +471,13 @@ def seed_demo_data(db: Session) -> None:
         seed_manual_inputs(db)
         provider_messages['manual_overlays'] = _refresh_public_overlays(db)
         seed_events(db)
+        _upsert_hormuz_traffic_stats(db, traffic_stats if traffic_stats is not None else _DEMO_HORMUZ_TRAFFIC)
         save_source_status(db, data_mode, provider_messages)
         _recompute_regime_scores(db, config)
         _recompute_alerts(db, config)
         return
 
-    history_map, source_map, provider_messages, data_mode = _build_series_payloads()
+    history_map, source_map, provider_messages, data_mode, traffic_stats = _build_series_payloads()
 
     for definition in SERIES_DEFINITIONS:
         history = history_map[definition.key]
@@ -476,6 +487,7 @@ def seed_demo_data(db: Session) -> None:
     seed_manual_inputs(db)
     provider_messages['manual_overlays'] = _refresh_public_overlays(db)
     seed_events(db)
+    _upsert_hormuz_traffic_stats(db, traffic_stats if traffic_stats is not None else _DEMO_HORMUZ_TRAFFIC)
     save_source_status(db, data_mode, provider_messages)
     _recompute_regime_scores(db, config)
     _recompute_alerts(db, config)
@@ -500,6 +512,7 @@ def bootstrap_demo_only(db: Session) -> None:
 
     seed_manual_inputs(db)
     seed_events(db)
+    _upsert_hormuz_traffic_stats(db, _DEMO_HORMUZ_TRAFFIC)
     save_source_status(
         db,
         'demo',
@@ -547,9 +560,11 @@ def refresh_market_data(db: Session, config: dict) -> None:
             commit=False,
         )
 
-    history_map, source_map, provider_messages, data_mode = _build_series_payloads(
+    history_map, source_map, provider_messages, data_mode, traffic_stats = _build_series_payloads(
         status_callback=_set_refresh_phase,
     )
+    # Persist live tanker counts (or fall back to demo) so the card always has numbers
+    _upsert_hormuz_traffic_stats(db, traffic_stats if traffic_stats is not None else _DEMO_HORMUZ_TRAFFIC, commit=False)
 
     _set_refresh_phase('Applying refreshed series to database')
 
