@@ -30,9 +30,8 @@ class HormuzTrafficStats:
     """Raw tanker-count statistics derived from PortWatch daily transit data."""
     latest_count: float        # most recent day's tanker call count
     avg_30d: float             # 30-day rolling average
-    avg_longterm: float        # 2019-2021 reference-period baseline (pre-AIS-degradation)
+    avg_longterm: float        # 2015–Feb 2026 pre-shutdown baseline average
     latest_date: str           # ISO date string of the most recent data point
-    ais_note: str = ''         # set when recent counts appear to reflect AIS coverage gaps
 
 
 @dataclass(slots=True)
@@ -290,16 +289,10 @@ def build_hormuz_transit_stress_history(rows: list[dict[str, object]]) -> list[t
 def _build_hormuz_traffic_stats(rows: list[dict[str, object]]) -> HormuzTrafficStats:
     """Derive traffic stats from PortWatch rows.
 
-    avg_longterm uses the 2019–2022 reference period when AIS coverage in the
-    Strait of Hormuz was dense and reliable.  Post-2022 AIS reception has
-    degraded significantly in Iranian-controlled waters, so using all-time
-    average would blend two qualitatively different coverage eras.
+    avg_longterm is the mean over 2015-01-01 through 2026-02-27, capturing a
+    full decade of normal Hormuz operations before the February 2026 shutdown.
 
-    avg_30d uses the most recent 30 calendar days of data.
-
-    ais_note is populated when the 30-day average falls below 30% of the
-    2019–2022 baseline, which typically indicates signal coverage gaps rather
-    than a real traffic collapse.
+    avg_30d is the rolling average of the most recent 30 calendar days.
     """
     daily_counts: dict[date, float] = {}
     for row in rows:
@@ -320,9 +313,9 @@ def _build_hormuz_traffic_stats(rows: list[dict[str, object]]) -> HormuzTrafficS
     recent_days = ordered_days[-30:] if len(ordered_days) >= 30 else ordered_days
     avg_30d = round(sum(daily_counts[d] for d in recent_days) / max(len(recent_days), 1), 1)
 
-    # Reference-period baseline: 2019-01-01 to 2022-01-01 (dense AIS coverage era)
-    _BASELINE_START = date(2019, 1, 1)
-    _BASELINE_END = date(2022, 1, 1)
+    # Pre-shutdown baseline: 2015-01-01 through 2026-02-27
+    _BASELINE_START = date(2015, 1, 1)
+    _BASELINE_END = date(2026, 2, 28)   # day before Iranian closure
     baseline_days = [d for d in ordered_days if _BASELINE_START <= d < _BASELINE_END]
     if baseline_days:
         avg_longterm = round(sum(daily_counts[d] for d in baseline_days) / len(baseline_days), 1)
@@ -330,21 +323,11 @@ def _build_hormuz_traffic_stats(rows: list[dict[str, object]]) -> HormuzTrafficS
         # No data in reference window; fall back to all-time mean
         avg_longterm = round(sum(daily_counts[d] for d in ordered_days) / max(len(ordered_days), 1), 1)
 
-    # Flag probable AIS coverage gap: recent avg < 30% of reference-era baseline
-    ais_note = ''
-    if avg_longterm > 0 and avg_30d < avg_longterm * 0.30:
-        ais_note = (
-            'Recent counts are well below the 2019–21 baseline. '
-            'This likely reflects AIS transponder signal gaps in Iranian-controlled '
-            'waters rather than an actual traffic collapse — use with caution.'
-        )
-
     return HormuzTrafficStats(
         latest_count=round(latest_count, 1),
         avg_30d=avg_30d,
         avg_longterm=avg_longterm,
         latest_date=latest_date.isoformat(),
-        ais_note=ais_note,
     )
 
 

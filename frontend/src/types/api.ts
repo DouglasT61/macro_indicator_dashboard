@@ -453,10 +453,9 @@ export interface MigrationOverview {
 export interface HormuzTrafficStats {
   latest_count: number;
   avg_30d: number;
-  avg_longterm: number;  // 2019–2021 reference-period baseline
+  avg_longterm: number;  // 2015–Feb 2026 pre-shutdown baseline
   latest_date: string;
   source: string;
-  ais_note?: string;     // set when recent counts likely reflect AIS coverage gaps
 }
 
 export interface DashboardOverview {

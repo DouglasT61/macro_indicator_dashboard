@@ -49,7 +49,7 @@ export function HormuzTrafficCard({ stats }: HormuzTrafficCardProps) {
 
       <div className="hormuz-card__context">
         <StatRow
-          label="2019–21 baseline"
+          label="Pre-shutdown avg"
           value={avgLongterm !== null ? fmt(avgLongterm) : '—'}
           sub=" tankers / day"
         />
@@ -80,11 +80,6 @@ export function HormuzTrafficCard({ stats }: HormuzTrafficCardProps) {
       {!hasData && (
         <p className="hormuz-card__unavailable">
           Live PortWatch data will populate on next refresh when the feed is available.
-        </p>
-      )}
-      {hasData && stats?.ais_note && (
-        <p className="hormuz-card__ais-note">
-          ⚠ {stats.ais_note}
         </p>
       )}
     </article>
