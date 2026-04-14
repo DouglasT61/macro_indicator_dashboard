@@ -196,10 +196,15 @@ def collect_tanker_disruption_assessment(aishub_username: str | None, timeout_se
 
 
 def _fetch_portwatch_hormuz_rows(client: httpx.Client) -> list[dict[str, object]]:
+    # Filter to Strait of Hormuz (portid='chokepoint6') at the query level so the
+    # 10,000-record page limit is not diluted by the other 28 chokepoints in the
+    # dataset.  Without this filter, `where=1=1` + `orderByFields=date ASC` only
+    # returns the oldest ~13% of all records; Hormuz data after ~2019 is silently
+    # dropped and averages are computed from stale history.
     response = client.get(
         PORTWATCH_HORMUZ_QUERY_URL,
         params={
-            'where': '1=1',
+            'where': "portid='chokepoint6'",
             'outFields': PORTWATCH_FIELDS,
             'returnGeometry': 'false',
             'orderByFields': 'date ASC',
@@ -213,7 +218,7 @@ def _fetch_portwatch_hormuz_rows(client: httpx.Client) -> list[dict[str, object]
     rows: list[dict[str, object]] = []
     for feature in features:
         attributes = feature.get('attributes', {}) if isinstance(feature, dict) else {}
-        if isinstance(attributes, dict) and _is_hormuz_record(attributes):
+        if isinstance(attributes, dict):
             rows.append(attributes)
     if not rows:
         raise ValueError('No PortWatch Hormuz rows returned')
