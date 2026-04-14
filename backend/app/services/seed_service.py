@@ -34,13 +34,20 @@ settings = get_settings()
 
 HORMUZ_TRAFFIC_SETTING_KEY = 'hormuz_traffic_stats'
 
-# Plausible demo values based on historical PortWatch Strait of Hormuz averages.
-# Roughly 18–22 tankers transit per day across the ~5-year PortWatch record.
+# Demo values derived from the 2019–2022 PortWatch reference period for chokepoint6
+# (Strait of Hormuz).  The 2019–2021 AIS-era baseline averaged ~47 tanker calls/day.
+# Post-2022 counts drop to 0–12/day due to AIS signal degradation in Iranian waters,
+# so avg_30d reflects the degraded-coverage era, not a real traffic collapse.
 _DEMO_HORMUZ_TRAFFIC = HormuzTrafficStats(
-    latest_count=19.0,
-    avg_30d=19.8,
-    avg_longterm=21.2,
+    latest_count=7.0,
+    avg_30d=4.2,
+    avg_longterm=47.0,
     latest_date='demo',
+    ais_note=(
+        'Recent counts are well below the 2019–21 baseline. '
+        'This likely reflects AIS transponder signal gaps in Iranian-controlled '
+        'waters rather than an actual traffic collapse — use with caution.'
+    ),
 )
 
 

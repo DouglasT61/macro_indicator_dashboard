@@ -433,9 +433,10 @@ class MigrationOverview(BaseModel):
 class HormuzTrafficStats(BaseModel):
     latest_count: float
     avg_30d: float
-    avg_longterm: float
+    avg_longterm: float   # 2019–2021 reference-period baseline
     latest_date: str
     source: str = 'portwatch/hormuz-transits'
+    ais_note: str = ''    # populated when recent counts appear to reflect AIS gaps
 
 
 class DashboardOverview(BaseModel):
